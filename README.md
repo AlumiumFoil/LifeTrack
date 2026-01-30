@@ -16,7 +16,7 @@
 | Student Name | School Email   | GitHub Username  |
 |    :---:     |     :---:      |     :---:        |
 | Mohit Kumar  |mkumar3@sfsu.edu|FrankOceanLover-MK|
-| member2      |                |                  |
+| Will Brust | wbrust@sfsu.edu | SQ-Ghost              |
 | member3      |                |                  |
 | member4      |                |                  |
 | member5      |                |                  |
