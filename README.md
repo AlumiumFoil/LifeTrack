@@ -17,7 +17,7 @@
 |    :---:     |     :---:      |     :---:        |
 | Mohit Kumar  |mkumar3@sfsu.edu|FrankOceanLover-MK|
 | Will Brust | wbrust@sfsu.edu | SQ-Ghost              |
-| member3      |                |                  |
+| John Carlo Naranja | jnaranja@sfsu.edu | AlumiumFoil |
 | member4      |                |                  |
 | member5      |                |                  |
 | member6      |                |                  |
