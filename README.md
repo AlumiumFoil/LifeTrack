@@ -19,7 +19,7 @@
 | Will Brust | wbrust@sfsu.edu | SQ-Ghost              |
 | John Carlo Naranja | jnaranja@sfsu.edu | AlumiumFoil |
 | Alex Hernandez | ahernandez75@sfsu.edu | Nand0-23 |
-| member5      |                |                  |
+| Lasiru Weerasuriya| lweerasuriya@sfsu.edu | Lasiiru |
 | member6      |                |                  |
 
 ## NO code needs to be stored in the root of your repository. You may rename the application folder if you like to your team's application name. But all source code related to your team's application should be stored inside the application folder.
