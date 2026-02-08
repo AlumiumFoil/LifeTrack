@@ -29,5 +29,5 @@
 18. Verified backend is running successfully on port 3000.
 
 ## Running the Backend Application with PM2
-pm2 start server.js
+pm2 start server.js --name <what_you_want_to_name_the_process>
 pm2 save

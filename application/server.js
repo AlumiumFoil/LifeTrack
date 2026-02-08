@@ -4,18 +4,18 @@ const cors = require('cors');
 const helmet = require('helmet');
 const dotenv = require('dotenv');
 const app = express()
-const port = process.env.PORT || 80;
+const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 
 // Define a route for GET requests to the root URL
 app.get('/', (req, res) => {
-    res.send('Backend server is running');
+    res.send({ msg: 'Backend Server: Online' });
 });
 
 app.get('/api/test', (req, res) => {
-    res.json({ status: 'API Test: Working' });
+    res.send({ msg: 'API Test: Working' });
 });
 
 app.get('/api/db-test', async (req, res) => {
