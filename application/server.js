@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const dotenv = require('dotenv');
+const mysql = require('mysql2/promise');
 const app = express()
 const port = process.env.PORT || 3000;
 
