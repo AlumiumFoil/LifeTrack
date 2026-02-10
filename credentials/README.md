@@ -10,21 +10,77 @@
 1. Server URL or IP
     <br> Server IP: 34.53.13.204
 2. SSH username
+    <br> deploy
 3. SSH password or key.
     <br> If a ssh key is used please upload the key to the credentials folder.
-
+    <br> Uploaded to the credentials folder.
+    <br> If asked for a password, password is: bruh
 4. Database URL or IP and port used.
-    <br><strong> NOTE THIS DOES NOT MEAN YOUR DATABASE NEEDS A PUBLIC FACING PORT.</strong> But knowing the IP and port number will help with SSH tunneling into the database. The default port is more than sufficient for this class.
+    <br>DB host: 127.0.0.1
+        DB port: 3306
+        Access method: SSH tunnel through the server, MySQL is not publicly exposed.
 5. Database username
+    <br>App user team1_user
+        Admin user class_cto
 6. Database password
+    <br> team1_user password Swesp26!2026  
+         class_cto password Swesp26!2026
 7. Database name (basically the name that contains all your tables)
-    <br> PORT=3306
-    <br> DB_HOST=localhost
-    <br> DB_USER=team1_user
-    <br> DB_PASSWORD=Swesp26!2026
-    <br> DB_NAME=team1_db
+    <br> team1_db
 
 8. Instructions on how to use the above information.
+
+## 8. Instructions
+
+### A. SSH into the server
+
+Use the SSH private key file that is stored in this folder.
+
+1. Download these files from this credentials folder to your computer
+   - team1_grader_ed25519
+   - team1_grader_ed25519.pub
+
+2. Set correct permissions on the private key file
+   - Mac or Linux
+     chmod 600 team1_grader_ed25519
+   - Windows PowerShell
+     icacls .\team1_grader_ed25519 /inheritance:r
+     icacls .\team1_grader_ed25519 /grant:r "$env:USERNAME:(R)"
+
+3. SSH command
+   ssh -i team1_grader_ed25519 deploy@34.53.13.204
+   If asked for password, it is : "bruh"
+
+### B. SSH tunnel to MySQL (MySQL is not publicly exposed)
+
+This forwards your local port 3306 to the server’s MySQL port 3306.
+
+1. Create the tunnel (leave this running)
+   ssh -i team1_grader_ed25519 -L 3306:127.0.0.1:3306 deploy@34.53.13.204
+
+2. In a second terminal, connect to MySQL through the tunnel
+
+App user
+   mysql -h 127.0.0.1 -P 3306 -u team1_user -p team1_db
+
+Admin user
+   mysql -h 127.0.0.1 -P 3306 -u class_cto -p
+
+### C. Verify the web app on the server
+
+After SSH login
+
+1. Check PM2
+   pm2 status
+   pm2 logs team1-app --lines 50
+
+2. Test locally on the server
+   curl http://127.0.0.1:3000/api/test
+   curl http://127.0.0.1:3000/api/db-test
+
+3. Test through Nginx
+   curl -I http://127.0.0.1
+
 
 # Most important things to Remember
 ## These values need to kept update to date throughout the semester. <br>
