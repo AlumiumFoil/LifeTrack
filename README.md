@@ -20,7 +20,6 @@
 | John Carlo Naranja | jnaranja@sfsu.edu | AlumiumFoil |
 | Alex Hernandez | ahernandez75@sfsu.edu | Nand0-23 |
 | Lasiru Weerasuriya| lweerasuriya@sfsu.edu | Lasiiru |
-| Shreya Harish   |sharish@sfsu.edu    | shreyshrey1016                  |
 |Khaterina Sengchareune| ksengchareune@sfsu.edu |skhaterina|
 
 
