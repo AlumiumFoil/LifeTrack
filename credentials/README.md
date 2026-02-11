@@ -27,8 +27,12 @@
          class_cto password Swesp26!2026
 7. Database name (basically the name that contains all your tables)
     <br> team1_db
+8.Application URL (Live Website)
+    <br> http://34.53.13.204
+9. GitHub Repository
+    <br> https://github.com/CSC-648-SFSU/CSC-648-848-S02-Spring2026-Team01
 
-8. Instructions on how to use the above information.
+10. Instructions on how to use the above information.
 
 ## 8. Instructions
 
@@ -80,6 +84,10 @@ After SSH login
 
 3. Test through Nginx
    curl -I http://127.0.0.1
+
+4. Visit the live website
+   http://34.53.13.204
+
 
 
 # Most important things to Remember
