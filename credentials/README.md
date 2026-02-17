@@ -8,7 +8,7 @@
 # Below is a list of items required. Missing items will causes points to be deducted from multiple milestone submissions.
 
 1. Server URL or IP
-    <br> Server IP: 34.53.13.204
+    <br> Server IP: 34.83.218.226
 2. SSH username
     <br> deploy
 3. SSH password or key.
@@ -28,7 +28,7 @@
 7. Database name (basically the name that contains all your tables)
     <br> team1_db
 8.Application URL (Live Website)
-    <br> http://34.53.13.204
+    <br> http://34.83.218.226
 9. GitHub Repository
     <br> https://github.com/CSC-648-SFSU/CSC-648-848-S02-Spring2026-Team01
 
@@ -52,7 +52,7 @@ Use the SSH private key file that is stored in this folder.
      icacls .\team1_grader_ed25519 /grant:r "$env:USERNAME:(R)"
 
 3. SSH command
-   ssh -i team1_grader_ed25519 deploy@34.53.13.204
+   ssh -i team1_grader_ed25519 deploy@34.83.218.226
    If asked for password, it is : "bruh"
 
 ### B. SSH tunnel to MySQL (MySQL is not publicly exposed)
@@ -60,7 +60,7 @@ Use the SSH private key file that is stored in this folder.
 This forwards your local port 3306 to the server’s MySQL port 3306.
 
 1. Create the tunnel (leave this running)
-   ssh -i team1_grader_ed25519 -L 3306:127.0.0.1:3306 deploy@34.53.13.204
+   ssh -i team1_grader_ed25519 -L 3306:127.0.0.1:3306 deploy@34.83.218.226
 
 2. In a second terminal, connect to MySQL through the tunnel
 
@@ -86,7 +86,7 @@ After SSH login
    curl -I http://127.0.0.1
 
 4. Visit the live website
-   http://34.53.13.204
+   http://34.83.218.226
 
 
 
@@ -94,3 +94,4 @@ After SSH login
 ## These values need to kept update to date throughout the semester. <br>
 ## <strong>Failure to do so will result it points be deducted from milestone submissions.</strong><br>
 ## You may store the most of the above in this README.md file. DO NOT Store the SSH key or any keys in this README.md file.
+
