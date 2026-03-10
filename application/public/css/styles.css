@@ -101,3 +101,106 @@ body {
   opacity: 0.9;
 }
 .small { font-size: 13px; color: var(--muted); }
+
+/*added for VP*/
+.vp-form {
+  display: grid;
+  gap: 16px;
+}
+
+.form-group {
+  display: grid;
+  gap: 8px;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(11, 18, 32, 0.9);
+  color: var(--text);
+  font: inherit;
+}
+
+.form-group input::placeholder {
+  color: var(--muted);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: rgba(77, 163, 255, 0.8);
+  box-shadow: 0 0 0 3px rgba(77, 163, 255, 0.15);
+}
+
+.results-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.results-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.result-card {
+  overflow: hidden;
+  padding: 0;
+}
+
+.result-image {
+  display: block;
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-bottom: 1px solid var(--border);
+}
+
+.result-content {
+  padding: 16px;
+}
+
+.result-content h2 {
+  margin: 0 0 10px 0;
+  font-size: 1.15rem;
+}
+
+.result-content p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.result-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.pill {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  font-size: 0.82rem;
+}
+
+@media (max-width: 640px) {
+  .result-image {
+    height: 180px;
+  }
+}

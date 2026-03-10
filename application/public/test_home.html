@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Team 1 - VP Search</title>
+  <link rel="stylesheet" href="./css/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="brand">CSC 648 - Team 1</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a href="./index.html">Home</a>
+        <a href="./about.html">About</a>
+      </div>
+    </div>
+
+    <section class="hero">
+      <h1>Vertical Prototype Search</h1>
+      <p>
+        CSC 648/848 • Spring 2026 • Team 1. Use this test page to search public
+        resources from the database and verify the full frontend-to-backend flow.
+      </p>
+    </section>
+
+    <section class="card" style="margin-top:18px;">
+      <h2 style="margin-top:0;">Search Resources</h2>
+      <p class="small" style="margin-bottom:16px;">
+        Enter a keyword, choose a category if desired, and submit to view results.
+        Leaving the search blank will return all public resources.
+      </p>
+
+      <form action="./test_results.html" method="GET" class="vp-form">
+        <div class="form-group">
+          <label for="q">Keyword Search</label>
+          <input
+            type="text"
+            id="q"
+            name="q"
+            placeholder="Try: resume, study, internship, wellness, template"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="category">Category</label>
+          <select id="category" name="category">
+            <option value="">All Categories</option>
+            <option value="academic">Academic</option>
+            <option value="career">Career</option>
+            <option value="wellness">Wellness</option>
+            <option value="productivity">Productivity</option>
+          </select>
+        </div>
+
+        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:18px;">
+          <button type="submit" class="btn">Search</button>
+          <a class="btn secondary" href="./index.html">Home</a>
+        </div>
+      </form>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>Suggested Searches</h2>
+        <p>Try keywords like <strong>resume</strong>, <strong>study</strong>, <strong>internship</strong>, <strong>wellness</strong>, or <strong>template</strong>.</p>
+      </article>
+
+      <article class="card">
+        <h2>Demo Goal</h2>
+        <p>This page is meant to verify search input, API connection, and DB-backed results display for the vertical prototype.</p>
+      </article>
+    </section>
+
+    <div class="footer">
+      Team 1 • Vertical Prototype Search Page
+    </div>
+  </div>
+</body>
+</html>
