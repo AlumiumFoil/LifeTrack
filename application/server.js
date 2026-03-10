@@ -47,59 +47,63 @@ app.get('/api/db-test', async (req, res) => {
 });
 
 // Search api call route
-app.get('/api/search', async (req, res) => {
+app.get('/api/resources/search', async (req, res) => {
     try {
-        const searchQuery = req.query.q;
+        const q = (req.query.q || '').trim();
+        const category = (req.query.category || '').trim();
+        const contentType = (req.query.content_type || '').trim();
 
-        // Validating search input
-        if (!searchQuery || searchQuery.trim().length < 1) {
-            return res.json({
-                success: false,
-                results: [],
-                message: 'Please enter at least 1 character'
-            });
-        }
-
-        // Validation passed
-        const searchTerm = `%${searchQuery.trim()}%`;
-
-        // Search in resources table. Searches for query in titles and descriptions
-        const sql = `
+        // Search for query in database table
+        let sql = `
             SELECT
-                'resources' as source,
-                resource_id as id,
+                resource_id,
                 title,
                 description,
-                url
+                url,
+                image_url,
+                content_type,
+                category
             FROM resources
-            WHERE title LIKE ? 
-                OR description LIKE ?
-            ORDER BY
-                CASE
-                    WHEN title LIKE ? THEN 1
-                    WHEN description LIKE ? THEN 2
-                    ELSE 3
-                END
-            LIMIT 30
+            WHERE is_public = 1
         `;
 
+        const params = [];
+
+        // Optional filters
+        // Keyword filter (titles and descriptions)
+        if (q) {
+            sql += ` AND (title LIKE ? OR description LIKE ?)`;
+            const likeTerm = `%${q}%`;
+            params.push(likeTerm, likeTerm);
+        }
+
+        // Category filter
+        if (category) {
+            sql += ` AND category = ?`;
+            params.push(category);
+        }
+
+        if (contentType) {
+            sql += ` AND content_type = ?`;
+            params.push(contentType);
+        }
+
+        sql += ` ORDER BY created_at DESC LIMIT 50`;
+
         // Execute the search with parameters
-        const [results] = await pool.query(sql, [
-            searchTerm,  // for title LIKE
-            searchTerm,  // for description LIKE
-            `%${searchQuery.trim()}%`,  // for title ordering
-            `%${searchQuery.trim()}%`   // for description ordering
-        ]);
+        const [results] = await pool.query(sql, params);
 
         res.json({
             success: true,
-            results: results,
+            results,
             total: results.length,
         });
     } catch (error) {
         console.error('Search error:', error);
         res.status(500).json({
             success: false,
+            results: [],
+            total: 0,
             error: 'An error occurred while searching',
         });
     }
