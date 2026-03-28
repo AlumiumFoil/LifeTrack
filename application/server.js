@@ -346,7 +346,6 @@ app.post('/api/auth/register', async (req, res) => {
 
         // Hash the password
         const passwordHash = hashPassword(password);
-        console.log('11. Password HASHED');
 
         // Create new user account
         const connection = await pool.getConnection();
@@ -424,6 +423,81 @@ app.post('/api/auth/register', async (req, res) => {
         res.status(500).json({
             success: false,
             error: 'An error occurred during registration'
+        });
+    }
+});
+
+/**
+ * User login - Authenticate user credentials
+ * Request body: { identifier, password }
+ * identifier can be either email or username
+ */
+app.post('/api/auth/login', async (req, res) => {
+    // DEBUG: Log what's being received
+    console.log('=== LOGIN DEBUG ===');
+    console.log('Request body:', req.body);
+    console.log('identifier:', req.body.identifier);
+    console.log('password:', req.body.password ? '[HIDDEN]' : 'undefined');
+    console.log('Content-Type:', req.headers['content-type']);
+
+    try {
+        const { identifier, password } = req.body;
+
+        if (!identifier || !password) {
+            return res.status(400).json({
+                success: false,
+                error: 'Email/username and password are required'
+            });
+        }
+
+        // Verify user by email or username
+        const [users] = await pool.query(
+            `SELECT
+                 account_id,
+                 email,
+                 username,
+                 password_hash,
+                 account_status
+            FROM user_accounts
+            WHERE (email = ? OR username = ?) AND account_status = 'active'`,
+            [identifier, identifier]
+        );
+
+        if (users.length === 0) {
+            return res.status(401).json({
+                success: false,
+                error: 'Invalid username or password'
+            });
+        }
+
+        const user = users[0];
+
+        // Verify password
+        const isPasswordValid = verifyPassword(password, user.password_hash);
+
+        if (!isPasswordValid) {
+            return res.status(401).json({
+                success: false,
+                error: 'Invalid username or password'
+            });
+        }
+
+        // Return user info
+        res.json({
+            success: true,
+            message: 'Login successful',
+            user: {
+                account_id: user.account_id,
+                email: user.email,
+                username: user.username,
+                account_status: user.account_status
+            }
+        });
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'An error occurred during login'
         });
     }
 });
