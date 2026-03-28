@@ -264,21 +264,8 @@ app.get('/api/security-questions', async (req, res) => {
  * securityQuestions are an array of objects with question_text and answer
  */
 app.post('/api/auth/register', async (req, res) => {
-    console.log('=== REGISTRATION DEBUG START ===');
-    console.log('1. Request received');
-    console.log('2. Request body:', JSON.stringify(req.body, null, 2));
-
     try {
         const { email, username, password, securityQuestions } = req.body;
-
-        console.log('3. Extracted fields:');
-        console.log('   - email:', email);
-        console.log('   - username:', username);
-        console.log('   - password exisrs:', !!password);
-        console.log('   - securityQuesions exist:', !!securityQuestions);
-        console.log('   - securityQuestions type:', typeof securityQuestions);
-        console.log('   - isArray:', Array.isArray(securityQuestions));
-        console.log('   - length:', securityQuestions?.length);
 
         // Validate required fields
         if (!email || !username || !password || !securityQuestions || !Array.isArray(securityQuestions) || securityQuestions.length === 0) {
@@ -287,8 +274,6 @@ app.post('/api/auth/register', async (req, res) => {
                 error: 'Missing required fields'
             });
         }
-
-        console.log('4. Validation PASSED');
 
         // Validate email format
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -299,8 +284,6 @@ app.post('/api/auth/register', async (req, res) => {
             });
         }
 
-        console.log('5. Email Validation PASSED');
-
         // Validate username length
         if (username.length < 3 || username.length > 50) {
             return res.status(400).json({
@@ -309,8 +292,6 @@ app.post('/api/auth/register', async (req, res) => {
             });
         }
 
-        console.log('6. Username Validation PASSED');
-
         // Validate password length
         if (password.length < 8) {
             return res.status(400).json({
@@ -318,8 +299,6 @@ app.post('/api/auth/register', async (req, res) => {
                 error: 'Password must be at least 8 characters long'
             });
         }
-
-        console.log('7. Password Validation PASSED');
 
         // Validate security questions
         for (const sq of securityQuestions) {
@@ -337,8 +316,6 @@ app.post('/api/auth/register', async (req, res) => {
             }
         }
 
-        console.log('8. Security Questions Validation PASSED');
-
         // Check if email already exists
         const [existingEmail] = await pool.query(
             `SELECT account_id 
@@ -353,8 +330,6 @@ app.post('/api/auth/register', async (req, res) => {
             });
         }
 
-        console.log('9. Email is unique');
-
         // Check if username already exists
         const [existingUsername] = await pool.query(
             `SELECT account_id
@@ -368,8 +343,6 @@ app.post('/api/auth/register', async (req, res) => {
                 error: 'Username already taken'
             });
         }
-
-        console.log('10. Username is unique');
 
         // Hash the password
         const passwordHash = hashPassword(password);
@@ -429,8 +402,6 @@ app.post('/api/auth/register', async (req, res) => {
 
             await connection.commit();
 
-            console.log('12. REGISTRATION SUCCESS');
-
             res.status(201).json({
                 success: true,
                 message: 'Registration successful',
@@ -442,11 +413,6 @@ app.post('/api/auth/register', async (req, res) => {
                 }
             });
         } catch (err) {
-            console.log('TRANSACTION ERROR');
-            console.log('Error:', err);
-            console.log('Error message:', err.message);
-            console.log('Error code:', err.code);
-            console.log('Error sql:', err.sql);
             await connection.rollback();
             throw err;
         } finally {
@@ -454,12 +420,6 @@ app.post('/api/auth/register', async (req, res) => {
             console.log('Connection released');
         }
     } catch (error) {
-        console.log('OUTER BLOCK CATCH');
-        console.log('Error type:', error.constructor.name);
-        console.log('Error message:', error.message);
-        console.log('Error code:', error.code);
-        console.log('Error stack:', error.stack);
-        console.log('REGISTRATION FAILED');
         console.error('Registration error:', error);
         res.status(500).json({
             success: false,
