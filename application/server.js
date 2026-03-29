@@ -431,6 +431,7 @@ app.post('/api/auth/register', async (req, res) => {
  * User login - Authenticate user credentials
  * Request body: { identifier, password }
  * identifier can be either email or username
+ * Frontend stores login data in memory or locally
  */
 app.post('/api/auth/login', async (req, res) => {
     // DEBUG: Log what's being received
@@ -498,6 +499,60 @@ app.post('/api/auth/login', async (req, res) => {
         res.status(500).json({
             success: false,
             error: 'An error occurred during login'
+        });
+    }
+});
+
+/**
+ * User logout - Simple logout with a client-side cleanup
+ * Server does not remember if users are logged in, so remove stored credentials from memory or local storage.
+ * Credentials are sent with every request in the authorization header.
+ * By logging out, the client stops sending credentials.
+ */
+app.post('/api/auth/logout', async (req, res) => {
+    res.json({
+        success: true,
+        message: 'Logout successful'
+    });
+});
+
+/**
+ * Get current user info - Retrieve the logged-in user's info for basic HTTP basic authentication
+ * User's info is used to maintain the user state across page refreshes.
+ */
+app.get('/api/auth/me', authenticateUser, async (req, res) => {
+    res.json({
+        success: true,
+        user: req.user
+    });
+});
+
+/**
+ * Get current user's assigned role - Retrieve the logged-in user's role info for basic authentication
+ * User roles determine what features and content they can access.
+ */
+app.get('/api/users/me/roles', authenticateUser, async (req, res) => {
+    // Need to differentiate between similar columns in different DB tables
+    try {
+        const [roles] = await pool.query(
+            `SELECT
+                 r.role_id,
+                 r.role_name
+            FROM roles r
+            JOIN user_roles ur ON r.role_id = ur.role_id
+            WHERE ur.account_id = ?`,
+            [req.user.account_id]
+        );
+
+        res.json({
+            success: true,
+            roles: roles
+        });
+    } catch (error) {
+        console.error('Get roles error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'An error has occurred'
         });
     }
 });
