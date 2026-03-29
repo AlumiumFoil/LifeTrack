@@ -520,7 +520,7 @@ app.post('/api/auth/logout', async (req, res) => {
  * Get current user info - Retrieve the logged-in user's info for basic HTTP basic authentication
  * User's info is used to maintain the user state across page refreshes.
  */
-app.get('/api/auth/me', authenticateUser, async (req, res) => {
+app.get('/api/auth/me', authenticateRequest, async (req, res) => {
     res.json({
         success: true,
         user: req.user
@@ -531,7 +531,7 @@ app.get('/api/auth/me', authenticateUser, async (req, res) => {
  * Get current user's assigned role - Retrieve the logged-in user's role info for basic authentication
  * User roles determine what features and content they can access.
  */
-app.get('/api/users/me/roles', authenticateUser, async (req, res) => {
+app.get('/api/users/me/roles', authenticateRequest, async (req, res) => {
     // Need to differentiate between similar columns in different DB tables
     try {
         const [roles] = await pool.query(
