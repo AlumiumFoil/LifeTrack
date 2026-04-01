@@ -1,0 +1,96 @@
+<!-- Authentication page for our HP and beyond.
+ On this page we allow an existing user to log into their account 
+ with eirther a username or password. It provides a link to the registration
+ page. When a login succeeds, we redirect the user to the dashboard -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Team 1 - Login / Register</title>
+  <link rel="stylesheet" href="./css/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <!--The top nav that is shared with the rest of the site-->
+    <div class="nav">
+      <div class="brand">CSC 648/848 • Team 1</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a href="./index.html">Home</a>
+        <a href="./about.html">About</a>
+      </div>
+    </div>
+
+    <!--intro explaining the page's purpose-->
+    <section class="hero">
+      <h1>Login / Register</h1>
+      <p>
+        Sign in with your username or email and password. If you do not have an
+        account yet, create one from the registration page.
+      </p>
+    </section>
+
+    <section class="card auth-card" style="margin-top:18px;">
+      <div class="auth-split">
+        <div>
+          <h2 style="margin-top:0;">Login</h2>
+          <p class="small" style="margin-bottom:16px;">
+            Enter your username or email and password to continue.
+          </p>
+
+          <!--The login form - JS in main.js will intercept a sumbittion, send a 
+          POST request to /api/auth/login, & will display either success/error message-->
+          <form id="loginForm" class="vp-form">
+            <div class="form-group">
+              <label for="identifier">Username or Email</label>
+              <input
+                type="text"
+                id="identifier"
+                name="identifier"
+                placeholder="Enter username or email"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="loginPassword">Password</label>
+              <input
+                type="password"
+                id="loginPassword"
+                name="password"
+                placeholder="Enter password"
+                required
+              />
+            </div>
+
+            <!--message updated dynamically by main.js-->
+            <div id="loginMessage" class="status-message" style="display:none;"></div>
+
+            <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:18px;">
+              <button type="submit" class="btn">Login</button>
+              <a class="btn secondary" href="./index.html">Back to Home</a>
+            </div>
+          </form>
+        </div>
+
+        <!--This is a side panel that will route new uesers to our registration page-->
+        <div class="card auth-side-panel">
+          <h2 style="margin-top:0;">New Here?</h2>
+          <p>
+            Create a new account to access your dashboard.
+          </p>
+          <a class="btn secondary" href="./register.html">Create Account</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">
+      Team 1 • Authentication Page
+    </div>
+  </div>
+
+  <!--this is our shared frontend logic file (our 'brain')
+  It handles login submittion (and many other page specific behavious)-->
+  <script src="./js/main.js"></script>
+</body>
+</html>
