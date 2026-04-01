@@ -8,7 +8,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Team 1 - Login / Register</title>
-  <link rel="stylesheet" href="./css/styles.css" />
+  <link rel="stylesheet" href="../css/styles.css" />
 </head>
 <body>
   <div class="container">
@@ -16,8 +16,8 @@
     <div class="nav">
       <div class="brand">CSC 648/848 • Team 1</div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <a href="./index.html">Home</a>
-        <a href="./about.html">About</a>
+        <a href="../index.html">Home</a>
+        <a href="../about.html">About</a>
       </div>
     </div>
 
@@ -68,7 +68,7 @@
 
             <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:18px;">
               <button type="submit" class="btn">Login</button>
-              <a class="btn secondary" href="./index.html">Back to Home</a>
+              <a class="btn secondary" href="../index.html">Back to Home</a>
             </div>
           </form>
         </div>
@@ -89,8 +89,7 @@
     </div>
   </div>
 
-  <!--this is our shared frontend logic file (our 'brain')
-  It handles login submittion (and many other page specific behavious)-->
-  <script src="./js/main.js"></script>
+  <!--this is our shared auth logic file with register.html. handles form submittion-->
+  <script src="../js/auth.js"></script>
 </body>
 </html>

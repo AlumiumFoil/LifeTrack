@@ -1,24 +1,29 @@
 <!-- Registration page for new accounts. Takes in usernames (3+ chars), email, pwd(8+ chars) 
- & security question answers for account recovery  -->
+ & security question answers for account recovery. Upon success on registration, frontend JS 
+ sends the form data to the backend & redirects the user back to login.  -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Team 1 - Registration</title>
-  <link rel="stylesheet" href="./css/styles.css" />
+  
+  <!--Shared styling across multiple pages-->
+  <link rel="stylesheet" href="../css/styles.css" />
 </head>
 <body>
   <div class="container">
+    <!--the top nav shared with the rest of out site-->
     <div class="nav">
       <div class="brand">CSC 648/848 • Team 1</div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <a href="./index.html">Home</a>
-        <a href="./about.html">About</a>
+        <a href="../index.html">Home</a>
+        <a href="../about.html">About</a>
         <a href="./auth.html">Login</a>
       </div>
     </div>
 
+    <!--the intro section that explains this pages purpose-->
     <section class="hero">
       <h1>Create Account</h1>
       <p>
@@ -33,7 +38,10 @@
         Usernames must be at least 3 characters. Passwords must be at least 8
         characters long.
       </p>
-    
+      
+      <!--This is our registration form - JS in the auth.js file will intercept
+      the submittion, format the data so it matches what the backend expects &
+      will display success or error messages-->
       <form id="registerForm" class="vp-form">
         <div class="form-group">
           <label for="registerUsername">Username</label>
@@ -68,6 +76,9 @@
           />
         </div>
 
+        <!--This is our security questions dropdown menu that we hardcoded tot he front.
+        Selected questions and answers are packsges into the securityQuestions array 
+        that the backend expects in the register route-->
         <div class="form-group">
           <label for="securityQuestion">Security Question</label>
           <select id="securityQuestion" name="securityQuestion" required>
@@ -99,6 +110,7 @@
           />
         </div>
 
+        <!--message area is updated dynamically by the auth.js file-->
         <div id="registerMessage" class="status-message" style="display:none;"></div>
 
         <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:18px;">
@@ -113,6 +125,7 @@
     </div>
   </div>
 
-  <script src="./js/main.js"></script>
+  <!--this is our shared auth logic file-->
+  <script src="../js/auth.js"></script>
 </body>
 </html>
