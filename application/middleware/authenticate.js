@@ -2,8 +2,8 @@
 // Handles all authentication-related functionality
 // Using bcrypt for password hashing and JWT for stateless auth
 
-const crypto = require('crypto'); // Built-in node.js module for password hashing
-const bcrypt = require('bcrypt'); 
+const crypto = require('crypto'); // used for JWT signing and token generation
+const bcrypt = require('bcrypt'); // used for password hashing
 const pool = require('../config/db');
 require('dotenv').config();
 
