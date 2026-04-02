@@ -86,7 +86,7 @@ const uploadSingleProfileImage = (req, res, next) => {
         if (error instanceof multer.MulterError && error.code === 'LIMIT_FILE_SIZE') {
             return res.status(400).json({
                 success: false,
-                error: `Profile image must be 5 MB bytes or smaller.`
+                error: `Profile image must be ${maxFileSizeBytes} bytes or smaller.`
             });
         }
 
