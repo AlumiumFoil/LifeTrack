@@ -12,7 +12,8 @@ const {
     generateRefreshToken,
     verifyRefreshToken,
     invalidateRefreshToken,
-    invalidateAllUserRefreshTokens
+    invalidateAllUserRefreshTokens,
+    blacklistAccessToken
 } = require('../middleware/authenticate');
 
 
@@ -324,9 +325,15 @@ const refreshToken = async (req, res) => {
 const logout = async (req, res) => {
     try {
         const { refreshToken: refreshTokenValue } = req.body;
+        // Get access token from authorization header
+        const accessToken = req.headers.authorization?.split(' ')[1];
 
         if (refreshTokenValue) {
             await invalidateRefreshToken(refreshTokenValue);
+        }
+        // Blacklist access token
+        if (accessToken) {
+            await blacklistAccessToken(accessToken);
         }
 
         res.json({
@@ -350,6 +357,15 @@ const logout = async (req, res) => {
  */
 const logoutAll = async (req, res) => {
     try {
+        // Get access token from authorization header
+        const accessToken = req.headers.authorization?.split(' ')[1];
+
+        // Blacklist current access token for the user
+        if (accessToken) {
+            await blacklistAccessToken(accessToken);
+        }
+
+        // Invalidate all refresh tokens for the user
         await invalidateAllUserRefreshTokens(req.user.account_id);
 
         res.json({

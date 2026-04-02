@@ -14,6 +14,7 @@ const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('he
 // Token expiration times in seconds
 const ACCESS_TOKEN_EXPIRY = 60 * 60; // 1 hour
 const REFRESH_TOKEN_EXPIRY = 7 * 24 * 60 * 60; // 7 days
+const BLACKLIST_CLEANUP_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
 
 // In-memory refresh token blacklist for logout
 const refreshTokenBlacklist = new Set();
@@ -216,6 +217,52 @@ const invalidateAllUserRefreshTokens = async (accountId) => {
     await pool.query('DELETE FROM refresh_tokens WHERE account_id = ?', [accountId]);
 };
 
+/**
+ * Add an access token to the blacklist
+ * @param {string} token - Access token
+ * @returns {Promise<void>}
+ */
+const blacklistAccessToken = async (token) => {
+    // Decode token to get expiration
+    let expiresAt = new Date(Date.now() + ACCESS_TOKEN_EXPIRY * 1000);
+    try {
+        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString());
+        if (payload.exp) {
+            expiresAt = new Date(payload.exp * 1000);
+        }
+    } catch (error) {
+        console.error('Error decoding token for blacklist:', error);
+    }
+    
+    await pool.query(
+        `INSERT INTO access_token_blacklist (token, expires_at)
+         VALUES (?, ?)`,
+        [token, expiresAt]
+    );
+};
+
+/**
+ * Check if an access token is blacklisted
+ * @param {string} token - Access token
+ * @returns {Promise<boolean>} True if blacklisted
+ */
+const isAccessTokenBlacklisted = async (token) => {
+    const [rows] = await pool.query(
+        `SELECT blacklist_id FROM access_token_blacklist 
+         WHERE token = ? AND expires_at > NOW()`,
+        [token]
+    );
+    return rows.length > 0;
+};
+
+/**
+ * Clean up expired blacklist entries
+ */
+const cleanupBlacklist = async () => {
+    const [result] = await pool.query('DELETE FROM access_token_blacklist WHERE expires_at < NOW()');
+    console.log(`Cleaned up ${result.affectedRows} expired blacklist entries`);
+};
+
 
 // Authentication middleware
 /**
@@ -240,6 +287,16 @@ const authenticateJWT = async (req, res, next) => {
         }
         
         const token = authHeader.split(' ')[1];
+
+        // Check if access token is blacklisted
+        const isBlacklisted = await isAccessTokenBlacklisted(token);
+        if (isBlacklisted) {
+            return res.status(401).json({
+                success: false,
+                error: 'Access token has been revoked. Please log in again.'
+            });
+        }
+
         const userAgent = req.headers['user-agent'] || 'unknown';
         const ipAddress = getClientIP(req);
         
@@ -287,6 +344,71 @@ const authenticateJWT = async (req, res, next) => {
     }
 };
 
+/**
+ * Optional JWT authentication middleware
+ * Attaches user to req.user if token is valid, but doesn't block unauthenticated requests
+ * Used for endpoints that show different content for logged-in vs guest users
+ * @param {object} req - Request object
+ * @param {object} res - Response object
+ * @param {function} next - middleware function
+ */
+const optionalAuthenticateJWT = async (req, res, next) => {
+    try {
+        const authHeader = req.headers.authorization;
+        
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return next(); // No token, continue as guest
+        }
+        
+        const token = authHeader.split(' ')[1];
+
+        // Check if access token is blacklisted
+        const isBlacklisted = await isAccessTokenBlacklisted(token);
+        if (isBlacklisted) {
+            return next(); // Treat user as guest
+        }
+
+        const userAgent = req.headers['user-agent'] || 'unknown';
+        const ipAddress = getClientIP(req);
+        
+        const decoded = verifyAccessToken(token, userAgent, ipAddress);
+        
+        if (!decoded) {
+            return next(); // Invalid token, continue as guest
+        }
+        
+        // Verify user still exists and is active
+        const [users] = await pool.query(
+            `SELECT account_id, email, username, account_status 
+             FROM user_accounts 
+             WHERE account_id = ? AND account_status = 'active'`,
+            [decoded.accountId]
+        );
+        
+        if (users.length === 0) {
+            return next(); // User not found, continue as guest
+        }
+        
+        const user = users[0];
+        
+        // Attach user info to request
+        req.user = {
+            account_id: user.account_id,
+            email: user.email,
+            username: user.username
+        };
+        
+        next();
+    } catch (error) {
+        // On error, continue as guest (don't block the request)
+        console.error('Optional auth error:', error.message);
+        next();
+    }
+};
+
+// Clean blacklist daily
+setInterval(cleanupBlacklist, BLACKLIST_CLEANUP_INTERVAL);
+
 // Exports
 module.exports = {
     // Password helpers
@@ -301,7 +423,10 @@ module.exports = {
     verifyRefreshToken,
     invalidateRefreshToken,
     invalidateAllUserRefreshTokens,
+    blacklistAccessToken,
+    isAccessTokenBlacklisted,
     
     // Middleware
-    authenticateJWT
+    authenticateJWT,
+    optionalAuthenticateJWT
 };
