@@ -19,6 +19,15 @@ const router = express.Router();
  */
 router.get('/security-questions', userController.getSecurityQuestions);
 
+/**
+ * GET /api/users/bcrypt-test
+ * Confirms bcrypt is installed and working correctly
+ * Hashes a test value and verifies both a matching and non-matching password
+ * No authentication required
+ * Output: { success, bcryptWorking, details }
+ */
+router.get('/bcrypt-test', userController.bcryptTest);
+
 // Protected User Routes - Requires a valid JWT token
 /**
  * GET /api/users/me/roles

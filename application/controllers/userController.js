@@ -336,8 +336,56 @@ const uploadProfileImage = async (req, res) => {
     }
 };
 
+/**
+ * Confirm that bcrypt hashing and verification are working correctly
+ * GET /api/users/bcrypt-test
+ * Hashes a test string, verifies a correct and incorrect password against it
+ * No authentication required - used to demonstrate bcrypt is working
+ * Output: { success, bcryptWorking, details }
+ */
+const bcryptTest = async (req, res) => {
+    try {
+        const bcrypt = require('bcrypt');
+        const testPassword = 'TestPassword123!';
+        const saltRounds = Number(process.env.BCRYPT_ROUNDS || 12);
+
+        // Hash the test password 
+        const hash = await bcrypt.hash(testPassword, saltRounds);
+
+        // Verify correct password matches the hash
+        const correctMatch = await bcrypt.compare(testPassword, hash);
+
+        // Verify wrong password doesnt match the hash
+        const wrongMatch = await bcrypt.compare('WrongPassword!', hash);
+
+        const bcryptWorking = correctMatch === true && wrongMatch === false;
+
+        res.json({
+            success: true,
+            bcryptWorking,
+            details: {
+                saltRoundsUsed: saltRounds,
+                hashGenerated: hash,
+                correctPasswordMatches: correctMatch,
+                wrongPasswordMatches: wrongMatch,
+                verdict: bcryptWorking
+                    ? 'PASS - bcrypt is working correctly'
+                    : 'FAIL - check bcrypt installation'
+            }
+        });
+    } catch (error) {
+        console.error('bcrypt test error:', error);
+        res.status(500).json({
+            success: false,
+            bcryptWorking: false,
+            error: 'bcrypt test failed: ' + error.message
+        });
+    }
+};
+
 module.exports = {
     getSecurityQuestions,
     getDashboard,
-    uploadProfileImage
+    uploadProfileImage,
+    bcryptTest
 };
