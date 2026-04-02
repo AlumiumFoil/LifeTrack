@@ -1,0 +1,432 @@
+// middleware/authenticate.js
+// Handles all authentication-related functionality
+// Using PBKDF2 for password hashing and JWT for stateless auth
+
+const crypto = require('crypto'); // Built-in node.js module for password hashing
+const pool = require('../config/db');
+require('dotenv').config();
+
+
+// JWT Configuration
+// JWT Secret - store in .env for security
+const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
+
+// Token expiration times in seconds
+const ACCESS_TOKEN_EXPIRY = 60 * 60; // 1 hour
+const REFRESH_TOKEN_EXPIRY = 7 * 24 * 60 * 60; // 7 days
+const BLACKLIST_CLEANUP_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
+
+// In-memory refresh token blacklist for logout
+const refreshTokenBlacklist = new Set();
+
+// Clean up expired blacklist entries periodically (every hour)
+setInterval(() => {
+    refreshTokenBlacklist.clear();
+}, 60 * 60 * 1000);
+
+
+// Password Helper Functions
+/**
+ * Hash a password using PBKDF2 with a random salt
+ * @param {string} password - Plain text password
+ * @returns {string} Hashed password in format "salt:hash"
+ */
+const hashPassword = (password) => {
+    const salt = crypto.randomBytes(16).toString('hex'); // 16-byte random salt
+    const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
+    return `${salt}:${hash}`; // Storing salt and hash together for verification
+};
+
+/**
+ * Verify a password against its stored hash
+ * @param {string} password - Plain text password
+ * @param {string} storedHash - Stored hash in format "salt:hash"
+ * @returns {boolean} True if password matches the stored hash
+ */
+const verifyPassword = (password, storedHash) => {
+    const [salt, hash] = storedHash.split(':');
+    const verifyHash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
+    return hash === verifyHash;
+};
+
+
+// JWT Helper Functions
+/**
+ * Get client IP address from request
+ * Used for token fingerprinting to prevent token theft across devices
+ * @param {object} req - Express request object
+ * @returns {string} Client IP address
+ */
+const getClientIP = (req) => {
+    return req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+};
+
+/**
+ * Generate a JWT access token for a user
+ * Includes fingerprinting (IP + UserAgent) to bind token to device
+ * JWT Structure: header.payload.signature (HS256 algorithm)
+ * @param {number} accountId - User's account ID
+ * @param {string} email - User's email
+ * @param {string} username - User's username
+ * @param {string} userAgent - User's browser user agent
+ * @param {string} ipAddress - User's IP address
+ * @returns {string} JWT access token
+ */
+const generateAccessToken = (accountId, email, username, userAgent, ipAddress) => {
+    const payload = {
+        accountId,
+        email,
+        username,
+        type: 'access',                         // Token type for validation
+        fingerprint: crypto                     // Device fingerprint
+            .createHash('sha256')
+            .update(`${userAgent}${ipAddress}`)
+            .digest('hex'),
+        iat: Math.floor(Date.now() / 1000),                      // Issued at timestamp
+        exp: Math.floor(Date.now() / 1000) + ACCESS_TOKEN_EXPIRY // Expiration timestamp
+    };
+    
+    const header = { alg: 'HS256', typ: 'JWT' }; // Specify algorithm and token type in header
+    const headerEncoded = Buffer.from(JSON.stringify(header)).toString('base64url');
+    const payloadEncoded = Buffer.from(JSON.stringify(payload)).toString('base64url');
+
+    // Signatures ensure that token has not been tampered with
+    const signature = crypto
+        .createHmac('sha256', JWT_SECRET)
+        .update(`${headerEncoded}.${payloadEncoded}`)
+        .digest('base64url');
+    
+    return `${headerEncoded}.${payloadEncoded}.${signature}`;
+};
+
+/**
+ * Verify and decode a JWT access token
+ * Validates signature, expiration, and device fingerprint
+ * @param {string} token - JWT token to verify
+ * @param {string} userAgent - User's browser user agent
+ * @param {string} ipAddress - User's IP address
+ * @returns {object|null} Decoded payload or null if invalid
+ */
+const verifyAccessToken = (token, userAgent, ipAddress) => {
+    try {
+        const [headerEncoded, payloadEncoded, signature] = token.split('.');
+        
+        if (!headerEncoded || !payloadEncoded || !signature) return null;
+        
+        // Verify that the signature matches expected value
+        const expectedSignature = crypto
+            .createHmac('sha256', JWT_SECRET)
+            .update(`${headerEncoded}.${payloadEncoded}`)
+            .digest('base64url');
+        
+        if (signature !== expectedSignature) return null;
+        
+        // Decode and parse payload
+        const payload = JSON.parse(Buffer.from(payloadEncoded, 'base64url').toString());
+        
+        if (payload.type !== 'access') return null;                   // Validate token type
+        if (payload.exp < Math.floor(Date.now() / 1000)) return null; // Check if token has expired
+        
+        // Validate device fingerprint
+        const expectedFingerprint = crypto
+            .createHash('sha256')
+            .update(`${userAgent}${ipAddress}`)
+            .digest('hex');
+        
+        if (payload.fingerprint !== expectedFingerprint) return null;
+        
+        return payload;
+    } catch (error) {
+        return null;
+    }
+};
+
+/**
+ * Generate a refresh token
+ * Refresh tokens are long-lived and can be revoked
+ * @param {number} accountId - User's account ID
+ * @returns {Promise<string>} Refresh token string
+ */
+const generateRefreshToken = async (accountId) => {
+    const refreshToken = crypto.randomBytes(64).toString('hex'); // 64-byte random token
+    const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY * 1000);
+    
+    // Store in database if token needs to be revoked
+    await pool.query(
+        `INSERT INTO refresh_tokens (account_id, token, expires_at, created_at)
+         VALUES (?, ?, ?, NOW())`,
+        [accountId, refreshToken, expiresAt]
+    );
+    
+    return refreshToken;
+};
+
+/**
+ * Verify a refresh token
+ * @param {string} token - Refresh token to verify
+ * @returns {Promise<object|null>} Token data with user info or null if invalid
+ */
+const verifyRefreshToken = async (token) => {
+    // Check if token was explicitly invalidated
+    // Logout would be considered explicitly invalidated
+    if (refreshTokenBlacklist.has(token)) return null;
+    
+    // Query the database for a valid token
+    const [tokens] = await pool.query(
+        `SELECT rt.account_id, rt.token, rt.expires_at, u.email, u.username, u.account_status
+         FROM refresh_tokens rt
+         JOIN user_accounts u ON rt.account_id = u.account_id
+         WHERE rt.token = ? AND rt.expires_at > NOW()`,
+        [token]
+    );
+    
+    if (tokens.length === 0) return null;
+    if (tokens[0].account_status !== 'active') return null;
+    
+    return tokens[0];
+};
+
+/**
+ * Invalidate a refresh token
+ * An action like logging out would invalidate a refresh token
+ * @param {string} token - Refresh token to invalidate
+ */
+const invalidateRefreshToken = async (token) => {
+    refreshTokenBlacklist.add(token);
+
+    // Remove refresh token from database
+    await pool.query('DELETE FROM refresh_tokens WHERE token = ?', [token]);
+};
+
+/**
+ * Invalidate all refresh tokens for a user
+ * A user logging out from all devices would invalidate all their refresh tokens
+ * @param {number} accountId - User's account ID
+ */
+const invalidateAllUserRefreshTokens = async (accountId) => {
+    const [tokens] = await pool.query(
+        'SELECT token FROM refresh_tokens WHERE account_id = ?',
+        [accountId]
+    );
+    
+    for (const token of tokens) {
+        refreshTokenBlacklist.add(token.token);
+    }
+
+    // Delete all user tokens from the database
+    await pool.query('DELETE FROM refresh_tokens WHERE account_id = ?', [accountId]);
+};
+
+/**
+ * Add an access token to the blacklist
+ * @param {string} token - Access token
+ * @returns {Promise<void>}
+ */
+const blacklistAccessToken = async (token) => {
+    // Decode token to get expiration
+    let expiresAt = new Date(Date.now() + ACCESS_TOKEN_EXPIRY * 1000);
+    try {
+        const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString());
+        if (payload.exp) {
+            expiresAt = new Date(payload.exp * 1000);
+        }
+    } catch (error) {
+        console.error('Error decoding token for blacklist:', error);
+    }
+    
+    await pool.query(
+        `INSERT INTO access_token_blacklist (token, expires_at)
+         VALUES (?, ?)`,
+        [token, expiresAt]
+    );
+};
+
+/**
+ * Check if an access token is blacklisted
+ * @param {string} token - Access token
+ * @returns {Promise<boolean>} True if blacklisted
+ */
+const isAccessTokenBlacklisted = async (token) => {
+    const [rows] = await pool.query(
+        `SELECT blacklist_id FROM access_token_blacklist 
+         WHERE token = ? AND expires_at > NOW()`,
+        [token]
+    );
+    return rows.length > 0;
+};
+
+/**
+ * Clean up expired blacklist entries
+ */
+const cleanupBlacklist = async () => {
+    const [result] = await pool.query('DELETE FROM access_token_blacklist WHERE expires_at < NOW()');
+    console.log(`Cleaned up ${result.affectedRows} expired blacklist entries`);
+};
+
+
+// Authentication middleware
+/**
+ * JWT authentication middleware
+ * Checks for Bearer token and validates it
+ * Attaches user info to req.user if valid
+ * Used to protect routes that require authentication
+ * @param {object} req - Express request object
+ * @param {object} res - Express response object
+ * @param {function} next - Express next middleware function
+ */
+const authenticateJWT = async (req, res, next) => {
+    try {
+        // Extract token from auth header
+        const authHeader = req.headers.authorization;
+        
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({
+                success: false,
+                error: 'Authentication required'
+            });
+        }
+        
+        const token = authHeader.split(' ')[1];
+
+        // Check if access token is blacklisted
+        const isBlacklisted = await isAccessTokenBlacklisted(token);
+        if (isBlacklisted) {
+            return res.status(401).json({
+                success: false,
+                error: 'Access token has been revoked. Please log in again.'
+            });
+        }
+
+        const userAgent = req.headers['user-agent'] || 'unknown';
+        const ipAddress = getClientIP(req);
+        
+        // Verify token
+        const decoded = verifyAccessToken(token, userAgent, ipAddress);
+        
+        if (!decoded) {
+            return res.status(401).json({
+                success: false,
+                error: 'Invalid or expired token'
+            });
+        }
+        
+        // Verify user still exists and is active
+        const [users] = await pool.query(
+            `SELECT account_id, email, username, account_status 
+             FROM user_accounts 
+             WHERE account_id = ? AND account_status = 'active'`,
+            [decoded.accountId]
+        );
+        
+        if (users.length === 0) {
+            return res.status(401).json({
+                success: false,
+                error: 'User no longer exists or account is inactive'
+            });
+        }
+        
+        const user = users[0];
+        
+        // Attach user info to request
+        req.user = {
+            account_id: user.account_id,
+            email: user.email,
+            username: user.username
+        };
+        
+        next();
+    } catch (error) {
+        console.error('JWT Authentication error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'An error occurred during authentication'
+        });
+    }
+};
+
+/**
+ * Optional JWT authentication middleware
+ * Attaches user to req.user if token is valid, but doesn't block unauthenticated requests
+ * Used for endpoints that show different content for logged-in vs guest users
+ * @param {object} req - Request object
+ * @param {object} res - Response object
+ * @param {function} next - middleware function
+ */
+const optionalAuthenticateJWT = async (req, res, next) => {
+    try {
+        const authHeader = req.headers.authorization;
+        
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return next(); // No token, continue as guest
+        }
+        
+        const token = authHeader.split(' ')[1];
+
+        // Check if access token is blacklisted
+        const isBlacklisted = await isAccessTokenBlacklisted(token);
+        if (isBlacklisted) {
+            return next(); // Treat user as guest
+        }
+
+        const userAgent = req.headers['user-agent'] || 'unknown';
+        const ipAddress = getClientIP(req);
+        
+        const decoded = verifyAccessToken(token, userAgent, ipAddress);
+        
+        if (!decoded) {
+            return next(); // Invalid token, continue as guest
+        }
+        
+        // Verify user still exists and is active
+        const [users] = await pool.query(
+            `SELECT account_id, email, username, account_status 
+             FROM user_accounts 
+             WHERE account_id = ? AND account_status = 'active'`,
+            [decoded.accountId]
+        );
+        
+        if (users.length === 0) {
+            return next(); // User not found, continue as guest
+        }
+        
+        const user = users[0];
+        
+        // Attach user info to request
+        req.user = {
+            account_id: user.account_id,
+            email: user.email,
+            username: user.username
+        };
+        
+        next();
+    } catch (error) {
+        // On error, continue as guest (don't block the request)
+        console.error('Optional auth error:', error.message);
+        next();
+    }
+};
+
+// Clean blacklist daily
+setInterval(cleanupBlacklist, BLACKLIST_CLEANUP_INTERVAL);
+
+// Exports
+module.exports = {
+    // Password helpers
+    hashPassword,
+    verifyPassword,
+    
+    // JWT helpers
+    getClientIP,
+    generateAccessToken,
+    verifyAccessToken,
+    generateRefreshToken,
+    verifyRefreshToken,
+    invalidateRefreshToken,
+    invalidateAllUserRefreshTokens,
+    blacklistAccessToken,
+    isAccessTokenBlacklisted,
+    
+    // Middleware
+    authenticateJWT,
+    optionalAuthenticateJWT
+};
