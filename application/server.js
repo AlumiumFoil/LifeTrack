@@ -1,120 +1,80 @@
-require("dotenv").config()
+// server.js
+// Main entry point for the application
+// Sets up middleware, CORS, security headers, and mounts all routes
+
+require("dotenv").config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const dotenv = require('dotenv');
-const mysql = require('mysql2/promise');
-const app = express()
-const port = process.env.PORT || 3000;
 const path = require('path');
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use(helmet({
-  hsts:false,
-  contentSecurityPolicy: false,
-  crossOriginOpenerPolicy: false,
-  originAgentCluster: false
+// Import route modules
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
+const searchRoutes = require('./routes/searchRoutes');
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+// CORS Configuration
+app.use(cors({
+    origin: process.env.CORS_ORIGIN || true,  // Allow frontend URL or all in development
+    credentials: true                         // Allow cookies/auth headers
 }));
+
+// Parse JSON request bodies
+app.use(express.json());
+
+// Security headers with Helmet
+app.use(helmet({
+    hsts: false,
+    contentSecurityPolicy: false,
+    crossOriginOpenerPolicy: false,
+    originAgentCluster: false
+}));
+
+// Additional security headers
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    next();
+});
+
+// Serve static files (HTML, CSS, JS)
 app.use(express.static(path.join(__dirname, "public")));
 
-// Formal connection pool with database
-const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    port: Number(process.env.DB_PORT || 3306),
-    user: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE,
-    waitForConnections: true,  // queue requests when all connections are busy
-    connectionLimit: 10,  // max number of simultaneous connections
-    queueLimit: 0  // max number of connection requests in queue
-});
 
-// Define a route for GET requests to the root URL
+// Routes
+// Serve main HTML page
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+    res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// Test route
+// Simple test endpoint to verify API is working
 app.get('/api/test', (req, res) => {
     res.send({ msg: 'API Test: Working' });
 });
 
-// DB test route
+// Database connection test endpoint
 app.get('/api/db-test', async (req, res) => {
     try {
+        const pool = require('./config/db');
         const [rows] = await pool.query("SELECT 1 AS ok");
-        res.json({ status: 'Database Test: Working' })
-    }   catch (err) {
+        res.json({ status: 'Database Test: Working' });
+    } catch (err) {
         res.status(500).json({ ok: false, error: String(err.message || err) });
     }
 });
 
-// Search api call route
-app.get('/api/resources/search', async (req, res) => {
-    try {
-        const q = (req.query.q || '').trim();
-        const category = (req.query.category || '').trim();
-        const contentType = (req.query.content_type || '').trim();
+// Mount API routes
+app.use('/api/auth', authRoutes);        // Authentication routes
+app.use('/api/users', userRoutes);       // User-related routes
+app.use('/api/resources', searchRoutes); // Resource search routes
 
-        // Search for query in database table
-        let sql = `
-            SELECT
-                resource_id,
-                title,
-                description,
-                url,
-                image_url,
-                content_type,
-                category
-            FROM resources
-            WHERE is_public = 1
-        `;
-
-        const params = [];
-
-        // Optional filters
-        // Keyword filter (titles and descriptions)
-        if (q) {
-            sql += ` AND (title LIKE ? OR description LIKE ?)`;
-            const likeTerm = `%${q}%`;
-            params.push(likeTerm, likeTerm);
-        }
-
-        // Category filter
-        if (category) {
-            sql += ` AND category = ?`;
-            params.push(category);
-        }
-
-        if (contentType) {
-            sql += ` AND content_type = ?`;
-            params.push(contentType);
-        }
-
-        sql += ` ORDER BY created_at DESC LIMIT 50`;
-
-        // Execute the search with parameters
-        const [results] = await pool.query(sql, params);
-
-        res.json({
-            success: true,
-            results,
-            total: results.length,
-        });
-    } catch (error) {
-        console.error('Search error:', error);
-        res.status(500).json({
-            success: false,
-            results: [],
-            total: 0,
-            error: 'An error occurred while searching',
-        });
-    }
-});
-
-// Start the server and listen for incoming requests
+// Start the server
 app.listen(port, "127.0.0.1", () => {
-  console.log(`server listening on http://127.0.0.1 ${port}`);
+    console.log(`server listening on http://127.0.0.1 ${port}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`CORS Origin: ${process.env.CORS_ORIGIN || 'all origins allowed'}`);
 });

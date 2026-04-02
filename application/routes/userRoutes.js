@@ -1,0 +1,62 @@
+// routes/userRoutes.js
+// Defines all user-related API routes
+// Routes are prefixed with /api/users
+
+const express = require('express');
+const authController = require('../controllers/authController');
+const userController = require('../controllers/userController');
+const { authenticateJWT } = require('../middleware/authenticate');
+const {uploadSingleProfileImage} = require('../middleware/profileImageUpload');
+
+const router = express.Router();
+
+
+// Public User Routes - No authentication required
+/**
+ * GET /api/users/security-questions
+ * Get list of premade security questions for registration
+ * Output: { success, questions }
+ */
+router.get('/security-questions', userController.getSecurityQuestions);
+
+/**
+ * GET /api/users/bcrypt-test
+ * Confirms bcrypt is installed and working correctly
+ * Hashes a test value and verifies both a matching and non-matching password
+ * No authentication required
+ * Output: { success, bcryptWorking, details }
+ */
+router.get('/bcrypt-test', userController.bcryptTest);
+
+// Protected User Routes - Requires a valid JWT token
+/**
+ * GET /api/users/me/roles
+ * Get current user's assigned role
+ * Requires authentication
+ * Output: { success, roles }
+ */
+router.get('/me/roles', authenticateJWT, authController.getUserRoles);
+
+/**
+ * GET /api/users/me/dashboard
+ * Return one complete dashboard for the authenticated user
+ * Requires authentication
+ * Output: { success, dashboard }
+ */
+router.get('/me/dashboard', authenticateJWT, userController.getDashboard);
+
+/**
+ * POST /api/users/me/profile-image
+ * Upload a profile image for the authenticated user
+ * Expects multipart/form-data with a single file field named profileImage
+ * Requires authentication
+ * Output: { success, message, image }
+ */
+router.post(
+    '/me/profile-image',
+    authenticateJWT,
+    uploadSingleProfileImage,
+    userController.uploadProfileImage
+);
+
+module.exports = router;
