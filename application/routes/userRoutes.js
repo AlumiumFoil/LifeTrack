@@ -6,6 +6,7 @@ const express = require('express');
 const authController = require('../controllers/authController');
 const userController = require('../controllers/userController');
 const { authenticateJWT } = require('../middleware/authenticate');
+const {uploadSingleProfileImage} = require('../middleware/profileImageUpload');
 
 const router = express.Router();
 
@@ -18,7 +19,6 @@ const router = express.Router();
  */
 router.get('/security-questions', userController.getSecurityQuestions);
 
-
 // Protected User Routes - Requires a valid JWT token
 /**
  * GET /api/users/me/roles
@@ -27,5 +27,27 @@ router.get('/security-questions', userController.getSecurityQuestions);
  * Output: { success, roles }
  */
 router.get('/me/roles', authenticateJWT, authController.getUserRoles);
+
+/**
+ * GET /api/users/me/dashboard
+ * Return one complete dashboard for the authenticated user
+ * Requires authentication
+ * Output: { success, dashboard }
+ */
+router.get('/me/dashboard', authenticateJWT, userController.getDashboard);
+
+/**
+ * POST /api/users/me/profile-image
+ * Upload a profile image for the authenticated user
+ * Expects multipart/form-data with a single file field named profileImage
+ * Requires authentication
+ * Output: { success, message, image }
+ */
+router.post(
+    '/me/profile-image',
+    authenticateJWT,
+    uploadSingleProfileImage,
+    userController.uploadProfileImage
+);
 
 module.exports = router;
