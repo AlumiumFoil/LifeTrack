@@ -1,8 +1,9 @@
 // middleware/authenticate.js
 // Handles all authentication-related functionality
-// Using PBKDF2 for password hashing and JWT for stateless auth
+// Using bcrypt for password hashing and JWT for stateless auth
 
 const crypto = require('crypto'); // Built-in node.js module for password hashing
+const bcrypt = require('bcrypt'); 
 const pool = require('../config/db');
 require('dotenv').config();
 
