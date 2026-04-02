@@ -4,7 +4,6 @@
 
 const pool = require('../config/db');
 const userModel = require('../models/userModel');
-const academicModel = require('../models/academicModel');
 const {
     hashPassword,
     verifyPassword,
@@ -83,7 +82,7 @@ const register = async (req, res) => {
         if (!email || !username || !password || !securityQuestions) {
             return res.status(400).json({
                 success: false,
-                error: 'Missing required fields: email, username, password, and security question(s) are required'
+                error: 'Missing required fields'
             });
         }
 
@@ -149,19 +148,19 @@ const register = async (req, res) => {
                     answer_hash: hashPassword(sq.answer)
                 });
             }
-            await academicModel.insertSecurityQuestions(accountId, questionsWithHashes, connection);
+            await userModel.insertSecurityQuestions(accountId, questionsWithHashes, connection);
 
             // Assign default role of college_student
-            const roleId = await academicModel.getRoleIdByName('college_student');
+            const roleId = await userModel.getRoleIdByName('college_student');
             if (roleId) {
-                await academicModel.assignRoleToUser(accountId, roleId);
+                await userModel.assignRoleToUser(accountId, roleId);
             }
 
             // Create default accessibility settings
-            await academicModel.createDefaultAccessibilitySettings(accountId, connection);
+            await userModel.createDefaultAccessibilitySettings(accountId, connection);
 
             // Create default dashboard
-            await academicModel.createDefaultDashboard(accountId, connection);
+            await userModel.createDefaultDashboard(accountId, connection);
 
             await connection.commit();
 
@@ -387,7 +386,7 @@ const getCurrentUser = async (req, res) => {
  */
 const getUserRoles = async (req, res) => {
     try {
-        const roles = await academicModel.getUserRoles(req.user.account_id);
+        const roles = await userModel.getUserRoles(req.user.account_id);
 
         res.json({
             success: true,
