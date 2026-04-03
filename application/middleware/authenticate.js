@@ -1,8 +1,9 @@
 // middleware/authenticate.js
 // Handles all authentication-related functionality
-// Using PBKDF2 for password hashing and JWT for stateless auth
+// Using bcrypt for password hashing and JWT for stateless auth
 
-const crypto = require('crypto'); // Built-in node.js module for password hashing
+const crypto = require('crypto'); // used for JWT signing and token generation
+const bcrypt = require('bcrypt'); // used for password hashing
 const pool = require('../config/db');
 require('dotenv').config();
 
@@ -15,6 +16,7 @@ const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('he
 const ACCESS_TOKEN_EXPIRY = 60 * 60; // 1 hour
 const REFRESH_TOKEN_EXPIRY = 7 * 24 * 60 * 60; // 7 days
 const BLACKLIST_CLEANUP_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
+const BCRYPT_ROUNDS = Number(process.env.BCRYPT_ROUNDS || 12);
 
 // In-memory refresh token blacklist for logout
 const refreshTokenBlacklist = new Set();
@@ -27,26 +29,23 @@ setInterval(() => {
 
 // Password Helper Functions
 /**
- * Hash a password using PBKDF2 with a random salt
+ * Hash a password using bcrypt. This returns a bcrypt hash string that 
+ * can be stored directly in user_accounts.password_hash
  * @param {string} password - Plain text password
- * @returns {string} Hashed password in format "salt:hash"
+ * @returns {Promise<string>} Bcrypt password hash
  */
-const hashPassword = (password) => {
-    const salt = crypto.randomBytes(16).toString('hex'); // 16-byte random salt
-    const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
-    return `${salt}:${hash}`; // Storing salt and hash together for verification
+const hashPassword = async (password) => {
+     return bcrypt.hash(password, BCRYPT_ROUNDS);
 };
 
 /**
  * Verify a password against its stored hash
  * @param {string} password - Plain text password
- * @param {string} storedHash - Stored hash in format "salt:hash"
- * @returns {boolean} True if password matches the stored hash
+ * @param {string} storedHash - Stored bcrypt hash 
+ * @returns {boolean} True if password matches
  */
-const verifyPassword = (password, storedHash) => {
-    const [salt, hash] = storedHash.split(':');
-    const verifyHash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
-    return hash === verifyHash;
+const verifyPassword = async (password, storedHash) => {
+    return bcrypt.compare(password, storedHash);
 };
 
 

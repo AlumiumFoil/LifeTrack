@@ -133,7 +133,7 @@ const register = async (req, res) => {
         }
 
         // Start database transaction to create a new user account
-        const passwordHash = hashPassword(password);
+        const passwordHash = await hashPassword(password);
         const connection = await pool.getConnection();
         await connection.beginTransaction();
         
@@ -146,7 +146,7 @@ const register = async (req, res) => {
             for (const sq of securityQuestions) {
                 questionsWithHashes.push({
                     question_text: sq.question_text,
-                    answer_hash: hashPassword(sq.answer)
+                    answer_hash: await hashPassword(sq.answer)
                 });
             }
             await userModel.insertSecurityQuestions(accountId, questionsWithHashes, connection);
@@ -229,7 +229,7 @@ const login = async (req, res) => {
         const user = users[0];
 
         // Verify password
-        const isPasswordValid = verifyPassword(password, user.password_hash);
+        const isPasswordValid = await verifyPassword(password, user.password_hash);
         if (!isPasswordValid) {
             return res.status(401).json({
                 success: false,
