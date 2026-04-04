@@ -14,6 +14,33 @@ document.addEventListener("DOMContentLoaded", () => {
 }
 });
 
+//saves the auth session data that is returned from the back
+//it stores tokens & basic user info so that later pages can use the auth indpoints
+function saveAuthSession(data) {
+  if (!data) return;
+
+  if (data.accessToken) {
+    localStorage.setItem("accessToken", data.accessToken);
+  }
+
+  if (data.refreshToken) {
+    localStorage.setItem("refreshToken", data.refreshToken);
+  }
+
+  if (data.user) {
+    localStorage.setItem("user", JSON.stringify(data.user));
+  }
+}
+
+//clears the saved auth session data
+//is useful for later when we logout or if theres some invalid session handling
+function clearAuthSession() {
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
+  localStorage.removeItem("user");
+}
+
+
 //** This sets up the login form on auth.html (aka our login page). This function
 // will listen for the form submission, sends our login info to the backend as JSON 
 // and will display it either as successful or an error message on this page.  */
@@ -68,6 +95,8 @@ function initializeLoginForm() {
       if (!response.ok || !data.success) {
         throw new Error(data.error || "Login failed.");
       }
+      //saves tokens & user info from back
+      saveAuthSession(data);
 
       //If this runs the login has been successul, so we display a success message.
       loginMessage.style.display = "block";
@@ -82,6 +111,9 @@ function initializeLoginForm() {
       //If something goes wrong such as a bad response, network failure, some backend error
       //we will display an error message within our status area
     } catch (error) {
+      //cleat old/partial session if the login had failed
+      clearAuthSession();
+
       loginMessage.style.display = "block";
       loginMessage.classList.add("error");
       loginMessage.textContent = error.message || "An error occurred during login.";
@@ -149,19 +181,24 @@ function initializeRegisterForm() {
         throw new Error(data.error || "Registration failed.");
       }
 
+      //save tokens & user data. Reg logs user in immediately
+      saveAuthSession(data);
+
       //if registration is a success, show message
       registerMessage.style.display = "block";
       registerMessage.classList.add("success");
-      registerMessage.textContent = "Registration successful. Redirecting to login...";
+      registerMessage.textContent = "Registration successful. Redirecting to Dashboard...";
 
       //After a delay, we will return the user to the login page so they can sign in
       setTimeout(() => {
-        window.location.href = "./auth.html";
-      }, 1200);
+        window.location.href = "./dashboard.html";
+      }, 1000);
 
       //If registration fails, show the error 
       // which is returned from backend (or our fallback message)
     } catch (error) {
+      clearAuthSession();
+      
       registerMessage.style.display = "block";
       registerMessage.classList.add("error");
       registerMessage.textContent = error.message || "An error occurred during registration.";
