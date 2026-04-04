@@ -3,6 +3,94 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>DASHBOARD - SUCCESS/title>
-  <link rel="stylesheet" href="./css/styles.css" />
+  <title>Team 1 - Dashboard</title>
+  <link rel="stylesheet" href="../css/styles.css" />
 </head>
+<body>
+  <div class="dashboard-frame">
+    <header class="dashboard-header">
+      <div class="dashboard-header-brand">LifeTrack</div>
+
+      <div class="dashboard-header-actions">
+        <a class="dashboard-header-link" href="./search.html">Search</a>
+
+        <a class="dashboard-header-profile" href="./profile.html">
+          <img
+            id="profilePreview"
+            class="dashboard-header-avatar"
+            src="https://placehold.co/120x120?text=User"
+            alt="Profile preview"
+          />
+          <span id="profileUsernameTop">Profile</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="dashboard-body">
+      <aside class="dashboard-sidebar">
+        <nav class="dashboard-nav">
+          <a class="dashboard-nav-link active" href="./dashboard.html">Home</a>
+          <a class="dashboard-nav-link" href="./goals.html">Goals</a>
+          <a class="dashboard-nav-link" href="./projects.html">Projects</a>
+          <a class="dashboard-nav-link" href="./studying.html">Studying</a>
+          <a class="dashboard-nav-link" href="./skillbuilding.html">Skill Building</a>
+          <a class="dashboard-nav-link" href="./jobpreparation.html">Job Preparation</a>
+          <a class="dashboard-nav-link" href="./wellness.html">Wellness</a>
+        </nav>
+      </aside>
+
+      <main class="dashboard-main">
+        <section class="dashboard-page-title">
+          <h1>Dashboard</h1>
+        </section>
+
+        <section class="dashboard-grid storyboard-grid">
+          <article class="card dashboard-panel dashboard-panel-large">
+            <h2>Studying</h2>
+            <p id="dashboardWelcome" class="small">Current Course: CSC 648</p>
+
+            <div class="dashboard-button-stack">
+              <a class="btn secondary" href="./studying.html">Create Study Plan</a>
+              <a class="btn secondary" href="./studying.html">Create Study Plan</a>
+              <a class="btn secondary" href="./studying.html">Create Study Plan</a>
+            </div>
+
+            <div class="dashboard-upload-block">
+              <label for="profileImageInput" class="small">Upload Profile Image</label>
+              <input type="file" id="profileImageInput" accept="image/*" />
+              <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+                <button id="uploadProfileBtn" class="btn" type="button">Upload Image</button>
+                <button id="refreshDashboardBtn" class="btn secondary" type="button">Refresh Dashboard</button>
+              </div>
+              <div id="dashboardMessage" class="status-message" style="display:none;"></div>
+            </div>
+          </article>
+
+          <article class="card dashboard-panel dashboard-panel-medium">
+            <h2>Upcoming Milestones</h2>
+            <div id="projectList" class="dashboard-list">
+              <p class="small">No project data loaded yet.</p>
+            </div>
+          </article>
+
+          <article class="card dashboard-panel dashboard-panel-medium">
+            <h2>Today's Schedule</h2>
+            <div id="academicProgressList" class="dashboard-list">
+              <p class="small">No academic progress loaded yet.</p>
+            </div>
+          </article>
+
+          <article class="card dashboard-panel dashboard-panel-full">
+            <h2>Wellness Snapshot</h2>
+            <div id="wellnessList" class="dashboard-list">
+              <p class="small">No wellness entries loaded yet.</p>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="../js/dashboard.js"></script>
+</body>
+</html>
