@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Team 1 - Search Results</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="brand">LifeTrack</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a href="./dashboard.html">Dashboard</a>
+        <a href="./search.html">Search</a>
+        <a href="../index.html">Home</a>
+      </div>
+    </div>
+
+    <section class="hero">
+      <h1>Search Results</h1>
+      <p id="resultsSummary">
+        Loading search results...
+      </p>
+    </section>
+
+    <section class="card" style="margin-top:18px;">
+      <div class="results-toolbar">
+        <div>
+          <h2 style="margin:0;">Returned Results</h2>
+          <p class="small" id="activeFilters" style="margin:8px 0 0 0;">
+            Preparing search filters...
+          </p>
+        </div>
+
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <a class="btn secondary" href="./search.html">New Search</a>
+          <a class="btn secondary" href="./dashboard.html">Dashboard</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="loadingState" class="card" style="margin-top:18px;">
+      <p style="margin:0;">Loading search results...</p>
+    </section>
+
+    <section id="errorState" class="card" style="margin-top:18px; display:none;">
+      <h2 style="margin-top:0;">Unable to Load Results</h2>
+      <p id="errorMessage" style="margin-bottom:0;">
+        Something went wrong while contacting the search API.
+      </p>
+    </section>
+
+    <section id="emptyState" class="card" style="margin-top:18px; display:none;">
+      <h2 style="margin-top:0;">No Results Found</h2>
+      <p style="margin-bottom:0;">
+        Try another keyword or category and run the search again.
+      </p>
+    </section>
+
+    <section id="resultsGrid" class="results-grid" style="display:none;"></section>
+
+    <div class="footer">
+      Team 1 • Search Results
+    </div>
+  </div>
+
+  <script src="../js/search.js"></script>
+</body>
+</html>
