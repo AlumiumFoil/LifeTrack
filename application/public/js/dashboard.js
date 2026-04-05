@@ -38,14 +38,14 @@ function setWelcomeFromStoredUser() {
 
   const profileUsernameTop = document.getElementById("profileUsernameTop");
   const dashboardWelcome = document.getElementById("dashboardWelcome");
-  const profileUsername = document.getElementById("profileUsername");
-  const profileEmail = document.getElementById("profileEmail");
+  //const profileUsername = document.getElementById("profileUsername");
+  //const profileEmail = document.getElementById("profileEmail");
 
   //fallback content when we dont have any saved user/data exists yet
   if (!storedUser) {
     if (dashboardWelcome) dashboardWelcome.textContent = "Welcome!";
-    if (profileUsername) profileUsername.textContent = "Guest User";
-    if (profileEmail) profileEmail.textContent = "Sign in to load your profile";
+    //if (profileUsername) profileUsername.textContent = "Guest User";
+    //if (profileEmail) profileEmail.textContent = "Sign in to load your profile";
     if (profileUsernameTop) profileUsernameTop.textContent = "Profile";
     return;
   }
@@ -54,14 +54,14 @@ function setWelcomeFromStoredUser() {
     dashboardWelcome.textContent = `Welcome, ${storedUser.username || "User"}!`;
   }
 
-  if (profileUsername) {
+ /* if (profileUsername) {
     profileUsername.textContent = storedUser.username || "User";
   }
 
   if (profileEmail) {
     profileEmail.textContent = storedUser.email || "";
   }
-
+*/
   if (profileUsernameTop) {
   profileUsernameTop.textContent = storedUser.username || "Profile";
 }
@@ -131,15 +131,15 @@ function populateDashboard(dashboard) {
 
   //breaks up the dash data into smaller sections & provides defaults
   const profile = dashboard.profile || {};
-  const summary = dashboard.summary || {};
+  //const summary = dashboard.summary || {};
   const projects = Array.isArray(dashboard.projects) ? dashboard.projects : [];
   const academicProgress = Array.isArray(dashboard.academicProgress) ? dashboard.academicProgress : [];
   const wellnessEntries = Array.isArray(dashboard.wellnessMoodEntries) ? dashboard.wellnessMoodEntries : [];
 
   const dashboardWelcome = document.getElementById("dashboardWelcome");
-  const profileUsername = document.getElementById("profileUsername");
+  //const profileUsername = document.getElementById("profileUsername");
   const profileUsernameTop = document.getElementById("profileUsernameTop");
-  const profileEmail = document.getElementById("profileEmail");
+  //const profileEmail = document.getElementById("profileEmail");
   const profilePreview = document.getElementById("profilePreview");
 
   //updates the visible profile/welcome text using backend data
@@ -147,27 +147,30 @@ function populateDashboard(dashboard) {
     dashboardWelcome.textContent = `Welcome, ${profile.username || "User"}!`;
   }
 
-  if (profileUsername) {
+  /*if (profileUsername) {
     profileUsername.textContent = profile.username || "User";
   }
-
+  */
   if (profileUsernameTop) {
   profileUsernameTop.textContent = profile.username || "Profile";
   }
-
+  /*
   if (profileEmail) {
     profileEmail.textContent = profile.email || "";
   }
+  */
 
   //updates profile image preview if the abckend provides one
   if (profilePreview && profile.profileThumbnailUrl) {
     profilePreview.src = profile.profileThumbnailUrl;
   }
 
+  /*
   //fills summary counts, defaults to 0 if any vals are missing
   document.getElementById("goalCount").textContent = summary.goalCount ?? 0;
   document.getElementById("projectCount").textContent = summary.projectCount ?? 0;
   document.getElementById("milestoneCount").textContent = summary.milestoneCount ?? 0;
+  */
 
   //render each dashboard section
   renderAcademicProgress(academicProgress);
