@@ -469,3 +469,32 @@ body {
     font-size: 1.1rem;
   }
 }
+
+/* dashboard profile tools row */
+.dashboard-bottom-tools {
+  margin-top: 18px;
+}
+
+.dashboard-bottom-tools .dashboard-profile-tools {
+  width: 100%;
+  max-width: 520px;
+}
+
+
+
+.dashboard-tool-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+@media (max-width: 700px) {
+  .dashboard-top-tools {
+    justify-content: stretch;
+  }
+
+  .dashboard-profile-tools {
+    width: 100%;
+  }
+}

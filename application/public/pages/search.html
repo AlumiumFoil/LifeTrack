@@ -1,13 +1,21 @@
+<!--This is the search page for the front end resource lookup.
+It lets the users enter a keyword/category/filter and sends the 
+query to results.html using GET params-->
+
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+   <!-- Helps page scale correctly on tablets/phones -->
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Team 1 - Search</title>
+  <!-- this is a shared style sheet used across the multiple pages -->
   <link rel="stylesheet" href="../css/styles.css" />
 </head>
 <body>
   <div class="container">
+
+     <!--top nav for moving between main/key pages -->
     <div class="nav">
       <div class="brand">LifeTrack</div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -20,11 +28,11 @@
     <section class="hero">
       <h1>Search</h1>
       <p>
-        Search public resources as a guest, or sign in to also search your
-        personal goals, projects, and milestones.
+        Search our public resources. Users with projects, milestones, etc. will see personalized results.
       </p>
     </section>
 
+    <!-- our main search form -->
     <section class="card" style="margin-top:18px;">
       <h2 style="margin-top:0;">Search Resources</h2>
       <p class="small" style="margin-bottom:16px;">
@@ -32,6 +40,7 @@
         Leaving the search blank will return all available public resources.
       </p>
 
+      <!--This sends data to the results.html page as a query string values-->
       <form action="./results.html" method="GET" class="vp-form">
         <div class="form-group">
           <label for="q">Keyword Search</label>
@@ -54,29 +63,12 @@
           </select>
         </div>
 
+        <!--the main page actions-->
         <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:18px;">
           <button type="submit" class="btn">Search</button>
           <a class="btn secondary" href="./dashboard.html">Back to Dashboard</a>
         </div>
       </form>
-    </section>
-
-    <section class="grid">
-      <article class="card">
-        <h2>Suggested Searches</h2>
-        <p>
-          Try keywords like <strong>resume</strong>, <strong>study</strong>,
-          <strong>internship</strong>, <strong>wellness</strong>, or
-          <strong>template</strong>.
-        </p>
-      </article>
-
-      <article class="card">
-        <h2>Search Scope</h2>
-        <p>
-          Logged-in users can see additional personal matches.
-        </p>
-      </article>
     </section>
 
     <div class="footer">
