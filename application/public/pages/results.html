@@ -1,13 +1,22 @@
+<!--
+Results page for our search
+It loads query vals from the URL & relies on search.js to fetch & render matching results
+-->
+
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <!--Helps page scale correctly on tablets/phones-->
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Team 1 - Search Results</title>
+  <!--this is a shared style sheet used across the multiple pages-->
   <link rel="stylesheet" href="../css/styles.css" />
 </head>
 <body>
   <div class="container">
+
+    <!--top nav for moving between main/key pages-->
     <div class="nav">
       <div class="brand">LifeTrack</div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -24,6 +33,7 @@
       </p>
     </section>
 
+     <!--this is a toolbar showing current filters and actions-->
     <section class="card" style="margin-top:18px;">
       <div class="results-toolbar">
         <div>
@@ -40,10 +50,12 @@
       </div>
     </section>
 
+     <!--this is a loading state shown while search.js is waiting for the API results-->
     <section id="loadingState" class="card" style="margin-top:18px;">
       <p style="margin:0;">Loading search results...</p>
     </section>
 
+    <!--this is the error state shown if our API request fails-->
     <section id="errorState" class="card" style="margin-top:18px; display:none;">
       <h2 style="margin-top:0;">Unable to Load Results</h2>
       <p id="errorMessage" style="margin-bottom:0;">
@@ -51,6 +63,7 @@
       </p>
     </section>
 
+    <!--this handles the empty state shown when the search succeeds but returns no matches-->
     <section id="emptyState" class="card" style="margin-top:18px; display:none;">
       <h2 style="margin-top:0;">No Results Found</h2>
       <p style="margin-bottom:0;">
@@ -58,6 +71,7 @@
       </p>
     </section>
 
+    <!--our main container where search.js inserts result cards-->
     <section id="resultsGrid" class="results-grid" style="display:none;"></section>
 
     <div class="footer">
@@ -65,6 +79,7 @@
     </div>
   </div>
 
+  <!--our JS file that handles the URL params, calling the search api and also rendering states/results-->
   <script src="../js/search.js"></script>
 </body>
 </html>
