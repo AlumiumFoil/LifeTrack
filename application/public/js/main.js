@@ -3,7 +3,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const path = window.location.pathname;
 
-  //Only run search/results if we are on the test_results page.
+  //runs search/results if we are on the test_results page.
   //keeps JS shared & only activate API on page that needs it
   if (path.endsWith("test_results.html")) {
     loadSearchResults();

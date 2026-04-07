@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <!--makes sure page will scale correctly on tablets/phones-->
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Team 1 - Dashboard</title>
+  <!--shared (main) style sheet for the front -->
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body>
+  <div class="dashboard-frame">
+    <!--Our top header w/ search link, app anme & shortcut to profile-->
+    <header class="dashboard-header">
+      <div class="dashboard-header-brand">LifeTrack</div>
+
+      <div class="dashboard-header-actions">
+        <a class="dashboard-header-link" href="./search.html">Search</a>
+
+        <!--profile preview thats shown in top right of dash-->
+        <a class="dashboard-header-profile" href="./profile.html">
+          <img
+            id="profilePreview"
+            class="dashboard-header-avatar"
+            src="https://placehold.co/120x120?text=User"
+            alt="Profile preview"
+          />
+          <span id="profileUsernameTop">Profile</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="dashboard-body">
+      <!--our sidebar nav for the main sections of our app-->
+      <aside class="dashboard-sidebar">
+        <nav class="dashboard-nav">
+          <a class="dashboard-nav-link active" href="./dashboard.html">Home</a>
+          <a class="dashboard-nav-link" href="./goals.html">Goals</a>
+          <a class="dashboard-nav-link" href="./projects.html">Projects</a>
+          <a class="dashboard-nav-link" href="./studying.html">Studying</a>
+          <a class="dashboard-nav-link" href="./skillbuilding.html">Skill Building</a>
+          <a class="dashboard-nav-link" href="./jobpreparation.html">Job Preparation</a>
+          <a class="dashboard-nav-link" href="./wellness.html">Wellness</a>
+        </nav>
+      </aside>
+
+      <main class="dashboard-main">
+        <section class="dashboard-page-title">
+          <h1>Dashboard</h1>
+        </section>
+        
+        <!--The main dashboard cards laid out in a grid-->
+        <section class="dashboard-grid storyboard-grid">
+          <article class="card dashboard-panel dashboard-panel-large">
+            <h2>Studying</h2>
+
+            <!--This is updated by JS after the dash data loads-->
+            <p id="dashboardWelcome" class="small">Current Course: CSC 648</p>
+
+            <!--buttons for study-plan related nav-->
+            <div class="dashboard-button-stack">
+              <a class="btn secondary" href="./studying.html">Create Study Plan</a>
+              <a class="btn secondary" href="./studying.html">Create Study Plan</a>
+              <a class="btn secondary" href="./studying.html">Create Study Plan</a>
+            </div>
+          </article>
+
+          <!--Milestone/projects summary card-->
+          <article class="card dashboard-panel dashboard-panel-medium">
+            <h2>Upcoming Milestones</h2>
+            <div id="projectList" class="dashboard-list">
+              <p class="small">No project data or milestones loaded yet. Time to get to work...</p>
+            </div>
+          </article>
+
+          <!--academic progress & schedule card-->
+          <article class="card dashboard-panel dashboard-panel-medium">
+            <h2>Today's Schedule</h2>
+            <div id="academicProgressList" class="dashboard-list">
+              <p class="small">No academic progress loaded yet. Schedule is wide open... </p>
+            </div>
+          </article>
+
+          <!--wellness sum card-->
+          <article class="card dashboard-panel dashboard-panel-full">
+            <h2>Wellness Snapshot</h2>
+            <div id="wellnessList" class="dashboard-list">
+              <p class="small">No wellness entries loaded yet. Check your wellness routinely for updates...</p>
+            </div>
+          </article>
+        </section>
+
+        <!--profile img upload area-->
+        <section class="dashboard-bottom-tools">
+          <article class="card dashboard-profile-tools">
+            <h2>Profile Image</h2>
+            <p class="small">Upload a profile image.</p>
+
+            <div class="dashboard-upload-block">
+              <label for="profileImageInput" class="small">Choose Image</label>
+              <input type="file" id="profileImageInput" accept="image/*" />
+
+              <!--upload & refresh controls-->
+              <div class="dashboard-tool-actions">
+                <button id="uploadProfileBtn" class="btn" type="button">Upload Image</button>
+                <button id="refreshDashboardBtn" class="btn secondary" type="button">Refresh Dashboard</button>
+              </div>
+
+              <!--status/error message shown by JS when needed-->
+              <div id="dashboardMessage" class="status-message" style="display:none;"></div>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!--where the dashboard page logic lives-->
+  <script src="../js/dashboard.js"></script>
+</body>
+</html>

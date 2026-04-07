@@ -1,0 +1,131 @@
+<!-- Registration page for new accounts. Takes in usernames (3+ chars), email, pwd(8+ chars) 
+ & security question answers for account recovery. Upon success on registration, frontend JS 
+ sends the form data to the backend & redirects the user back to login.  -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Team 1 - Registration</title>
+  
+  <!--Shared styling across multiple pages-->
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <!--the top nav shared with the rest of out site-->
+    <div class="nav">
+      <div class="brand">CSC 648/848 • Team 1</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a href="../index.html">Home</a>
+        <a href="../about.html">About</a>
+        <a href="./auth.html">Login</a>
+      </div>
+    </div>
+
+    <!--the intro section that explains this pages purpose-->
+    <section class="hero">
+      <h1>Create Account</h1>
+      <p>
+        Register a new account using your username, email, password, and a
+        security question for account recovery.
+      </p>
+    </section>
+
+    <section class="card auth-card" style="margin-top:18px;">
+      <h2 style="margin-top:0;">Registration Form</h2>
+      <p class="small" style="margin-bottom:16px;">
+        Usernames must be at least 3 characters. Passwords must be at least 8
+        characters long.
+      </p>
+      
+      <!--This is our registration form - JS in the auth.js file will intercept
+      the submittion, format the data so it matches what the backend expects &
+      will display success or error messages-->
+      <form id="registerForm" class="vp-form">
+        <div class="form-group">
+          <label for="registerUsername">Username</label>
+          <input
+            type="text"
+            id="registerUsername"
+            name="username"
+            placeholder="Enter a username"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="registerEmail">Email</label>
+          <input
+            type="email"
+            id="registerEmail"
+            name="email"
+            placeholder="Enter your email address"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="registerPassword">Password</label>
+          <input
+            type="password"
+            id="registerPassword"
+            name="password"
+            placeholder="Create a password"
+            required
+          />
+        </div>
+
+        <!--This is our security questions dropdown menu that we hardcoded tot he front.
+        Selected questions and answers are packsges into the securityQuestions array 
+        that the backend expects in the register route-->
+        <div class="form-group">
+          <label for="securityQuestion">Security Question</label>
+          <select id="securityQuestion" name="securityQuestion" required>
+            <option value="">Select a security question</option>
+            <option value="What is the name of your first pet?">What is the name of your first pet?</option>
+            <option value="What was your first car?">What was your first car?</option>
+            <option value="What was your childhood nickname?">What was your childhood nickname?</option>
+            <option value="What city were you born in?">What city were you born in?</option>
+            <option value="What elementary school did you attend?">What elementary school did you attend?</option>
+            <option value="What is your favorite movie?">What is your favorite movie?</option>
+            <option value="What is your favorite book?">What is your favorite book?</option>
+            <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+            <option value="What is the name of your best friend from your childhood?">What is the name of your best friend from your childhood?</option>
+            <option value="What is your favorite food?">What is your favorite food?</option>
+            <option value="What is your favorite color?">What is your favorite color?</option>
+            <option value="What street did you grow up on?">What street did you grow up on?</option>
+            <option value="Who is your favorite musical artist?">Who is your favorite musical artist?</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="securityAnswer">Security Answer</label>
+          <input
+            type="text"
+            id="securityAnswer"
+            name="securityAnswer"
+            placeholder="Enter your answer"
+            required
+          />
+        </div>
+
+        <!--message area is updated dynamically by the auth.js file-->
+        <div id="registerMessage" class="status-message" style="display:none;"></div>
+
+        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:18px;">
+          <button type="submit" class="btn">Create Account</button>
+          <a class="btn secondary" href="./auth.html">Back to Login</a>
+        </div>
+      </form>
+    </section>
+
+    <div class="footer">
+      Team 1 • Registration Page
+    </div>
+  </div>
+
+  <!--this is our shared auth logic file-->
+  <script src="../js/auth.js"></script>
+</body>
+</html>
