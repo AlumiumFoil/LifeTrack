@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Goal Management – Team 1</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body>
+  <div class="dashboard-frame">
+
+    <header class="dashboard-header">
+      <a class="dashboard-header-brand" href="../index.html">LifeTrack</a>
+      <div class="dashboard-header-actions">
+        <span class="dashboard-header-link">Team 1 &nbsp;•&nbsp; Spring 2026</span>
+      </div>
+    </header>
+
+    <div class="dashboard-body">
+      <aside class="dashboard-sidebar">
+        <nav class="dashboard-nav">
+          <a class="dashboard-nav-link" href="./dashboard.html">Home</a>
+          <a class="dashboard-nav-link active" href="./goals.html">Goals</a>
+          <a class="dashboard-nav-link" href="./studying.html">Studying</a>
+          <a class="dashboard-nav-link" href="./wellness.html">Wellness</a>
+          <a class="dashboard-nav-link" href="./admin.html">Admin</a>
+        </nav>
+      </aside>
+
+      <main class="dashboard-main">
+
+        <section class="hero">
+          <h1>Goal Management</h1>
+          <p>Track and manage your personal and academic goals. Stay focused on what matters most.</p>
+        </section>
+
+        <!-- Summary cards -->
+        <div class="summary-row">
+          <div class="summary-card">
+            <div class="s-value" id="stat-total">6</div>
+            <div class="s-label">Total Goals</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value accent" id="stat-inprogress">3</div>
+            <div class="s-label">In Progress</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value green" id="stat-completed">2</div>
+            <div class="s-label">Completed</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value amber" id="stat-week">1</div>
+            <div class="s-label">Due This Week</div>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls-bar">
+          <input class="ctrl-input" type="text" id="search-input" placeholder="Search goals…" />
+          <select class="ctrl-select" id="status-filter">
+            <option value="all">All Statuses</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+            <option value="Not Started">Not Started</option>
+            <option value="Overdue">Overdue</option>
+          </select>
+          <select class="ctrl-select" id="cat-filter">
+            <option value="all">All Categories</option>
+            <option value="Academic">Academic</option>
+            <option value="Health">Health</option>
+            <option value="Career">Career</option>
+            <option value="Personal">Personal</option>
+          </select>
+          <button class="btn" onclick="openModal()">+ New Goal</button>
+        </div>
+
+        <!-- Tab bar -->
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="setTab(this,'all')">All</button>
+          <button class="tab-btn" onclick="setTab(this,'In Progress')">In Progress</button>
+          <button class="tab-btn" onclick="setTab(this,'Completed')">Completed</button>
+          <button class="tab-btn" onclick="setTab(this,'Not Started')">Not Started</button>
+        </div>
+
+        <!-- Goal cards grid -->
+        <div class="grid" id="goals-grid"></div>
+
+        <div class="footer">Team 1 • Spring 2026</div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Create / Edit Modal -->
+  <div class="modal-overlay" id="goal-modal">
+    <div class="modal">
+      <h2 id="modal-title">New Goal</h2>
+      <div class="vp-form">
+        <div class="form-group">
+          <label>Goal Title</label>
+          <input type="text" id="goal-title" placeholder="e.g. Complete research paper" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Category</label>
+            <select id="goal-cat">
+              <option>Academic</option>
+              <option>Health</option>
+              <option>Career</option>
+              <option>Personal</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="goal-status">
+              <option>Not Started</option>
+              <option>In Progress</option>
+              <option>Completed</option>
+              <option>Overdue</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Target Date</label>
+            <input type="date" id="goal-date" />
+          </div>
+          <div class="form-group">
+            <label>Progress (%)</label>
+            <input type="number" id="goal-progress" min="0" max="100" placeholder="0" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" id="goal-desc" placeholder="Short description…" />
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn" onclick="closeModal()">Save Goal</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/goals.js"></script>
+</body>
+</html>

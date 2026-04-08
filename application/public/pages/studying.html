@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Academic Management – Team 1</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body>
+  <div class="dashboard-frame">
+
+    <header class="dashboard-header">
+      <a class="dashboard-header-brand" href="../index.html">LifeTrack</a>
+      <div class="dashboard-header-actions">
+        <span class="dashboard-header-link">Team 1 &nbsp;•&nbsp; Spring 2026</span>
+      </div>
+    </header>
+
+    <div class="dashboard-body">
+      <aside class="dashboard-sidebar">
+        <nav class="dashboard-nav">
+          <a class="dashboard-nav-link" href="./dashboard.html">Home</a>
+          <a class="dashboard-nav-link" href="./goals.html">Goals</a>
+          <a class="dashboard-nav-link active" href="./studying.html">Studying</a>
+          <a class="dashboard-nav-link" href="./wellness.html">Wellness</a>
+          <a class="dashboard-nav-link" href="./admin.html">Admin</a>
+        </nav>
+      </aside>
+
+      <main class="dashboard-main">
+
+        <section class="hero">
+          <h1>Academic Management</h1>
+          <p>Monitor your courses, grades, and upcoming assignments all in one place.</p>
+        </section>
+
+        <!-- Summary cards -->
+        <div class="summary-row">
+          <div class="summary-card">
+            <div class="s-value accent">3.6</div>
+            <div class="s-label">Current GPA</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value">15</div>
+            <div class="s-label">Credit Hours</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value accent2">5</div>
+            <div class="s-label">Active Courses</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value amber">3</div>
+            <div class="s-label">Due This Week</div>
+          </div>
+        </div>
+
+        <!-- Courses -->
+        <div class="section-heading">Courses — Spring 2026</div>
+        <div class="course-grid" id="course-grid"></div>
+
+        <!-- Assignment tracker -->
+        <div class="section-heading">Assignment Tracker</div>
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="filterAssign(this,'all')">All</button>
+          <button class="tab-btn" onclick="filterAssign(this,'Upcoming')">Upcoming</button>
+          <button class="tab-btn" onclick="filterAssign(this,'Submitted')">Submitted</button>
+          <button class="tab-btn" onclick="filterAssign(this,'Graded')">Graded</button>
+        </div>
+        <div class="assign-list" id="assign-list"></div>
+
+        <div class="footer">Team 1 • Spring 2026</div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="../js/studying.js"></script>
+</body>
+</html>
