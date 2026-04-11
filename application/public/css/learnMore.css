@@ -1,0 +1,97 @@
+/* Learn More page styling - page specific style lives here*/
+
+.learnmore-nav {
+  align-items: center;
+}
+
+.learnmore-brand {
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--text);
+}
+
+.learnmore-nav-links {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.learnmore-hero {
+  padding: 30px 32px;
+}
+
+.learnmore-hero h1 {
+  margin: 0 0 12px;
+  font-size: 34px;
+  line-height: 1.15;
+}
+
+.learnmore-intro {
+  max-width: 760px;
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.learnmore-section {
+  margin-top: 32px;
+}
+
+.learnmore-section .section-heading {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.category-description {
+  margin: 12px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+  max-width: 850px;
+}
+
+.resource-grid {
+  margin-top: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.resource-card {
+  min-height: 150px;
+}
+
+.resource-card h2 {
+  margin-bottom: 10px;
+}
+
+.resource-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+  .learnmore-nav {
+    align-items: stretch;
+  }
+
+  .learnmore-nav-links {
+    justify-content: flex-start;
+  }
+
+  .learnmore-brand {
+    font-size: 26px;
+  }
+
+  .learnmore-hero {
+    padding: 24px 20px;
+  }
+
+  .learnmore-hero h1 {
+    font-size: 28px;
+  }
+
+  .learnmore-intro {
+    font-size: 15px;
+  }
+}
