@@ -4,33 +4,88 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Team 1 - Landing</title>
+  <title>LifeTrack</title>
   <link rel="stylesheet" href="./css/styles.css" />
+  <link rel="stylesheet" href="./css/index.css" />
 </head>
 <body>
   <div class="container">
-    <div class="nav">
-      <div class="brand">CSC 648/848 • Team 1</div>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <a href="./about.html">About</a>
+    <div class="nav landing-nav">
+      <div class="brand-group">
+        <div class="brand landing-brand">LifeTrack</div>
+      </div>
+
+      <div class="nav-links">
         <a href="./goals.html">Goals</a>
         <a href="./academic.html">Academic</a>
         <a href="./wellness.html">Wellness</a>
         <a href="./admin.html">Admin</a>
+        <a href="./pages/auth.html">Login</a>
+        <a href="./pages/register.html">Register</a>
       </div>
     </div>
 
-    <section class="hero">
-      <h1>Team 1 Landing Page</h1>
-      <p>
-        Welcome to our project site. Check out the About page to view team member pages & bios, 
-        launch the vertical prototype search demo or register / login to our app  see it in action.
-      </p>
+    <section class="hero landing-hero">
+      <div class="hero-copy">
+        <h1>LifeTrack</h1>
+        <p class="tagline">Your all-in-one student life management platform.</p>
 
-      <div style="margin-top:14px; display:flex; gap:12px; flex-wrap:wrap;">
-        <a class="btn" href="./about.html">Go to About</a>
-        <a class="btn secondary" href="./test_home.html">Vertical Prototype</a>
-        <a class="btn secondary" href="./pages/auth.html">Login / Register</a>
+        <p class="hero-description">
+          LifeTrack is designed for students who want one place to manage daily responsibilities,
+          track academic progress, stay on top of personal wellness, and organize goals that matter.
+          Our platform helps students balance school and life with tools built specifically around
+          the challenges of student life.
+        </p>
+
+        <div class="hero-actions">
+          <a class="btn" href="./pages/register.html">Get Started</a>
+          <a class="btn secondary" href="./pages/learnMore.html">Learn More</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section">
+      <div class="section-heading">What LifeTrack Offers</div>
+
+      <div class="grid feature-grid feature-grid-three">
+        <div class="card feature-card">
+          <div class="feature-icon">🎯</div>
+          <h2>Productivity</h2>
+          <p>
+            Set personal and academic goals, organize priorities, and keep track of progress over time.
+          </p>
+        </div>
+
+        <div class="card feature-card">
+          <div class="feature-icon">📘</div>
+          <h2>Academic</h2>
+          <p>
+            Monitor coursework, stay aware of deadlines, and keep your school responsibilities organized.
+          </p>
+        </div>
+
+        <div class="card feature-card">
+          <div class="feature-icon">💙</div>
+          <h2>Wellness</h2>
+          <p>
+            Build healthy habits, reflect on your well-being, and support a more balanced student routine.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-section team-section">
+      <div class="section-heading team-heading">About Our Team</div>
+
+      <div class="card team-card">
+        <p>
+          Team 01 is a group of engineers from SFSU who wanted to make life management easier for
+          students by creating a platform that brings together organization, academic support, and wellness tools in one place.
+        </p>
+
+        <div class="team-actions">
+          <a class="btn" href="./about.html">Meet the Team</a>
+        </div>
       </div>
     </section>
 
