@@ -704,9 +704,11 @@ body {
   border-right: 1px solid var(--border);
   background: rgba(255,255,255,0.02);
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
-.dashboard-nav { display: grid; padding-top: 12px; }
+.dashboard-nav { display: grid; padding-top: 12px; flex: 0 0 auto;}
 
 .dashboard-nav-link {
   text-decoration: none;
@@ -897,4 +899,31 @@ body {
 
   .dashboard-top-tools { justify-content: stretch; }
   .dashboard-profile-tools { width: 100%; }
+}
+
+/*dash logout*/
+.dashboard-sidebar-footer {
+  margin-top: auto;
+  padding: 14px 12px;
+  border-top: none;
+}
+
+.dashboard-logout-btn {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.95rem;
+  text-align: left;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.dashboard-logout-btn:hover {
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  border-color: rgba(255,255,255,0.25);
 }

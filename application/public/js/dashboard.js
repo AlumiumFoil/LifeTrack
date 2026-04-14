@@ -72,17 +72,22 @@ async function initializeDashboard() {
   setWelcomeFromStoredUser();
 
   const refreshButton = document.getElementById("refreshDashboardBtn");
-  const uploadButton = document.getElementById("uploadProfileBtn");
+  const logoutButton = document.getElementById("logoutBtn");
+  //const uploadButton = document.getElementById("uploadProfileBtn");
 
   //this hooks up the upload button for the profile image uploads
   if (refreshButton) {
     refreshButton.addEventListener("click", loadDashboardData);
   }
 
-  //loads lives dashboard data from backend
-  if (uploadButton) {
-    uploadButton.addEventListener("click", uploadProfileImage);
+  if (logoutButton) {
+    logoutButton.addEventListener("click", logoutUser);
   }
+
+  //loads lives dashboard data from backend
+  //if (uploadButton) {
+    //uploadButton.addEventListener("click", uploadProfileImage);
+ // }
 
   await loadDashboardData();
 }
@@ -242,6 +247,7 @@ function renderWellness(items) {
   `).join("");
 }
 
+/*
 //takes care of our profile image upload in the front
 async function uploadProfileImage() {
   const token = getAccessToken();
@@ -290,6 +296,14 @@ async function uploadProfileImage() {
   } catch (error) {
     showDashboardMessage(error.message || "An error occurred while uploading image.", "error");
   }
+}
+*/
+
+//user logout
+function logoutUser() {
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("user");
+  window.location.href = "./auth.html";
 }
 
 //prevents html injection by replacing special chars w/ safe html versions 
