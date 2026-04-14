@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Admin Dashboard – Team 1</title>
+  <title>Admin – LifeTrack</title>
   <link rel="stylesheet" href="../css/styles.css" />
 </head>
 <body>
@@ -21,7 +21,10 @@
         <nav class="dashboard-nav">
           <a class="dashboard-nav-link" href="./dashboard.html">Home</a>
           <a class="dashboard-nav-link" href="./goals.html">Goals</a>
+          <a class="dashboard-nav-link" href="./projects.html">Projects</a>
           <a class="dashboard-nav-link" href="./studying.html">Studying</a>
+          <a class="dashboard-nav-link" href="./skillbuilding.html">Skill Building</a>
+          <a class="dashboard-nav-link" href="./jobpreparation.html">Job Preparation</a>
           <a class="dashboard-nav-link" href="./wellness.html">Wellness</a>
           <a class="dashboard-nav-link active" href="./admin.html">Admin</a>
         </nav>
@@ -31,7 +34,7 @@
 
         <section class="hero">
           <h1>Admin Dashboard</h1>
-          <p>Manage users, review content, and monitor platform activity.</p>
+          <p>Manage user accounts, review submitted content, and keep the LifeTrack platform running smoothly.</p>
         </section>
 
         <!-- Section 1: Summary Cards -->
@@ -46,7 +49,7 @@
           </div>
           <div class="summary-card">
             <div class="s-value accent" id="stat-resources">6</div>
-            <div class="s-label">Resources</div>
+            <div class="s-label">Submitted Resources</div>
           </div>
           <div class="summary-card">
             <div class="s-value amber" id="stat-pending">3</div>
@@ -54,11 +57,11 @@
           </div>
         </div>
 
-        <!-- Section 2: User Management -->
+        <!-- User list — toggle/delete actions rendered by admin.js -->
         <div class="section-heading">User Management</div>
         <div class="assign-list" id="user-list"></div>
 
-        <!-- Section 3: Content Moderation -->
+        <!-- Submitted resource queue — approve or remove -->
         <div class="section-heading">Content Moderation</div>
         <div class="assign-list" id="resource-list"></div>
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Wellness – Team 1</title>
+  <title>Wellness Hub – LifeTrack</title>
   <link rel="stylesheet" href="../css/styles.css" />
 </head>
 <body>
@@ -21,7 +21,10 @@
         <nav class="dashboard-nav">
           <a class="dashboard-nav-link" href="./dashboard.html">Home</a>
           <a class="dashboard-nav-link" href="./goals.html">Goals</a>
+          <a class="dashboard-nav-link" href="./projects.html">Projects</a>
           <a class="dashboard-nav-link" href="./studying.html">Studying</a>
+          <a class="dashboard-nav-link" href="./skillbuilding.html">Skill Building</a>
+          <a class="dashboard-nav-link" href="./jobpreparation.html">Job Preparation</a>
           <a class="dashboard-nav-link active" href="./wellness.html">Wellness</a>
           <a class="dashboard-nav-link" href="./admin.html">Admin</a>
         </nav>
@@ -30,19 +33,19 @@
       <main class="dashboard-main">
 
         <section class="hero">
-          <h1>Wellness</h1>
-          <p>Check in daily, track your habits, and keep an eye on your mental and physical wellbeing.</p>
+          <h1>Wellness Hub</h1>
+          <p>Log your mood, build daily habits, and keep your mental and physical wellbeing on track — all in one place.</p>
         </section>
 
-        <!-- Today's check-in -->
+        <!-- Daily check-in — mood and stress entry -->
         <div class="section-heading">Today's Check-In</div>
         <div class="checkin-card">
           <p style="margin:0 0 4px; font-weight:600;">How are you feeling today?</p>
-          <p style="margin:0; font-size:13px; color:var(--muted);">Select your current mood</p>
+          <p style="margin:0; font-size:13px; color:var(--muted);">Tap a mood to begin today's check-in</p>
           <div class="mood-grid" id="mood-grid"></div>
 
           <div class="stress-bar-wrap" style="margin-top:6px;">
-            <div class="stress-label">Stress Level</div>
+            <div class="stress-label">Today's Stress Level</div>
             <input type="range" id="stress-slider" min="1" max="10" value="4"
                    style="width:100%; accent-color:var(--accent);"
                    oninput="document.getElementById('stress-val').textContent = this.value" />
@@ -59,15 +62,15 @@
           </div>
         </div>
 
-        <!-- Daily habits -->
+        <!-- Habit checklist — toggled by wellness.js -->
         <div class="section-heading">Daily Habits</div>
         <div class="habit-list" id="habit-list"></div>
 
-        <!-- Recent check-in history -->
-        <div class="section-heading">Recent Check-Ins</div>
+        <!-- Check-in log — newest entries first -->
+        <div class="section-heading">Check-In History</div>
         <div class="history-list" id="history-list"></div>
 
-        <!-- Wellness resources -->
+        <!-- Curated wellness links and tips -->
         <div class="section-heading">Wellness Resources</div>
         <div class="grid" id="resources-grid"></div>
 

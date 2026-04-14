@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Academic Management – Team 1</title>
+  <title>Study Workspace – LifeTrack</title>
   <link rel="stylesheet" href="../css/styles.css" />
 </head>
 <body>
@@ -21,7 +21,10 @@
         <nav class="dashboard-nav">
           <a class="dashboard-nav-link" href="./dashboard.html">Home</a>
           <a class="dashboard-nav-link" href="./goals.html">Goals</a>
+          <a class="dashboard-nav-link" href="./projects.html">Projects</a>
           <a class="dashboard-nav-link active" href="./studying.html">Studying</a>
+          <a class="dashboard-nav-link" href="./skillbuilding.html">Skill Building</a>
+          <a class="dashboard-nav-link" href="./jobpreparation.html">Job Preparation</a>
           <a class="dashboard-nav-link" href="./wellness.html">Wellness</a>
           <a class="dashboard-nav-link" href="./admin.html">Admin</a>
         </nav>
@@ -30,8 +33,8 @@
       <main class="dashboard-main">
 
         <section class="hero">
-          <h1>Academic Management</h1>
-          <p>Monitor your courses, grades, and upcoming assignments all in one place.</p>
+          <h1>Study Workspace</h1>
+          <p>Plan your study sessions, track your courses and grades, and stay on top of every assignment — all from one workspace.</p>
         </section>
 
         <!-- Summary cards -->
@@ -46,7 +49,7 @@
           </div>
           <div class="summary-card">
             <div class="s-value accent2">5</div>
-            <div class="s-label">Active Courses</div>
+            <div class="s-label">Enrolled Courses</div>
           </div>
           <div class="summary-card">
             <div class="s-value amber">3</div>
@@ -54,11 +57,11 @@
           </div>
         </div>
 
-        <!-- Courses -->
-        <div class="section-heading">Courses — Spring 2026</div>
+        <!-- Course cards — rendered by studying.js -->
+        <div class="section-heading">My Courses — Spring 2026</div>
         <div class="course-grid" id="course-grid"></div>
 
-        <!-- Assignment tracker -->
+        <!-- Assignment tracker — tab-filtered by status -->
         <div class="section-heading">Assignment Tracker</div>
         <div class="tab-bar">
           <button class="tab-btn active" onclick="filterAssign(this,'all')">All</button>
