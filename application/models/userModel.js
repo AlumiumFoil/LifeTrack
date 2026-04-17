@@ -206,13 +206,33 @@ const getUserProfile = async (accountId) => {
  * @returns {Promise<object>} Result of the update operation
  */
 const updateUserProfile = async (accountId, profileData) => {
-    const { name, major, academicYear, university } = profileData;
+    const fields = [];
+    const values = [];
+
+    // Build query based on provided fields
+    if (profileData.name !== undefined) {
+        fields.push('full_name = ?');
+        values.push(profileData.name);
+    }
+    if (profileData.major !== undefined) {
+        fields.push('major = ?');
+        values.push(profileData.major);
+    }
+    if (profileData.academicYear !== undefined) {
+        fields.push('academic_year = ?');
+        values.push(profileData.academicYear);
+    }
+    if (profileData.university !== undefined) {
+        fields.push('university = ?');
+        values.push(profileData.university);
+    }
+
+    // Add accountId & update user data with the array
+    values.push(accountId);
 
     const [result] = await pool.query(
-        `UPDATE user_accounts
-         SET full_name = ?, major = ?, academic_year = ?, university = ?
-         WHERE account_id = ?`,
-        [name || null, major || null, academicYear || null, university || null, accountId]
+        `UPDATE user_accounts SET ${fields.join(', ')} WHERE account_id = ?`,
+        values
     );
 
     return result;

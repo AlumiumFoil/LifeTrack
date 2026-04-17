@@ -435,8 +435,24 @@ const updateUserProfile = async (req, res) => {
         const accountId = req.user.account_id;
         const { name, major, academicYear, university } = req.body;
 
-        // At least one field must be provided
-        if (!name && !major && !academicYear && !university) {
+        // Create object to only grab provided fields
+        const updateFields = {};
+
+        if (name !== undefined && name !== null && name.trim() !== '') {
+            updateFields.name = name.trim();
+        }
+        if (major !== undefined && major !== null && major.trim() !== '') {
+            updateFields.major = major.trim();
+        }
+        if (academicYear !== undefined && academicYear !== null && academicYear.trim() !== '') {
+            updateFields.academicYear = academicYear.trim();
+        }
+        if (university !== undefined && university !== null && university.trim() !== '') {
+            updateFields.university = university.trim();
+        }
+
+        // Check if any field were provided
+        if (Object.keys(updateFields).length === 0) {
             return res.status(400).json({
                 success: false,
                 error: 'At least one field must be provided'
@@ -444,25 +460,25 @@ const updateUserProfile = async (req, res) => {
         }
 
         // Validate field lengths
-        if (name !== undefined && name.length > 150) {
+        if (updateFields.name && updateFields.name.length > 150) {
             return res.status(400).json({
                 success: false,
                 error: 'Name must not exceed 150 characters'
             });
         }
-        if (major !== undefined && major.length > 150) {
+        if (updateFields.major && updateFields.major.length > 150) {
             return res.status(400).json({
                 success: false,
                 error: 'Major must not exceed 150 characters'
             });
         }
-        if (academicYear !== undefined && academicYear.length > 50) {
+        if (updateFields.academicYear && updateFields.academicYear.length > 50) {
             return res.status(400).json({
                 success: false,
                 error: 'Academic Year must not exceed 50 characters'
             });
         }
-        if (university !== undefined && university.length > 150) {
+        if (updateFields.university && updateFields.university.length > 150) {
             return res.status(400).json({
                 success: false,
                 error: 'University must not exceed 150 characters'
@@ -470,7 +486,7 @@ const updateUserProfile = async (req, res) => {
         }
 
         // Update user profile
-        await userModel.updateUserProfile(accountId, { name, major, academicYear, university });
+        await userModel.updateUserProfile(accountId, updateFields);
 
         // Fetch updated profile & remove sensitive fields
         const updatedProfile = await userModel.getUserProfile(accountId);
