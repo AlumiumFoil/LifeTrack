@@ -2,6 +2,7 @@
 // Handles all authentication-related business logic
 // Manages user registration, login, token refresh, and logout
 
+const crypto = require('crypto');
 const pool = require('../config/db');
 const userModel = require('../models/userModel');
 const {
@@ -417,6 +418,242 @@ const getUserRoles = async (req, res) => {
     }
 };
 
+/**
+ * Get security questions for logged-in users
+ * Requires authentication
+ * GET /api/auth/password-reset/me
+ * Output: { success, securityQuestions }
+ */
+const getMySecurityQuestions = async (req, res) => {
+    try {
+        const accountId = req.user.account_id;
+        
+        // Get user's security questions
+        const securityQuestions = await userModel.getUserSecurityQuestions(accountId);
+        
+        if (securityQuestions.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'No security questions found for this account'
+            });
+        }
+        
+        res.json({
+            success: true,
+            securityQuestions: securityQuestions.map(q => ({
+                question_id: q.question_id,
+                question_text: q.question_text
+            }))
+        });
+    } catch (error) {
+        console.error('Get my security questions error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'An error occurred'
+        });
+    }
+};
+
+/**
+ * Initiate password reset for unauthenticated users
+ * No authentication required
+ * POST /api/auth/password-reset/initiate
+ * Input: { identifier } (email or username)
+ * Output: { success, accountId, securityQuestions }
+ */
+const initiatePasswordReset = async (req, res) => {
+    try {
+        const { identifier } = req.body;
+        
+        if (!identifier) {
+            return res.status(400).json({
+                success: false,
+                error: 'Email or username is required'
+            });
+        }
+        
+        // Find user by email or username
+        const users = await userModel.findUserByIdentifier(identifier);
+        
+        if (users.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'No account found with that email or username'
+            });
+        }
+        
+        const accountId = users[0].account_id;
+        
+        // Get user's security questions
+        const securityQuestions = await userModel.getUserSecurityQuestions(accountId);
+        
+        if (securityQuestions.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'No security questions found for this account'
+            });
+        }
+        
+        res.json({
+            success: true,
+            accountId: accountId,
+            securityQuestions: securityQuestions.map(q => ({
+                question_id: q.question_id,
+                question_text: q.question_text
+            }))
+        });
+    } catch (error) {
+        console.error('Initiate password reset error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'An error occurred'
+        });
+    }
+};
+
+/**
+ * Verify security answers and generate reset token
+ * No authentication required
+ * POST /api/auth/password-reset/verify
+ * Input: { accountId, answers }
+ * Output: { success, resetToken, expiresInMinutes }
+ */
+const verifyPasswordResetAnswers = async (req, res) => {
+    try {
+        const { accountId, answers } = req.body;
+        
+        if (!accountId || !answers || !Array.isArray(answers) || answers.length === 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'Account ID and answers are required'
+            });
+        }
+        
+        // Fetch user's security questions with hashed answers
+        const [questions] = await pool.query(
+            `SELECT question_id, answer_hash 
+             FROM user_security_questions 
+             WHERE account_id = ?`,
+            [accountId]
+        );
+        
+        if (questions.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'No security questions found for this account'
+            });
+        }
+        
+        // Verify each answer
+        for (const answer of answers) {
+            const question = questions.find(q => q.question_id === answer.question_id);
+            if (!question) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Invalid question ID'
+                });
+            }
+            
+            const isAnswerValid = await verifyPassword(answer.answer, question.answer_hash);
+            if (!isAnswerValid) {
+                return res.status(401).json({
+                    success: false,
+                    error: 'One or more answers are incorrect'
+                });
+            }
+        }
+        
+        // Generate a short-lived reset token (15 minutes)
+        const crypto = require('crypto');
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+        
+        // Store reset token in database
+        await pool.query(
+            `INSERT INTO password_reset_tokens (account_id, token, expires_at)
+             VALUES (?, ?, ?)`,
+            [accountId, resetToken, expiresAt]
+        );
+        
+        res.json({
+            success: true,
+            message: 'Security answers verified successfully',
+            resetToken: resetToken,
+            expiresInMinutes: 15
+        });
+    } catch (error) {
+        console.error('Verify password reset answers error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'An error occurred during verification'
+        });
+    }
+};
+
+/**
+ * Complete password reset using reset token
+ * POST /api/auth/password-reset/complete
+ * Input: { resetToken, newPassword }
+ * Output: { success, message }
+ */
+const completePasswordReset = async (req, res) => {
+    try {
+        const { resetToken, newPassword } = req.body;
+        
+        if (!resetToken || !newPassword) {
+            return res.status(400).json({
+                success: false,
+                error: 'Reset token and new password are required'
+            });
+        }
+        
+        // Validate new password strength
+        if (newPassword.length < 8) {
+            return res.status(400).json({
+                success: false,
+                error: 'New password must be at least 8 characters long'
+            });
+        }
+        
+        // Verify reset token
+        const [tokens] = await pool.query(
+            `SELECT account_id FROM password_reset_tokens 
+             WHERE token = ? AND expires_at > NOW()`,
+            [resetToken]
+        );
+        
+        if (tokens.length === 0) {
+            return res.status(401).json({
+                success: false,
+                error: 'Invalid or expired reset token'
+            });
+        }
+        
+        const accountId = tokens[0].account_id;
+        
+        // Hash and update new password
+        const newPasswordHash = await hashPassword(newPassword);
+        await userModel.updateUserPassword(accountId, newPasswordHash);
+        
+        // Delete the used reset token
+        await pool.query(`DELETE FROM password_reset_tokens WHERE token = ?`, [resetToken]);
+        
+        // Invalidate all refresh tokens (log out from all devices)
+        await invalidateAllUserRefreshTokens(accountId);
+        
+        res.json({
+            success: true,
+            message: 'Password reset successfully. Please log in again.'
+        });
+    } catch (error) {
+        console.error('Complete password reset error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'An error occurred while resetting password'
+        });
+    }
+};
+
 // Exports
 module.exports = {
     register,
@@ -425,5 +662,9 @@ module.exports = {
     logout,
     logoutAll,
     getCurrentUser,
-    getUserRoles
+    getUserRoles,
+    getMySecurityQuestions,
+    initiatePasswordReset,
+    verifyPasswordResetAnswers,
+    completePasswordReset
 };
