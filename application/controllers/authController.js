@@ -515,21 +515,34 @@ const initiatePasswordReset = async (req, res) => {
  * Verify security answers and generate reset token
  * No authentication required
  * POST /api/auth/password-reset/verify
- * Input: { accountId, answers }
+ * Input: { identifier, answers }
  * Output: { success, resetToken, expiresInMinutes }
  */
 const verifyPasswordResetAnswers = async (req, res) => {
     try {
-        const { accountId, answers } = req.body;
+        const { identifier, answers } = req.body;
         
-        if (!accountId || !answers || !Array.isArray(answers) || answers.length === 0) {
+        // Validate required fields
+        if (!identifier || !answers || !Array.isArray(answers) || answers.length === 0) {
             return res.status(400).json({
                 success: false,
-                error: 'Account ID and answers are required'
+                error: 'Identifier (email/username) and answers are required'
             });
         }
         
-        // Fetch user's security questions with hashed answers
+        // Find user by email or username
+        const users = await userModel.findUserByIdentifier(identifier);
+        
+        if (users.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'No account found with that email or username'
+            });
+        }
+        
+        const accountId = users[0].account_id;
+        
+        // Fetch user's security questions
         const [questions] = await pool.query(
             `SELECT question_id, answer_hash 
              FROM user_security_questions 
