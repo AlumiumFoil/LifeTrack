@@ -167,6 +167,107 @@ const createDefaultDashboard = async (accountId, connection) => {
     );
 };
 
+/**
+ * Get complete user profile by account ID
+ * Returns all profile information
+ * @param {number} accountId - User's account ID
+ * @returns {Promise<object|null>} User profile object or null if not found
+ */
+const getUserProfile = async (accountId) => {
+    const [users] = await pool.query(
+        `SELECT
+             account_id,
+             email,
+             username,
+             full_name,
+             major,
+             academic_year,
+             university,
+             account_status,
+             created_at,
+             profile_image_url,
+             profile_image_thumbnail_url
+         FROM user_accounts
+         WHERE account_id = ?`,
+        [accountId]
+    );
+
+    if (users.length === 0) {
+        return null;
+    }
+
+    return users[0];
+};
+
+/**
+ * Update user profile information
+ * @param {number} accountId - User's account ID
+ * @param {object} profileData - Object containing full_name, major, academic_year, university
+ * @returns {Promise<object>} Result of the update operation
+ */
+const updateUserProfile = async (accountId, profileData) => {
+    const { name, major, academicYear, university } = profileData;
+
+    const [result] = await pool.query(
+        `UPDATE user_accounts
+         SET full_name = ?, major = ?, academic_year = ?, university = ?
+         WHERE account_id = ?`,
+        [name || null, major || null, academicYear || null, university || null, accountId]
+    );
+
+    return result;
+};
+
+/**
+ * Update user's password
+ * @param {number} accountId - User's account ID
+ * @param {string} newPasswordHash - New hashed password
+ * @returns {Promise<object>} Result of the update operation
+ */
+const updateUserPassword = async (accountId, newPasswordHash) => {
+    const [result] = await pool.query(
+        `UPDATE user_accounts SET password_hash = ? WHERE account_id = ?`,
+        [newPasswordHash, accountId]
+    );
+
+    return result;
+};
+
+/**
+ * Get user's password hash by account ID
+ * @param {number} accountId - User's account ID
+ * @returns {Promise<string|null>} Password hash or null if not found
+ */
+const getUserPasswordHash = async (accountId) => {
+    const [users] = await pool.query(
+        `SELECT password_hash FROM user_accounts WHERE account_id = ?`,
+        [accountId]
+    );
+
+    if (users.length === 0) {
+        return null;
+    }
+
+    return users[0].password_hash;
+}
+
+/**
+ * Get current user's security questions
+ * @param {number} accountId - User's account ID
+ * @returns {Promise<Array>} Array of security question objects
+ */
+const getUserSecurityQuestions = async (accountId) => {
+    const [questions] = await pool.query(
+        `SELECT question_id, question_text, created_at
+         FROM user_security_questions
+         WHERE account_id = ?
+         ORDER BY question_id ASC`,
+         [accountId]
+    );
+
+    return questions;
+};
+
 // Exports
 module.exports = {
     // User account functions
@@ -175,6 +276,11 @@ module.exports = {
     emailExists,
     usernameExists,
     createUser,
+    getUserProfile,
+    updateUserProfile,
+    updateUserPassword,
+    getUserPasswordHash,
+    getUserSecurityQuestions,
     
     // User role functions
     getRoleIdByName,

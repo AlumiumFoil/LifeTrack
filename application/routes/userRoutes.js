@@ -59,4 +59,38 @@ router.post(
     userController.uploadProfileImage
 );
 
+/**
+ * GET /api/users/me/profile
+ * Get current user's complete profile
+ * Requires authentication
+ * Output: { success, profile }
+ */
+router.get('/me/profile', authenticateJWT, userController.getUserProfile);
+
+/**
+ * PUT /api/users/me/profile
+ * Update current user's profile 
+ * Requires authentication
+ * Input: { name, major, year, university }
+ * Output: { success, message, profile }
+ */
+router.put('/me/profile', authenticateJWT, userController.updateUserProfile);
+
+/**
+ * PUT /api/users/me/password
+ * Change user's password
+ * Requires authentication
+ * Input: { currentPassword, newPassword }
+ * Output: { success, message }
+ */
+router.put('/me/password', authenticateJWT, userController.changePassword);
+
+/**
+ * GET /api/users/me/security-questions
+ * Get current user's security questions
+ * Requires authentication
+ * Output: { success, securityQuestions }
+ */
+router.get('/me/security-questions', authenticateJWT, userController.getUserSecurityQuestions);
+
 module.exports = router;

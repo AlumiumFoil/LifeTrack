@@ -7,6 +7,11 @@ const path = require('path');
 const sharp = require('sharp');
 const dashboardModel = require('../models/dashboardModel');
 const profileImageModel = require('../models/profileImageModel');
+const userModel = require('../models/userModel');
+const {
+    verifyPassword,
+    hashPassword
+} = require('../middleware/authenticate');
 
 /**
  * Build a public URL for a file served from the public directory
@@ -383,9 +388,208 @@ const bcryptTest = async (req, res) => {
     }
 };
 
+/**
+ * Get current user's complete profile
+ * Requires authentication
+ * GET /api/users/me/profile
+ * Output: { success, profile }
+ */
+const getUserProfile = async (req, res) => {
+    try {
+        const accountId = req.user.account_id;
+
+        const profile = await userModel.getUserProfile(accountId);
+
+        if (!profile) {
+            return res.status(404).json({
+                success: false,
+                error: 'User profile not found'
+            });
+        }
+
+        // Remove sensitive fields from being shown
+        delete profile.password_hash;
+
+        res.json({
+            success: true,
+            profile
+        });
+    } catch (error) {
+        console.error('Get user profile error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'An error occurred while fetching profile'
+        });
+    }
+};
+
+/**
+ * Update current user's profile
+ * Requires authentication
+ * PUT /api/users/me/profile
+ * Input: { name, major, year, university } (at least one required)
+ * Output: { success, message, profile }
+ */
+const updateUserProfile = async (req, res) => {
+    try {
+        const accountId = req.user.account_id;
+        const { name, major, academicYear, university } = req.body;
+
+        // At least one field must be provided
+        if (!name && !major && !academicYear && !university) {
+            return res.status(400).json({
+                success: false,
+                error: 'At least one field must be provided'
+            });
+        }
+
+        // Validate field lengths
+        if (name !== undefined && name.length > 150) {
+            return res.status(400).json({
+                success: false,
+                error: 'Name must not exceed 150 characters'
+            });
+        }
+        if (major !== undefined && major.length > 150) {
+            return res.status(400).json({
+                success: false,
+                error: 'Major must not exceed 150 characters'
+            });
+        }
+        if (academicYear !== undefined && academicYear.length > 50) {
+            return res.status(400).json({
+                success: false,
+                error: 'Academic Year must not exceed 50 characters'
+            });
+        }
+        if (university !== undefined && university.length > 150) {
+            return res.status(400).json({
+                success: false,
+                error: 'University must not exceed 150 characters'
+            });
+        }
+
+        // Update user profile
+        await userModel.updateUserProfile(accountId, { name, major, academicYear, university });
+
+        // Fetch updated profile & remove sensitive fields
+        const updatedProfile = await userModel.getUserProfile(accountId);
+        delete updatedProfile.password_hash;
+
+        res.json({
+            success: true,
+            message: 'Profile updated successfully',
+            profile: updatedProfile
+        });
+    } catch (error) {
+        console.error('Update user profile error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'An error occurred while udpating profile'
+        });
+    }
+};
+
+/**
+ * Change user's password
+ * Requires authentication
+ * PUT /api/users/me/password
+ * Input: { currentPassword, newPassword }
+ * Output: { success, message }
+ */
+const changePassword = async (req, res) => {
+    try {
+        const accountId = req.user.account_id;
+        const { currentPassword, newPassword } = req.body;
+
+        // Validate required fields
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({
+                success: false,
+                error: 'Current password and new password are requried'
+            });
+        }
+
+        // Validate new password strength
+        if (newPassword.length < 8) {
+            return res.status(400).json({
+                success: false,
+                error: 'New password must be at least 8 characters long'
+            });
+        }
+
+        // Get current user's password hash
+        const passwordHash = await userModel.getUserPasswordHash(accountId);
+
+        if (!passwordHash) {
+            return res.status(404).json({
+                success: false,
+                error: 'User not found'
+            });
+        }
+
+        // Verify current password
+        const isPasswordValid = await verifyPassword(currentPassword, passwordHash);
+        if (!isPasswordValid) {
+            return res.status(401).json({
+                success: false,
+                error: 'Current password is incorrent'
+            });
+        }
+
+        // Hash and update new password
+        const newPasswordHash = await hashPassword(newPassword);
+        await userModel.updateUserPassword(accountId, newPasswordHash);
+
+        // Invalidate all refresh tokens
+        // User must login again
+        const { invalidateAllUserRefreshTokens } = require('../middleware/authenticate');
+        await invalidateAllUserRefreshTokens(accountId);
+
+        res.json({
+            success: true,
+            message: 'Password has been changed successfully. Please log in again.'
+        });
+    } catch (error) {
+        console.error('Change password error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'An error occurred while changing password'
+        });
+    }
+};
+
+/**
+ * Get current user's security questions
+ * Requires authentication
+ * GET /api/users/me/security-questions
+ * Output: { success, securityQuestions }
+ */
+const getUserSecurityQuestions = async (req, res) => {
+    try {
+        const accountId = req.user.account_id;
+        const securityQuestions = await userModel.getUserSecurityQuestions(accountId);
+
+        res.json({
+            success: true,
+            securityQuestions
+        });
+    } catch (error) {
+        console.error('Get security questions error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'An error occurred while fetching security questions'
+        });
+    }
+};
+
 module.exports = {
     getSecurityQuestions,
     getDashboard,
     uploadProfileImage,
-    bcryptTest
+    bcryptTest,
+    getUserProfile,
+    updateUserProfile,
+    changePassword,
+    getUserSecurityQuestions
 };
