@@ -1,21 +1,269 @@
-<!--profile img upload area
-        <section class="dashboard-bottom-tools">
-          <article class="card dashboard-profile-tools">
-            <h2>Profile Image</h2>
-            <p class="small">Upload a profile image.</p>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <!-- makes sure page scales correctly on tablets/phones -->
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Team 1 - Profile</title>
 
-            <div class="dashboard-upload-block">
-              <label for="profileImageInput" class="small">Choose Image</label>
-              <input type="file" id="profileImageInput" accept="image/*" />
+  <!-- shared/global stylesheet -->
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/profile.css" />
+</head>
+<body>
+  <div class="dashboard-frame">
+    <!-- top header kept consistent with dashboard -->
+    <header class="dashboard-header">
+      <div class="dashboard-header-brand">LifeTrack</div>
 
-              <!--upload & refresh controls
-              <div class="dashboard-tool-actions">
-                <button id="uploadProfileBtn" class="btn" type="button">Upload Image</button>
-                <button id="refreshDashboardBtn" class="btn secondary" type="button">Refresh Dashboard</button>
+      <div class="dashboard-header-actions">
+        <a class="dashboard-header-profile" href="./search.html">Search</a>
+
+        <!-- profile shortcut in top-right -->
+        <a class="dashboard-header-profile" href="./profile.html">
+          <img
+            id="profilePreview"
+            class="dashboard-header-avatar"
+            src="https://placehold.co/120x120?text=User"
+            alt="Profile preview"
+          />
+          <span id="profileUsernameTop">Profile</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="dashboard-body">
+      <!-- sidebar kept the same as dashboard -->
+      <aside class="dashboard-sidebar">
+        <nav class="dashboard-nav">
+          <a class="dashboard-nav-link" href="./dashboard.html">Home</a>
+          <a class="dashboard-nav-link" href="./studying.html">Academic</a>
+          <a class="dashboard-nav-link" href="./jobpreparation.html">Career</a>
+          <a class="dashboard-nav-link" href="./goals.html">Productivity</a>
+          <a class="dashboard-nav-link" href="./wellness.html">Wellness</a>
+        </nav>
+
+        <div class="dashboard-sidebar-footer">
+          <button id="logoutBtn" class="dashboard-logout-btn" type="button">Logout</button>
+        </div>
+      </aside>
+
+      <main class="dashboard-main">
+        <section class="dashboard-page-title">
+          <h1>Profile</h1>
+        </section>
+
+        <!-- message area for load/update/upload results -->
+        <div id="profileMessage" class="status-message" style="display: none;"></div>
+
+        <!-- profile overview card -->
+        <section class="grid">
+          <article class="card">
+            <div class="profile-header-layout">
+              <div class="profile-image-block">
+                <img
+                  id="profilePageImage"
+                  class="profile-page-avatar"
+                  src="https://placehold.co/240x240?text=User"
+                  alt="Profile image"
+                />
+
+                <div class="dashboard-upload-block">
+                  <label for="profileImageInput" class="small">Choose Image</label>
+                  <input type="file" id="profileImageInput" accept="image/*" />
+
+                  <div class="dashboard-tool-actions">
+                    <button id="uploadProfileBtn" class="btn" type="button">Upload Image</button>
+                  </div>
+                </div>
               </div>
 
-              <!--status/error message shown by JS when needed
-              <div id="dashboardMessage" class="status-message" style="display:none;"></div>
+              <div class="profile-summary-block">
+                <h2 id="profileUsername">Username</h2>
+                <p id="profileEmail" class="small">Email address</p>
+
+                <div class="profile-meta-list">
+                  <div class="profile-meta-row">
+                    <span class="small">Account Status</span>
+                    <strong id="profileStatus">active</strong>
+                  </div>
+
+                  <div class="profile-meta-row">
+                    <span class="small">Member Since</span>
+                    <strong id="profileMemberSince">--</strong>
+                  </div>
+                </div>
+              </div>
             </div>
           </article>
-        </section>-->
+        </section>
+
+        <!-- personal information -->
+        <section class="grid">
+          <article class="card">
+            <div class="profile-section-header">
+              <h2>Personal Information</h2>
+              <button id="editProfileBtn" class="btn secondary" type="button">Edit</button>
+            </div>
+
+            <div class="profile-info-grid">
+              <div class="profile-info-item">
+                <span class="small">Full Name</span>
+                <strong id="profileFullName">Not set</strong>
+              </div>
+
+              <div class="profile-info-item">
+                <span class="small">University</span>
+                <strong id="profileUniversity">San Francisco State University</strong>
+              </div>
+
+              <div class="profile-info-item">
+                <span class="small">Major / Program</span>
+                <strong id="profileMajor">Not set</strong>
+              </div>
+
+              <div class="profile-info-item">
+                <span class="small">Year</span>
+                <strong id="profileYear">Not set</strong>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <!-- account settings -->
+        <section class="grid">
+          <article class="card">
+            <h2>Account Settings</h2>
+            <p class="small">Manage login and security related settings for your account.</p>
+
+            <div class="profile-settings-list">
+              <div class="profile-settings-item">
+                <div>
+                  <strong>Change Password</strong>
+                  <p class="small">Update your password using your current password and security answers.</p>
+                </div>
+                <button id="openPasswordModalBtn" class="btn secondary" type="button">Change Password</button>
+              </div>
+
+              <div class="profile-settings-item">
+                <div>
+                  <strong>Security Questions</strong>
+                  <p class="small">Review the questions currently tied to your account.</p>
+                </div>
+                <button id="loadSecurityQuestionsBtn" class="btn secondary" type="button">View Questions</button>
+              </div>
+            </div>
+
+            <div id="securityQuestionsBlock" class="profile-security-block" style="display: none;">
+              <h3>Saved Security Questions</h3>
+              <div id="securityQuestionsList" class="dashboard-list">
+                <p class="small">No security questions loaded yet.</p>
+              </div>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- edit profile modal -->
+  <div id="editProfileModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal">
+      <h2>Edit Personal Information</h2>
+
+      <form id="editProfileForm" class="vp-form">
+        <div class="form-group">
+          <label for="editName">Full Name</label>
+          <input
+            type="text"
+            id="editName"
+            name="name"
+            maxlength="150"
+            placeholder="Enter your full name"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="editUniversity">University</label>
+          <input
+            type="text"
+            id="editUniversity"
+            name="university"
+            maxlength="150"
+            placeholder="Enter your university"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="editMajor">Major / Program</label>
+          <input
+            type="text"
+            id="editMajor"
+            name="major"
+            maxlength="150"
+            placeholder="Enter your major or program"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="editYear">Academic Year</label>
+          <select id="editYear" name="year">
+            <option value="">Select year</option>
+            <option value="Freshman">Freshman</option>
+            <option value="Sophomore">Sophomore</option>
+            <option value="Junior">Junior</option>
+            <option value="Senior">Senior</option>
+            <option value="Graduate">Graduate</option>
+          </select>
+        </div>
+
+        <div class="modal-actions">
+          <button id="cancelEditProfileBtn" class="btn secondary" type="button">Cancel</button>
+          <button id="saveProfileBtn" class="btn" type="submit">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- change password modal -->
+  <div id="passwordModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal">
+      <h2>Change Password</h2>
+
+      <form id="changePasswordForm" class="vp-form">
+        <div class="form-group">
+          <label for="currentPassword">Current Password</label>
+          <input
+            type="password"
+            id="currentPassword"
+            name="currentPassword"
+            placeholder="Enter current password"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="newPassword">New Password</label>
+          <input
+            type="password"
+            id="newPassword"
+            name="newPassword"
+            placeholder="Enter new password"
+          />
+        </div>
+
+        <div id="securityAnswerFields" class="vp-form">
+          <!-- security question answer inputs will be inserted by profile.js -->
+        </div>
+
+        <div class="modal-actions">
+          <button id="cancelPasswordBtn" class="btn secondary" type="button">Cancel</button>
+          <button id="savePasswordBtn" class="btn" type="submit">Update Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- profile page logic -->
+  <script src="../js/profile.js"></script>
+</body>
+</html>
