@@ -1,0 +1,179 @@
+/* profile page specific styling */
+
+/* keeps profile sections a little more structured than the default grid */
+.profile-header-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.profile-image-block {
+  display: grid;
+  gap: 16px;
+}
+
+.profile-page-avatar {
+  width: 100%;
+  max-width: 240px;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.05);
+}
+
+.profile-summary-block h2 {
+  margin: 0 0 8px;
+  font-size: 1.9rem;
+  line-height: 1.2;
+}
+
+.profile-summary-block > .small {
+  margin: 0 0 18px;
+  display: block;
+}
+
+.profile-meta-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.profile-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+}
+
+.profile-meta-row strong {
+  font-size: 0.98rem;
+  text-transform: capitalize;
+}
+
+.profile-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.profile-section-header h2 {
+  margin: 0;
+}
+
+.profile-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.profile-info-item {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+}
+
+.profile-info-item strong {
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.profile-settings-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.profile-settings-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+}
+
+.profile-settings-item p {
+  margin: 6px 0 0;
+}
+
+.profile-security-block {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.profile-security-block h3 {
+  margin: 0 0 14px;
+  font-size: 1rem;
+}
+
+/* makes the message area fit the dashboard spacing a bit better */
+#profileMessage {
+  margin-bottom: 18px;
+}
+
+/* profile page uses the same upload controls, but tighten spacing slightly */
+.profile-image-block .dashboard-upload-block {
+  margin-top: 0;
+}
+
+.profile-image-block .dashboard-tool-actions {
+  margin-top: 0;
+}
+
+/* modal polish for profile-specific forms */
+#editProfileModal .modal,
+#passwordModal .modal {
+  max-width: 560px;
+}
+
+#securityAnswerFields {
+  display: grid;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+/* responsive behavior */
+@media (max-width: 900px) {
+  .profile-header-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-image-block {
+    justify-items: start;
+  }
+}
+
+@media (max-width: 640px) {
+  .profile-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-settings-item,
+  .profile-section-header,
+  .profile-meta-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .profile-page-avatar {
+    max-width: 200px;
+  }
+
+  .profile-summary-block h2 {
+    font-size: 1.55rem;
+  }
+}
