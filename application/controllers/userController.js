@@ -4,6 +4,7 @@
 
 const fs = require('fs/promises');
 const path = require('path');
+const pool = require('../config/db');
 const sharp = require('sharp');
 const dashboardModel = require('../models/dashboardModel');
 const profileImageModel = require('../models/profileImageModel');
@@ -510,13 +511,13 @@ const updateUserProfile = async (req, res) => {
  * Change user's password
  * Requires authentication
  * PUT /api/users/me/password
- * Input: { currentPassword, newPassword }
+ * Input: { currentPassword, newPassword, answers }
  * Output: { success, message }
  */
 const changePassword = async (req, res) => {
     try {
         const accountId = req.user.account_id;
-        const { currentPassword, newPassword } = req.body;
+        const { currentPassword, newPassword, answers } = req.body;
 
         // Validate required fields
         if (!currentPassword || !newPassword) {
@@ -531,6 +532,14 @@ const changePassword = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 error: 'New password must be at least 8 characters long'
+            });
+        }
+
+        // Validate if security questions answers are provided
+        if (!answers || !Array.isArray(answers) || answers.length === 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'Security question answers are required'
             });
         }
 
@@ -551,6 +560,40 @@ const changePassword = async (req, res) => {
                 success: false,
                 error: 'Current password is incorrent'
             });
+        }
+
+        // Fetch user's security questions with hashed answers
+        const [questions] = await pool.query(
+            `SELECT question_id, answer_hash 
+             FROM user_security_questions 
+             WHERE account_id = ?`,
+            [accountId]
+        );
+
+        if (questions.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'No security questions found for this account'
+            });
+        }
+
+        // Verify each security answer
+        for (const answer of answers) {
+            const question = questions.find(q => q.question_id === answer.question_id);
+            if (!question) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Invalid question ID'
+                });
+            }
+
+            const isAnswerValid = await verifyPassword(answer.answer, question.answer_hash);
+            if (!isAnswerValid) {
+                return res.status(401).json({
+                    success: false,
+                    error: 'One or more security answers are incorrect'
+                });
+            }
         }
 
         // Hash and update new password
@@ -575,30 +618,6 @@ const changePassword = async (req, res) => {
     }
 };
 
-/**
- * Get current user's security questions
- * Requires authentication
- * GET /api/users/me/security-questions
- * Output: { success, securityQuestions }
- */
-const getUserSecurityQuestions = async (req, res) => {
-    try {
-        const accountId = req.user.account_id;
-        const securityQuestions = await userModel.getUserSecurityQuestions(accountId);
-
-        res.json({
-            success: true,
-            securityQuestions
-        });
-    } catch (error) {
-        console.error('Get security questions error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'An error occurred while fetching security questions'
-        });
-    }
-};
-
 module.exports = {
     getSecurityQuestions,
     getDashboard,
@@ -606,6 +625,5 @@ module.exports = {
     bcryptTest,
     getUserProfile,
     updateUserProfile,
-    changePassword,
-    getUserSecurityQuestions
+    changePassword
 };
