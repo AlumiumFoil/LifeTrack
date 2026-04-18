@@ -85,12 +85,4 @@ router.put('/me/profile', authenticateJWT, userController.updateUserProfile);
  */
 router.put('/me/password', authenticateJWT, userController.changePassword);
 
-/**
- * GET /api/users/me/security-questions
- * Get current user's security questions
- * Requires authentication
- * Output: { success, securityQuestions }
- */
-router.get('/me/security-questions', authenticateJWT, userController.getUserSecurityQuestions);
-
 module.exports = router;

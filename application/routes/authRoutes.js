@@ -61,14 +61,6 @@ router.post('/logout-all', authenticateJWT, authController.logoutAll);
 router.get('/me', authenticateJWT, authController.getCurrentUser);
 
 /**
- * GET /api/auth/password-reset/me
- * Get security questions for authenticated (logged-in) user
- * Requires authentication
- * Output: { success, securityQuestions }
- */
-router.get('/password-reset/me', authenticateJWT, authController.getMySecurityQuestions);
-
-/**
  * POST /api/auth/password-reset/initiate
  * Initiate password reset for unauthenticated users
  * Input: { identifier } (email or username)

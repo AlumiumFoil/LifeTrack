@@ -419,42 +419,6 @@ const getUserRoles = async (req, res) => {
 };
 
 /**
- * Get security questions for logged-in users
- * Requires authentication
- * GET /api/auth/password-reset/me
- * Output: { success, securityQuestions }
- */
-const getMySecurityQuestions = async (req, res) => {
-    try {
-        const accountId = req.user.account_id;
-        
-        // Get user's security questions
-        const securityQuestions = await userModel.getUserSecurityQuestions(accountId);
-        
-        if (securityQuestions.length === 0) {
-            return res.status(404).json({
-                success: false,
-                error: 'No security questions found for this account'
-            });
-        }
-        
-        res.json({
-            success: true,
-            securityQuestions: securityQuestions.map(q => ({
-                question_id: q.question_id,
-                question_text: q.question_text
-            }))
-        });
-    } catch (error) {
-        console.error('Get my security questions error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'An error occurred'
-        });
-    }
-};
-
-/**
  * Initiate password reset for unauthenticated users
  * No authentication required
  * POST /api/auth/password-reset/initiate
@@ -676,7 +640,6 @@ module.exports = {
     logoutAll,
     getCurrentUser,
     getUserRoles,
-    getMySecurityQuestions,
     initiatePasswordReset,
     verifyPasswordResetAnswers,
     completePasswordReset
