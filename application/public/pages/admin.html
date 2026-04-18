@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin – LifeTrack</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body>
+  <div class="dashboard-frame">
+
+    <header class="dashboard-header">
+      <a class="dashboard-header-brand" href="../index.html">LifeTrack</a>
+      <div class="dashboard-header-actions">
+        <a class="dashboard-header-profile" href="./search.html">Search</a>
+        <a class="dashboard-header-profile" href="./profile.html">
+          <img
+            id="profilePreview"
+            class="dashboard-header-avatar"
+            src="https://placehold.co/120x120?text=User"
+            alt="Profile preview"
+          />
+          <span id="profileUsernameTop">Profile</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="dashboard-body">
+      <aside class="dashboard-sidebar">
+        <nav class="dashboard-nav">
+          <a class="dashboard-nav-link" href="./dashboard.html">Home</a>
+          <a class="dashboard-nav-link" href="./studying.html">Academic</a>
+          <a class="dashboard-nav-link" href="./jobpreparation.html">Career</a>
+          <a class="dashboard-nav-link" href="./goals.html">Productivity</a>
+          <a class="dashboard-nav-link" href="./wellness.html">Wellness</a>
+        </nav>
+      </aside>
+
+      <main class="dashboard-main">
+
+        <section class="hero">
+          <h1>Admin Dashboard</h1>
+          <p>Manage user accounts, review submitted content, and keep the LifeTrack platform running smoothly.</p>
+        </section>
+
+        <!-- Section 1: Summary Cards -->
+        <div class="summary-row">
+          <div class="summary-card">
+            <div class="s-value" id="stat-total-users">7</div>
+            <div class="s-label">Total Users</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value green" id="stat-active-users">6</div>
+            <div class="s-label">Active Users</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value accent" id="stat-resources">6</div>
+            <div class="s-label">Submitted Resources</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value amber" id="stat-pending">3</div>
+            <div class="s-label">Pending Review</div>
+          </div>
+        </div>
+
+        <!-- User list — toggle/delete actions rendered by admin.js -->
+        <div class="section-heading">User Management</div>
+        <div class="assign-list" id="user-list"></div>
+
+        <!-- Submitted resource queue — approve or remove -->
+        <div class="section-heading">Content Moderation</div>
+        <div class="assign-list" id="resource-list"></div>
+
+        <div class="footer">Team 1 • Spring 2026</div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="../js/admin.js"></script>
+</body>
+</html>

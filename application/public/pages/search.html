@@ -1,38 +1,47 @@
-<!-- VP search page. Works with filters & text entry, takes us to the search results page -->
+<!--This is the search page for the front end resource lookup.
+It lets the users enter a keyword/category/filter and sends the 
+query to results.html using GET params-->
+
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+   <!-- Helps page scale correctly on tablets/phones -->
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Team 1 - VP Search</title>
-  <link rel="stylesheet" href="./css/styles.css" />
+  <title>Team 1 - Search</title>
+  <!-- this is a shared style sheet used across the multiple pages -->
+  <link rel="stylesheet" href="../css/styles.css" />
 </head>
 <body>
   <div class="container">
+
+     <!--top nav for moving between main/key pages -->
     <div class="nav">
-      <div class="brand">CSC 648 - Team 1</div>
+      <div class="brand">LifeTrack</div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <a href="./index.html">Home</a>
-        <a href="./about.html">About</a>
+        <a href="./dashboard.html">Dashboard</a>
+        <a href="../index.html">Home</a>
+        <a href="../about.html">About</a>
       </div>
     </div>
 
     <section class="hero">
-      <h1>Vertical Prototype Search</h1>
+      <h1>Search</h1>
       <p>
-        CSC 648/848 • Spring 2026 • Team 1. Use this test page to search public
-        resources from the database and verify the full frontend-to-backend flow.
+        Search our public resources. Users with projects, milestones, etc. will see personalized results.
       </p>
     </section>
 
+    <!-- our main search form -->
     <section class="card" style="margin-top:18px;">
       <h2 style="margin-top:0;">Search Resources</h2>
       <p class="small" style="margin-bottom:16px;">
         Enter a keyword, choose a category if desired, and submit to view results.
-        Leaving the search blank will return all public resources.
+        Leaving the search blank will return all available public resources.
       </p>
 
-      <form action="./test_results.html" method="GET" class="vp-form">
+      <!--This sends data to the results.html page as a query string values-->
+      <form action="./results.html" method="GET" class="vp-form">
         <div class="form-group">
           <label for="q">Keyword Search</label>
           <input
@@ -54,27 +63,16 @@
           </select>
         </div>
 
+        <!--the main page actions-->
         <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:18px;">
           <button type="submit" class="btn">Search</button>
-          <a class="btn secondary" href="./index.html">Home</a>
+          <a class="btn secondary" href="./dashboard.html">Back to Dashboard</a>
         </div>
       </form>
     </section>
 
-    <section class="grid">
-      <article class="card">
-        <h2>Suggested Searches</h2>
-        <p>Try keywords like <strong>resume</strong>, <strong>study</strong>, <strong>internship</strong>, <strong>wellness</strong>, or <strong>template</strong>.</p>
-      </article>
-
-      <article class="card">
-        <h2>Demo Goal</h2>
-        <p>This page is meant to verify search input, API connection, and DB-backed results display for the vertical prototype.</p>
-      </article>
-    </section>
-
     <div class="footer">
-      Team 1 • Vertical Prototype Search Page
+      Team 1 • Search Page
     </div>
   </div>
 </body>
