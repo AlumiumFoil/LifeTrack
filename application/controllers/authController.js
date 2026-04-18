@@ -490,7 +490,7 @@ const verifyPasswordResetAnswers = async (req, res) => {
         if (!identifier || !answers || !Array.isArray(answers) || answers.length === 0) {
             return res.status(400).json({
                 success: false,
-                error: 'Identifier (email/username) and answers are required'
+                error: 'Identifier and answers are required'
             });
         }
         
