@@ -618,6 +618,33 @@ const changePassword = async (req, res) => {
     }
 };
 
+/**
+ * Get current user's security questions
+ * Requires authentication
+ * GET /api/users/me/security-questions
+ * Output: { success, securityQuestions }
+ */
+const getUserSecurityQuestions = async (req, res) => {
+    try {
+        const accountId = req.user.account_id;
+        const securityQuestions = await userModel.getUserSecurityQuestions(accountId);
+
+        res.json({
+            success: true,
+            securityQuestions: securityQuestions.map(q => ({
+                question_id: q.question_id,
+                question_text: q.question_text
+            }))
+        });
+    } catch (error) {
+        console.error('Get security questions error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'An error occurred while fetching security questions'
+        });
+    }
+};
+
 module.exports = {
     getSecurityQuestions,
     getDashboard,
@@ -625,5 +652,6 @@ module.exports = {
     bcryptTest,
     getUserProfile,
     updateUserProfile,
-    changePassword
+    changePassword,
+    getUserSecurityQuestions
 };
