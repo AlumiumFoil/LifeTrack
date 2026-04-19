@@ -42,6 +42,11 @@ function showProfileMessage(message, type = "success") {
   profileMessage.className = "status-message";
   profileMessage.classList.add(type);
   profileMessage.textContent = message;
+
+  profileMessage.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
 }
 
 // hides the message area when needed
@@ -319,6 +324,13 @@ async function submitProfileUpdate(event) {
   const university = document.getElementById("editUniversity")?.value.trim() || "";
   const major = document.getElementById("editMajor")?.value.trim() || "";
   const year = document.getElementById("editYear")?.value || "";
+
+  const hasAtLeastOneValue = name || university || major || year;
+
+  if (!hasAtLeastOneValue) {
+    showProfileMessage("Please fill in at least one field before saving.", "error");
+    return;
+  }
 
   const requestBody = {
     name,
