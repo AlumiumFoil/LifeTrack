@@ -174,9 +174,6 @@ const createDefaultDashboard = async (accountId, connection) => {
  * @returns {Promise<object|null>} User profile object or null if not found
  */
 const getUserProfile = async (accountId) => {
-    if (fields.length === 0) {
-        return { affectedRows: 0 };
-    }
     const [users] = await pool.query(
         `SELECT
              account_id,
