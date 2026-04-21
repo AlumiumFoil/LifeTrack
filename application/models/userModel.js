@@ -257,6 +257,27 @@ const getAccessibilitySettingsByAccountId = async (accountId) => {
         return rows[0] || null;  
 };
 
+/**
+ * Create default accessibility settings if the row does not exist yet
+ * @param {number} accountId - user's account ID
+ * @returns {Promise<void>}
+ */
+const ensureAccessibilitySettingsExist = async (accountId) => {
+    await pool.query(
+        `INSERT INTO user_accessibility_settings (
+             account_id,
+             theme_mode,
+             text_size,
+             high_contrast_enabled,
+             font_choice,
+             color_blind_mode
+         )
+         VALUES (?, 'system', 'normal', 0, NULL, NULL)
+         ON DUPLICATE KEY UPDATE account_id = account_id`,
+        [accountId]
+    );
+};
+
 
 
 /**
