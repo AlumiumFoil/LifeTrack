@@ -110,4 +110,13 @@ router.put('/me/accessibility', authenticateJWT, userController.updateAccessibil
  */
 router.get('/me/security-questions', authenticateJWT, userController.getUserSecurityQuestions);
 
+/**
+ * PUT /api/users/me/security-questions
+ * Update current user's security question answers
+ * Requires authentication
+ * Input: { securityQuestions: [{ questionId, answer }] }
+ * Output: { success, message, securityQuestions }
+ */
+router.put('/me/security-questions', authenticateJWT, userController.updateUserSecurityQuestions);
+
 module.exports = router;
