@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Resume Starter Template – LifeTrack</title>
+  <link rel="stylesheet" href="../../css/styles.css" />
+</head>
+<body>
+  <div class="dashboard-frame">
+
+    <header class="dashboard-header">
+      <a class="dashboard-header-brand" href="../../index.html">LifeTrack</a>
+      <div class="dashboard-header-actions">
+        <a class="dashboard-header-profile" href="../search.html">Search</a>
+        <a class="dashboard-header-profile" href="../profile.html">
+          <img
+            id="profilePreview"
+            class="dashboard-header-avatar"
+            src="https://placehold.co/120x120?text=User"
+            alt="Profile preview"
+          />
+          <span id="profileUsernameTop">Profile</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="dashboard-body">
+      <aside class="dashboard-sidebar">
+        <nav class="dashboard-nav">
+          <a class="dashboard-nav-link" href="../dashboard.html">Home</a>
+          <a class="dashboard-nav-link" href="../studying.html">Academic</a>
+          <a class="dashboard-nav-link active" href="../jobpreparation.html">Career</a>
+          <a class="dashboard-nav-link" href="../goals.html">Productivity</a>
+          <a class="dashboard-nav-link" href="../wellness.html">Wellness</a>
+        </nav>
+      </aside>
+
+      <main class="dashboard-main">
+
+        <section class="hero">
+          <h1>Resume Starter Template</h1>
+          <p>A simple way to build your resume without overthinking it. Fill in each section with your own info and check it off when you're done.</p>
+        </section>
+
+        <div class="summary-row">
+          <div class="summary-card">
+            <div class="s-value" id="stat-total">6</div>
+            <div class="s-label">Total Sections</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value green" id="stat-done">0</div>
+            <div class="s-label">Filled In</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value accent" id="stat-remaining">6</div>
+            <div class="s-label">Remaining</div>
+          </div>
+        </div>
+
+        <div class="grid" id="checklist-grid">
+
+          <div class="card checklist-card" data-id="contact">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-contact" />
+              <label class="checklist-label" for="cb-contact">Contact Info</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li><strong>Full Name</strong> &middot; City, State &middot; Phone &middot; Email</li>
+              <li>LinkedIn: linkedin.com/in/yourname</li>
+              <li>GitHub: github.com/yourname</li>
+            </ul>
+          </div>
+
+          <div class="card checklist-card" data-id="summary">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-summary" />
+              <label class="checklist-label" for="cb-summary">Summary</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li>State your degree, school, and expected graduation year</li>
+              <li>Mention 1 or 2 areas you're strong in or enjoy</li>
+              <li>Say what kind of role or opportunity you're looking for</li>
+            </ul>
+          </div>
+
+          <div class="card checklist-card" data-id="education">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-education" />
+              <label class="checklist-label" for="cb-education">Education</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li><strong>San Francisco State University</strong> &mdash; B.S. Computer Science</li>
+              <li>Expected: May 2026 &nbsp;|&nbsp; GPA: 3.4 / 4.0</li>
+              <li>Coursework: Data Structures, Software Engineering, Databases, Operating Systems</li>
+            </ul>
+          </div>
+
+          <div class="card checklist-card" data-id="experience">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-experience" />
+              <label class="checklist-label" for="cb-experience">Experience</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li><strong>Software Engineering Intern</strong> – Example Co. &nbsp;|&nbsp; Jun – Aug 2025</li>
+              <li>Built and maintained REST API endpoints using Node.js and Express</li>
+              <li>Reduced page load time by 18% through query optimization</li>
+              <li>Worked in two-week Agile sprint cycles with a small team</li>
+            </ul>
+          </div>
+
+          <div class="card checklist-card" data-id="projects">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-projects" />
+              <label class="checklist-label" for="cb-projects">Projects</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li><strong>LifeTrack</strong> – Student life management platform &nbsp;|&nbsp; React &middot; Node.js &middot; MySQL</li>
+              <li>Built the Goals and Wellness modules with habit tracking and progress views</li>
+              <li>Built responsive UI components used across all dashboard pages</li>
+              <li>github.com/yourname/lifetrack</li>
+            </ul>
+          </div>
+
+          <div class="card checklist-card" data-id="skills">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-skills" />
+              <label class="checklist-label" for="cb-skills">Skills</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li><strong>Languages:</strong> JavaScript, Python, Java, SQL</li>
+              <li><strong>Frameworks &amp; Tools:</strong> React, Node.js, Express, Git, Docker, MySQL</li>
+              <li><strong>Concepts:</strong> REST APIs, Agile, responsive design, version control</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <div class="controls-bar" style="margin-top:1.5rem;">
+          <button class="btn" id="save-btn" type="button">Save Resource</button>
+          <a class="btn secondary" href="../dashboard.html">Back to Dashboard</a>
+        </div>
+
+        <p id="save-msg" style="display:none; margin-top:0.75rem; font-size:0.875rem; color:var(--green,#22c55e);"></p>
+
+        <div class="footer">Team 1 &middot; Spring 2026</div>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+
+    const checkboxes = document.querySelectorAll('.checklist-checkbox');
+    const statDone = document.getElementById('stat-done');
+    const statRemaining = document.getElementById('stat-remaining');
+    const total = checkboxes.length;
+
+    function updateCounts() {
+      const done = Array.from(checkboxes).filter(cb => cb.checked).length;
+      statDone.textContent = done;
+      statRemaining.textContent = total - done;
+    }
+
+    function applyCardStyle(cb) {
+      const card = cb.closest('.checklist-card');
+      if (cb.checked) {
+        card.style.opacity = '0.6';
+        card.querySelector('.checklist-label').style.textDecoration = 'line-through';
+      } else {
+        card.style.opacity = '1';
+        card.querySelector('.checklist-label').style.textDecoration = 'none';
+      }
+    }
+
+    checkboxes.forEach(cb => {
+      cb.addEventListener('change', () => {
+        applyCardStyle(cb);
+        updateCounts();
+      });
+    });
+
+    document.getElementById('save-btn').addEventListener('click', () => {
+      const done = Array.from(checkboxes).filter(cb => cb.checked).length;
+      const msg = document.getElementById('save-msg');
+      msg.textContent = `Saved — ${done} of ${total} sections filled in.`;
+      msg.style.display = 'block';
+      setTimeout(() => { msg.style.display = 'none'; }, 3000);
+    });
+  </script>
+</body>
+</html>

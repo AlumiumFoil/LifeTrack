@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Portfolio Checklist – LifeTrack</title>
+  <link rel="stylesheet" href="../../css/styles.css" />
+</head>
+<body>
+  <div class="dashboard-frame">
+
+    <header class="dashboard-header">
+      <a class="dashboard-header-brand" href="../../index.html">LifeTrack</a>
+      <div class="dashboard-header-actions">
+        <a class="dashboard-header-profile" href="../search.html">Search</a>
+        <a class="dashboard-header-profile" href="../profile.html">
+          <img
+            id="profilePreview"
+            class="dashboard-header-avatar"
+            src="https://placehold.co/120x120?text=User"
+            alt="Profile preview"
+          />
+          <span id="profileUsernameTop">Profile</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="dashboard-body">
+      <aside class="dashboard-sidebar">
+        <nav class="dashboard-nav">
+          <a class="dashboard-nav-link" href="../dashboard.html">Home</a>
+          <a class="dashboard-nav-link" href="../studying.html">Academic</a>
+          <a class="dashboard-nav-link active" href="../jobpreparation.html">Career</a>
+          <a class="dashboard-nav-link" href="../goals.html">Productivity</a>
+          <a class="dashboard-nav-link" href="../wellness.html">Wellness</a>
+        </nav>
+      </aside>
+
+      <main class="dashboard-main">
+
+        <section class="hero">
+          <h1>Portfolio Checklist</h1>
+          <p>A simple checklist to make sure your portfolio has the basics covered. Check things off as you add them.</p>
+        </section>
+
+        <div class="summary-row">
+          <div class="summary-card">
+            <div class="s-value" id="stat-total">6</div>
+            <div class="s-label">Total Items</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value green" id="stat-done">0</div>
+            <div class="s-label">Done</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value accent" id="stat-remaining">6</div>
+            <div class="s-label">Remaining</div>
+          </div>
+        </div>
+
+        <div class="grid" id="checklist-grid">
+
+          <div class="card checklist-card" data-id="about">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-about" />
+              <label class="checklist-label" for="cb-about">About Section</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li>Who you are and what you study</li>
+              <li>What you're interested in or what you've worked on</li>
+              <li>What kind of role you're looking for</li>
+            </ul>
+          </div>
+
+          <div class="card checklist-card" data-id="projects">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-projects" />
+              <label class="checklist-label" for="cb-projects">Projects</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li>2 or 3 projects you're actually proud of</li>
+              <li>What you built and what tech you used</li>
+              <li>Link to the repo or a live demo</li>
+            </ul>
+          </div>
+
+          <div class="card checklist-card" data-id="resume">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-resume" />
+              <label class="checklist-label" for="cb-resume">Resume Link</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li>Upload as a PDF</li>
+              <li>Link it somewhere obvious, not buried in the footer</li>
+              <li>Label it clearly so people know what it is</li>
+            </ul>
+          </div>
+
+          <div class="card checklist-card" data-id="contact">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-contact" />
+              <label class="checklist-label" for="cb-contact">Contact Info</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li>Email at minimum</li>
+              <li>A contact form is a nice bonus</li>
+              <li>Make it easy to spot on the page</li>
+            </ul>
+          </div>
+
+          <div class="card checklist-card" data-id="github">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-github" />
+              <label class="checklist-label" for="cb-github">GitHub Link</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li>Link to your public GitHub profile</li>
+              <li>Pin your best repos to the top</li>
+              <li>Keep recent commits visible so it doesn't look inactive</li>
+            </ul>
+          </div>
+
+          <div class="card checklist-card" data-id="mobile">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-mobile" />
+              <label class="checklist-label" for="cb-mobile">Mobile Check</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li>Open it on your phone and check the layout</li>
+              <li>Check fonts, buttons, and images at mobile size</li>
+              <li>Fix anything broken before you share it</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <div class="controls-bar" style="margin-top:1.5rem;">
+          <button class="btn" id="save-btn" type="button">Save Resource</button>
+          <a class="btn secondary" href="../dashboard.html">Back to Dashboard</a>
+        </div>
+
+        <p id="save-msg" style="display:none; margin-top:0.75rem; font-size:0.875rem; color:var(--green,#22c55e);"></p>
+
+        <div class="footer">Team 1 &middot; Spring 2026</div>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+
+    const checkboxes = document.querySelectorAll('.checklist-checkbox');
+    const statDone = document.getElementById('stat-done');
+    const statRemaining = document.getElementById('stat-remaining');
+    const total = checkboxes.length;
+
+    function updateCounts() {
+      const done = Array.from(checkboxes).filter(cb => cb.checked).length;
+      statDone.textContent = done;
+      statRemaining.textContent = total - done;
+    }
+
+    function applyCardStyle(cb) {
+      const card = cb.closest('.checklist-card');
+      if (cb.checked) {
+        card.style.opacity = '0.6';
+        cb.closest('.checklist-card').querySelector('.checklist-label').style.textDecoration = 'line-through';
+      } else {
+        card.style.opacity = '1';
+        cb.closest('.checklist-card').querySelector('.checklist-label').style.textDecoration = 'none';
+      }
+    }
+
+    checkboxes.forEach(cb => {
+      cb.addEventListener('change', () => {
+        applyCardStyle(cb);
+        updateCounts();
+      });
+    });
+
+    document.getElementById('save-btn').addEventListener('click', () => {
+      const done = Array.from(checkboxes).filter(cb => cb.checked).length;
+      const msg = document.getElementById('save-msg');
+      msg.textContent = `Saved — ${done} of ${total} items checked off.`;
+      msg.style.display = 'block';
+      setTimeout(() => { msg.style.display = 'none'; }, 3000);
+    });
+  </script>
+</body>
+</html>
