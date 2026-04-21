@@ -909,5 +909,8 @@ module.exports = {
     getUserProfile,
     updateUserProfile,
     changePassword,
+    getAccessibilitySettings,
+    updateAccessibilitySettings,
+    updateUserSecurityQuestions,
     getUserSecurityQuestions
 };
