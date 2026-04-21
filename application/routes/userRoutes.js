@@ -86,6 +86,23 @@ router.put('/me/profile', authenticateJWT, userController.updateUserProfile);
 router.put('/me/password', authenticateJWT, userController.changePassword);
 
 /**
+ * GET /api/users/me/accessibility
+ * Get user's accessibility settings
+ * Requires authentication
+ * Output: { success, accessibility }
+ */
+router.get('/me/accessibility', authenticateJWT, userController.getAccessibilitySettings);
+
+/**
+ * PUT /api/users/me/accessibility
+ * Update user's accessibility settings
+ * Requires authentication
+ * Input: { themeMode?, textSize?, highContrastEnabled? }
+ * Output: { success, message, accessibility }
+ */
+router.put('/me/accessibility', authenticateJWT, userController.updateAccessibilitySettings);
+
+/**
  * GET /api/users/me/security-questions
  * Get current user's security questions
  * Requires authentication
