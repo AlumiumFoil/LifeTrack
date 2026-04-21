@@ -278,6 +278,31 @@ const ensureAccessibilitySettingsExist = async (accountId) => {
     );
 };
 
+/**
+ * Update accessibility settings for a user
+ * @param {number} accountId - user's account ID
+ * @param {object} settings - accessibility settings to save
+ * @param {string} settings.themeMode - theme mode value
+ * @param {string} settings.textSize - text size value
+ * @param {number} settings.highContrastEnabled - high contrast flag
+ * @returns {Promise<void>}
+ */
+const updateAccessibilitySettings = async (accountId, settings) => {
+    await pool.query(
+        `UPDATE user_accessibility_settings
+         SET theme_mode = ?,
+             text_size = ?,
+             high_contrast_enabled = ?
+         WHERE account_id = ?`,
+        [
+            settings.themeMode,
+            settings.textSize,
+            settings.highContrastEnabled,
+            accountId
+        ]
+    );
+};
+
 
 
 /**
