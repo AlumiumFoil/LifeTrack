@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Focus Guide – LifeTrack</title>
+  <link rel="stylesheet" href="../../css/styles.css" />
+</head>
+<body>
+  <div class="dashboard-frame">
+
+    <header class="dashboard-header">
+      <a class="dashboard-header-brand" href="../../index.html">LifeTrack</a>
+      <div class="dashboard-header-actions">
+        <a class="dashboard-header-profile" href="../search.html">Search</a>
+        <a class="dashboard-header-profile" href="../profile.html">
+          <img
+            id="profilePreview"
+            class="dashboard-header-avatar"
+            src="https://placehold.co/120x120?text=User"
+            alt="Profile preview"
+          />
+          <span id="profileUsernameTop">Profile</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="dashboard-body">
+      <aside class="dashboard-sidebar">
+        <nav class="dashboard-nav">
+          <a class="dashboard-nav-link" href="../dashboard.html">Home</a>
+          <a class="dashboard-nav-link" href="../studying.html">Academic</a>
+          <a class="dashboard-nav-link" href="../jobpreparation.html">Career</a>
+          <a class="dashboard-nav-link" href="../goals.html">Productivity</a>
+          <a class="dashboard-nav-link active" href="../wellness.html">Wellness</a>
+        </nav>
+      </aside>
+
+      <main class="dashboard-main">
+
+        <section class="hero">
+          <h1>Focus Guide</h1>
+          <p>Quick tips to reset, focus, and get back on track. Read through each one and check it off after you've tried it.</p>
+        </section>
+
+        <div class="summary-row">
+          <div class="summary-card">
+            <div class="s-value" id="stat-total">6</div>
+            <div class="s-label">Total Tips</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value green" id="stat-done">0</div>
+            <div class="s-label">Tried</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value accent" id="stat-remaining">6</div>
+            <div class="s-label">Remaining</div>
+          </div>
+        </div>
+
+        <div class="grid" id="checklist-grid">
+
+          <div class="card checklist-card" data-id="breathing">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-breathing" />
+              <label class="checklist-label" for="cb-breathing">60-Second Breathing Reset</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li>Breathe in for 4 counts</li>
+              <li>Hold for 4 counts</li>
+              <li>Breathe out for 6 counts</li>
+              <li>Repeat 4 times</li>
+              <li>Try it before studying or after something stressful</li>
+            </ul>
+          </div>
+
+          <div class="card checklist-card" data-id="focus-reset">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-focus-reset" />
+              <label class="checklist-label" for="cb-focus-reset">5-Minute Focus Reset</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li>Step away from your screen for 5 minutes</li>
+              <li>Stretch, get water, or look out a window</li>
+              <li>Don't check your phone during the break</li>
+              <li>When you sit back down, write one thing to start with</li>
+            </ul>
+          </div>
+
+          <div class="card checklist-card" data-id="distractions">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-distractions" />
+              <label class="checklist-label" for="cb-distractions">Remove Distractions</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li>Put your phone across the room or face down</li>
+              <li>Close any tabs you don't need right now</li>
+              <li>Use a site blocker like Cold Turkey if needed</li>
+              <li>Let people around you know you need quiet time</li>
+            </ul>
+          </div>
+
+          <div class="card checklist-card" data-id="next-step">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-next-step" />
+              <label class="checklist-label" for="cb-next-step">One Small Next Step</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li>Pick the smallest thing you can do right now</li>
+              <li>Not "finish the project", just "open the file"</li>
+              <li>Not "study for the exam", just "read the first page"</li>
+              <li>Getting started is usually the hardest part</li>
+            </ul>
+          </div>
+
+          <div class="card checklist-card" data-id="sprints">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-sprints" />
+              <label class="checklist-label" for="cb-sprints">Study Sprint Tips</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li>Work for 25 minutes, then take a 5-minute break</li>
+              <li>After 4 rounds, take a longer break (15 to 20 minutes)</li>
+              <li>Don't multitask during sprints</li>
+              <li>Use the timer on the Studying page to keep track</li>
+            </ul>
+          </div>
+
+          <div class="card checklist-card" data-id="break">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-break" />
+              <label class="checklist-label" for="cb-break">When to Take a Break</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li>You've re-read the same paragraph 3 times</li>
+              <li>You can't remember what you just read</li>
+              <li>You feel tense or your eyes are strained</li>
+              <li>Take a real break, not a "scroll your phone" break</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <div class="controls-bar" style="margin-top:1.5rem;">
+          <button class="btn" id="save-btn" type="button">Save Resource</button>
+          <a class="btn secondary" href="../dashboard.html">Back to Dashboard</a>
+        </div>
+
+        <p id="save-msg" style="display:none; margin-top:0.75rem; font-size:0.875rem; color:var(--green,#22c55e);"></p>
+
+        <div class="footer">Team 1 &middot; Spring 2026</div>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+
+    const checkboxes = document.querySelectorAll('.checklist-checkbox');
+    const statDone = document.getElementById('stat-done');
+    const statRemaining = document.getElementById('stat-remaining');
+    const total = checkboxes.length;
+
+    function updateCounts() {
+      const done = Array.from(checkboxes).filter(cb => cb.checked).length;
+      statDone.textContent = done;
+      statRemaining.textContent = total - done;
+    }
+
+    function applyCardStyle(cb) {
+      const card = cb.closest('.checklist-card');
+      if (cb.checked) {
+        card.style.opacity = '0.6';
+        card.querySelector('.checklist-label').style.textDecoration = 'line-through';
+      } else {
+        card.style.opacity = '1';
+        card.querySelector('.checklist-label').style.textDecoration = 'none';
+      }
+    }
+
+    checkboxes.forEach(cb => {
+      cb.addEventListener('change', () => {
+        applyCardStyle(cb);
+        updateCounts();
+      });
+    });
+
+    document.getElementById('save-btn').addEventListener('click', () => {
+      const done = Array.from(checkboxes).filter(cb => cb.checked).length;
+      const msg = document.getElementById('save-msg');
+      msg.textContent = `Saved — ${done} of ${total} tips tried.`;
+      msg.style.display = 'block';
+      setTimeout(() => { msg.style.display = 'none'; }, 3000);
+    });
+  </script>
+</body>
+</html>
