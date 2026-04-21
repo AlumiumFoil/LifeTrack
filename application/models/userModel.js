@@ -244,7 +244,7 @@ const updateUserProfile = async (accountId, profileData) => {
  * @returns {Promise<object | null>} Accessibility settings or null if missing
  */
 const getAccessibilitySettingsByAccountId = async (accountId) => {
-    const [rows] = await.pool query(`
+    const [rows] = await pool.query(`
         SELECT
              account_id AS accountId,
              theme_mode AS themeMode,
