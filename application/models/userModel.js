@@ -303,7 +303,35 @@ const updateAccessibilitySettings = async (accountId, settings) => {
     );
 };
 
+/**
+ * Update security question answers for a user
+ * @param {number} accountId - user's account ID
+ * @param {Array} securityQuestions - array of { questionId, answerHash }
+ * @returns {Promise<void>}
+ */
+const updateUserSecurityQuestionAnswers = async (accountId, securityQuestions) => {
+    const connection = await pool.getConnection();
 
+    try {
+        await connection.beginTransaction();
+
+        for (const question of securityQuestions) {
+            await connection.query(
+                `UPDATE user_security_questions
+                 SET answer_hash = ?
+                 WHERE account_id = ? AND question_id = ?`,
+                [question.answerHash, accountId, question.questionId]
+            );
+        }
+
+        await connection.commit();
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
+    }
+};
 
 /**
  * Update user's password
