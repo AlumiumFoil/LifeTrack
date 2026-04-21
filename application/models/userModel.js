@@ -396,6 +396,10 @@ module.exports = {
     updateUserPassword,
     getUserPasswordHash,
     getUserSecurityQuestions,
+    getAccessibilitySettingsByAccountId,
+    ensureAccessibilitySettingsExist,
+    updateAccessibilitySettings,
+    updateUserSecurityQuestionAnswers,
     
     // User role functions
     getRoleIdByName,
