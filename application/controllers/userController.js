@@ -140,6 +140,262 @@ const attachMilestonesToProjects = (projects, milestones) => {
 };
 
 /**
+ * Convert different input values into 1 or 0 for MySQL
+ * Accepts booleans, numbers, and common string forms used by frontends
+ * @param {boolean|number|string} value - Raw high contrast input
+ * @returns {number|null} 1, 0, or null when invalid
+ */
+const normalizeHighContrastEnabled = (value) => {
+    if (value === true || value === 1 || value === '1' || value === 'true') {
+        return 1;
+    }
+
+    if (value === false || value === 0 || value === '0' || value === 'false') {
+        return 0;
+    }
+
+    return null;
+};
+
+/**
+ * Get or initialize the current user's accessibility settings
+ * GET /api/users/me/accessibility
+ * Requires authentication
+ * Output: { success, accessibility }
+ */
+const getAccessibilitySettings = async (req, res) => {
+    try {
+        const accountId = req.user.account_id;
+
+        await userModel.ensureAccessibilitySettingsExist(accountId);
+
+        const accessibility = await userModel.getAccessibilitySettingsByAccountId(
+            accountId
+        );
+
+        return res.json({
+            success: true,
+            accessibility
+        });
+    } catch (error) {
+        console.error('Get accessibility settings error:', error);
+        return res.status(500).json({
+            success: false,
+            error: 'An error occurred while fetching accessibility settings.'
+        });
+    }
+};
+
+/**
+ * Update the current user's accessibility settings
+ * PUT /api/users/me/accessibility
+ * Requires authentication
+ * Input: { themeMode?, textSize?, highContrastEnabled? }
+ * Output: { success, message, accessibility }
+ */
+const updateAccessibilitySettings = async (req, res) => {
+    try {
+        const accountId = req.user.account_id;
+        const { themeMode, textSize, highContrastEnabled } = req.body;
+
+        const allowedThemeModes = ['light', 'dark', 'system'];
+        const allowedTextSizes = ['small', 'normal', 'large'];
+
+        if (
+            themeMode === undefined &&
+            textSize === undefined &&
+            highContrastEnabled === undefined
+        ) {
+            return res.status(400).json({
+                success: false,
+                error:
+                    'At least one of themeMode, textSize, or highContrastEnabled must be provided.'
+            });
+        }
+
+        const nextSettings = {};
+
+        if (themeMode !== undefined) {
+            if (
+                typeof themeMode !== 'string' ||
+                !allowedThemeModes.includes(themeMode.trim())
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'themeMode must be one of: light, dark, or system.'
+                });
+            }
+
+            nextSettings.themeMode = themeMode.trim();
+        }
+
+        if (textSize !== undefined) {
+            if (
+                typeof textSize !== 'string' ||
+                !allowedTextSizes.includes(textSize.trim())
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'textSize must be one of: small, normal, or large.'
+                });
+            }
+
+            nextSettings.textSize = textSize.trim();
+        }
+
+        if (highContrastEnabled !== undefined) {
+            const normalizedHighContrast = normalizeHighContrastEnabled(
+                highContrastEnabled
+            );
+
+            if (normalizedHighContrast === null) {
+                return res.status(400).json({
+                    success: false,
+                    error:
+                        'highContrastEnabled must be true, false, 1, 0, "true", or "false".'
+                });
+            }
+
+            nextSettings.highContrastEnabled = normalizedHighContrast;
+        }
+
+        await userModel.ensureAccessibilitySettingsExist(accountId);
+
+        const currentSettings = await userModel.getAccessibilitySettingsByAccountId(
+            accountId
+        );
+
+        await userModel.updateAccessibilitySettings(accountId, {
+            themeMode: nextSettings.themeMode ?? currentSettings.themeMode,
+            textSize: nextSettings.textSize ?? currentSettings.textSize,
+            highContrastEnabled:
+                nextSettings.highContrastEnabled ??
+                currentSettings.highContrastEnabled
+        });
+
+        const updatedAccessibility =
+            await userModel.getAccessibilitySettingsByAccountId(accountId);
+
+        return res.json({
+            success: true,
+            message: 'Accessibility settings updated successfully.',
+            accessibility: updatedAccessibility
+        });
+    } catch (error) {
+        console.error('Update accessibility settings error:', error);
+        return res.status(500).json({
+            success: false,
+            error: 'An error occurred while updating accessibility settings.'
+        });
+    }
+};
+
+/**
+ * Update answers for the user's security questions
+ * PUT /api/users/me/security-questions
+ * Requires authentication
+ * Input: { securityQuestions: [{ questionId, answer }] }
+ * Output: { success, message, securityQuestions }
+ */
+const updateUserSecurityQuestions = async (req, res) => {
+    try {
+        const accountId = req.user.account_id;
+        const { securityQuestions } = req.body;
+
+        if (!Array.isArray(securityQuestions) || securityQuestions.length === 0) {
+            return res.status(400).json({
+                success: false,
+                error:
+                    'securityQuestions must be a non-empty array of question updates.'
+            });
+        }
+
+        const existingQuestions = await userModel.getUserSecurityQuestions(accountId);
+
+        if (existingQuestions.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'No security questions found for this account.'
+            });
+        }
+
+        const existingQuestionIds = new Set(
+            existingQuestions.map((question) => Number(question.question_id))
+        );
+        const seenQuestionIds = new Set();
+        const questionsWithHashes = [];
+
+        for (const securityQuestion of securityQuestions) {
+            const questionId = Number(securityQuestion?.questionId);
+            const answer =
+                typeof securityQuestion?.answer === 'string'
+                    ? securityQuestion.answer.trim()
+                    : '';
+
+            if (!Number.isInteger(questionId) || questionId <= 0) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Each security question update must include a valid questionId.'
+                });
+            }
+
+            if (!existingQuestionIds.has(questionId)) {
+                return res.status(400).json({
+                    success: false,
+                    error:
+                        'One or more questionId values do not belong to the authenticated user.'
+                });
+            }
+
+            if (seenQuestionIds.has(questionId)) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Duplicate questionId values are not allowed in one request.'
+                });
+            }
+
+            if (answer.length < 2 || answer.length > 255) {
+                return res.status(400).json({
+                    success: false,
+                    error:
+                        'Each security answer must be between 2 and 255 characters.'
+                });
+            }
+
+            seenQuestionIds.add(questionId);
+            questionsWithHashes.push({
+                questionId,
+                answerHash: await hashPassword(answer)
+            });
+        }
+
+        await userModel.updateUserSecurityQuestionAnswers(
+            accountId,
+            questionsWithHashes
+        );
+
+        const updatedSecurityQuestions = await userModel.getUserSecurityQuestions(
+            accountId
+        );
+
+        return res.json({
+            success: true,
+            message: 'Security question answers updated successfully.',
+            securityQuestions: updatedSecurityQuestions.map((question) => ({
+                question_id: question.question_id,
+                question_text: question.question_text
+            }))
+        });
+    } catch (error) {
+        console.error('Update security questions error:', error);
+        return res.status(500).json({
+            success: false,
+            error: 'An error occurred while updating security questions.'
+        });
+    }
+};
+
+/**
  * Get list of premade security questions
  * GET /api/users/security-questions
  * Used during account registration
