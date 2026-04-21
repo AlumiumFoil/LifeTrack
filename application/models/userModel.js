@@ -239,6 +239,27 @@ const updateUserProfile = async (accountId, profileData) => {
 };
 
 /**
+ * Get current accessibility settings for user
+ * @param {number} accountId - user's account ID
+ * @returns {Promise<object | null>} Accessibility settings or null if missing
+ */
+const getAccessibilitySettingsByAccountId = async (accountId) => {
+    const [rows] = await.pool query(`
+        SELECT
+             account_id AS accountId,
+             theme_mode AS themeMode,
+             text_size AS textSize,
+             high_contrast_enabled AS highContrastEnabled
+        FROM user_accessibility_settings
+        WHERE account_id = ?`,
+        [accountId]
+        );
+        return rows[0] || null;  
+};
+
+
+
+/**
  * Update user's password
  * @param {number} accountId - User's account ID
  * @param {string} newPasswordHash - New hashed password
