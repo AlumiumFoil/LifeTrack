@@ -101,7 +101,10 @@ function setProfileFromStoredUser() {
 async function initializeProfilePage() {
   setProfileFromStoredUser();
   wireProfileEvents();
-  await loadUserProfile();
+  await Promise.all([
+    loadUserProfile(),
+    loadAccessibilitySettings()
+  ]);
 }
 
 // all page event listeners live here
@@ -115,6 +118,9 @@ function wireProfileEvents() {
   const openPasswordModalButton = document.getElementById("openPasswordModalBtn");
   const cancelPasswordButton = document.getElementById("cancelPasswordBtn");
   const changePasswordForm = document.getElementById("changePasswordForm");
+
+  const defaultModeButton = document.getElementById("defaultModeBtn");
+  const accessibilityModeButton = document.getElementById("accessibilityModeBtn");
 
   const loadSecurityQuestionsButton = document.getElementById("loadSecurityQuestionsBtn");
 
@@ -152,6 +158,19 @@ function wireProfileEvents() {
 
   if (loadSecurityQuestionsButton) {
     loadSecurityQuestionsButton.addEventListener("click", loadSecurityQuestionsForDisplay);
+  }
+
+  //accessibility buttons
+  if (defaultModeButton) {
+    defaultModeButton.addEventListener("click", () => {
+      updateAccessibilityMode("default");
+    });
+  }
+
+  if (accessibilityModeButton) {
+    accessibilityModeButton.addEventListener("click", () => {
+      updateAccessibilityMode("accessibility");
+    });
   }
 
   // allows clicking outside the modal to close it
@@ -600,6 +619,112 @@ async function submitPasswordChange(event) {
     }, 1200);
   } catch (error) {
     showProfileMessage(error.message || "An error occurred while changing password.", "error");
+  }
+}
+
+//accessibility helper functions
+async function loadAccessibilitySettings() {
+  const token = getAccessToken();
+
+  if (!token) return;
+
+  try {
+    const response = await fetch("/api/users/me/accessibility", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || "Could not load accessibility settings.");
+    }
+
+    applyAccessibilitySettings(data.accessibility);
+  } catch (error) {
+    showProfileMessage(error.message || "An error occurred while loading accessibility settings.", "error");
+  }
+}
+
+function applyAccessibilitySettings(accessibility) {
+  if (!accessibility) return;
+
+  const themeMode = accessibility.themeMode || "dark";
+  const textSize = accessibility.textSize || "normal";
+  const highContrastEnabled =
+    accessibility.highContrastEnabled === true ||
+    accessibility.highContrastEnabled === 1 ||
+    accessibility.highContrastEnabled === "1";
+
+  const isAccessibilityMode =
+    themeMode === "light" &&
+    textSize === "large" &&
+    highContrastEnabled;
+
+  document.body.setAttribute(
+    "data-accessibility-mode",
+    isAccessibilityMode ? "accessibility" : "default"
+  );
+
+  updateAccessibilityButtons(isAccessibilityMode ? "accessibility" : "default");
+}
+
+function updateAccessibilityButtons(mode) {
+  const defaultModeButton = document.getElementById("defaultModeBtn");
+  const accessibilityModeButton = document.getElementById("accessibilityModeBtn");
+
+  if (defaultModeButton) {
+    defaultModeButton.classList.toggle("active-mode", mode === "default");
+  }
+
+  if (accessibilityModeButton) {
+    accessibilityModeButton.classList.toggle("active-mode", mode === "accessibility");
+  }
+}
+
+async function updateAccessibilityMode(mode) {
+  const token = getAccessToken();
+
+  if (!token) {
+    showProfileMessage("You must be logged in to update accessibility settings.", "error");
+    return;
+  }
+
+  const requestBody =
+    mode === "accessibility"
+      ? {
+          themeMode: "light",
+          textSize: "large",
+          highContrastEnabled: true
+        }
+      : {
+          themeMode: "dark",
+          textSize: "normal",
+          highContrastEnabled: false
+        };
+
+  try {
+    const response = await fetch("/api/users/me/accessibility", {
+      method: "PUT",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || "Accessibility settings update failed.");
+    }
+
+    applyAccessibilitySettings(data.accessibility);
+    showProfileMessage("Accessibility settings updated successfully.", "success");
+  } catch (error) {
+    showProfileMessage(error.message || "An error occurred while updating accessibility settings.", "error");
   }
 }
 

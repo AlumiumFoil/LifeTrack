@@ -927,3 +927,95 @@ body {
   color: var(--text);
   border-color: rgba(255,255,255,0.25);
 }
+
+/* ── User accessibility mode ── */
+
+body[data-accessibility-mode="accessibility"] {
+  --bg: #eef4ff;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #334155;
+  --border: rgba(15, 23, 42, 0.18);
+  background:
+    radial-gradient(1200px 600px at 20% 0%, rgba(77,163,255,0.12), transparent 60%),
+    radial-gradient(900px 600px at 80% 10%, rgba(139,92,246,0.10), transparent 60%),
+    #eef4ff;
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+body[data-accessibility-mode="accessibility"] .card,
+body[data-accessibility-mode="accessibility"] .course-card,
+body[data-accessibility-mode="accessibility"] .summary-card,
+body[data-accessibility-mode="accessibility"] .assign-item,
+body[data-accessibility-mode="accessibility"] .history-item,
+body[data-accessibility-mode="accessibility"] .dashboard-list-item,
+body[data-accessibility-mode="accessibility"] .checkin-card,
+body[data-accessibility-mode="accessibility"] .profile-info-item,
+body[data-accessibility-mode="accessibility"] .profile-meta-row,
+body[data-accessibility-mode="accessibility"] .profile-settings-item,
+body[data-accessibility-mode="accessibility"] .modal {
+  background: rgba(255,255,255,0.96);
+  color: var(--text);
+  border-color: rgba(15,23,42,0.2);
+}
+
+body[data-accessibility-mode="accessibility"] .dashboard-header,
+body[data-accessibility-mode="accessibility"] .dashboard-sidebar {
+  background: rgba(255,255,255,0.88);
+  border-color: rgba(15,23,42,0.16);
+}
+
+body[data-accessibility-mode="accessibility"] .dashboard-nav-link,
+body[data-accessibility-mode="accessibility"] .dashboard-header-profile,
+body[data-accessibility-mode="accessibility"] .dashboard-header-brand,
+body[data-accessibility-mode="accessibility"] .dashboard-header-link,
+body[data-accessibility-mode="accessibility"] .small,
+body[data-accessibility-mode="accessibility"] .card p,
+body[data-accessibility-mode="accessibility"] .assign-meta,
+body[data-accessibility-mode="accessibility"] .history-date,
+body[data-accessibility-mode="accessibility"] .course-meta {
+  color: var(--muted);
+}
+
+body[data-accessibility-mode="accessibility"] .dashboard-nav-link:hover,
+body[data-accessibility-mode="accessibility"] .dashboard-header-link:hover,
+body[data-accessibility-mode="accessibility"] .btn.secondary:hover {
+  color: var(--text);
+}
+
+body[data-accessibility-mode="accessibility"] .dashboard-nav-link.active {
+  background: rgba(77,163,255,0.14);
+  color: #0f172a;
+  border-left-color: var(--accent);
+}
+
+body[data-accessibility-mode="accessibility"] .btn.secondary,
+body[data-accessibility-mode="accessibility"] .dashboard-logout-btn,
+body[data-accessibility-mode="accessibility"] .tab-btn,
+body[data-accessibility-mode="accessibility"] .mood-btn,
+body[data-accessibility-mode="accessibility"] .pill {
+  background: rgba(255,255,255,0.96);
+  color: var(--text);
+  border-color: rgba(15,23,42,0.18);
+}
+
+body[data-accessibility-mode="accessibility"] .dashboard-logout-btn:hover {
+  background: rgba(15,23,42,0.06);
+  color: var(--text);
+}
+
+body[data-accessibility-mode="accessibility"] .form-group input,
+body[data-accessibility-mode="accessibility"] .form-group select,
+body[data-accessibility-mode="accessibility"] .dashboard-upload-block input[type="file"],
+body[data-accessibility-mode="accessibility"] .ctrl-input,
+body[data-accessibility-mode="accessibility"] .ctrl-select {
+  background: #ffffff;
+  color: var(--text);
+  border-color: rgba(15,23,42,0.22);
+}
+
+body[data-accessibility-mode="accessibility"] .status-message {
+  border-width: 2px;
+}
