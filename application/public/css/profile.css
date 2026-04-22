@@ -177,3 +177,15 @@
     font-size: 1.55rem;
   }
 }
+
+.accessibility-toggle-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.accessibility-toggle-group .btn.active-mode {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff;
+  border-color: transparent;
+}
