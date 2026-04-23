@@ -174,9 +174,6 @@ const createDefaultDashboard = async (accountId, connection) => {
  * @returns {Promise<object|null>} User profile object or null if not found
  */
 const getUserProfile = async (accountId) => {
-    if (fields.length === 0) {
-        return { affectedRows: 0 };
-    }
     const [users] = await pool.query(
         `SELECT
              account_id,
@@ -242,6 +239,101 @@ const updateUserProfile = async (accountId, profileData) => {
 };
 
 /**
+ * Get current accessibility settings for user
+ * @param {number} accountId - user's account ID
+ * @returns {Promise<object | null>} Accessibility settings or null if missing
+ */
+const getAccessibilitySettingsByAccountId = async (accountId) => {
+    const [rows] = await pool.query(`
+        SELECT
+             account_id AS accountId,
+             theme_mode AS themeMode,
+             text_size AS textSize,
+             high_contrast_enabled AS highContrastEnabled
+        FROM user_accessibility_settings
+        WHERE account_id = ?`,
+        [accountId]
+        );
+        return rows[0] || null;  
+};
+
+/**
+ * Create default accessibility settings if the row does not exist yet
+ * @param {number} accountId - user's account ID
+ * @returns {Promise<void>}
+ */
+const ensureAccessibilitySettingsExist = async (accountId) => {
+    await pool.query(
+        `INSERT INTO user_accessibility_settings (
+             account_id,
+             theme_mode,
+             text_size,
+             high_contrast_enabled,
+             font_choice,
+             color_blind_mode
+         )
+         VALUES (?, 'system', 'normal', 0, NULL, NULL)
+         ON DUPLICATE KEY UPDATE account_id = account_id`,
+        [accountId]
+    );
+};
+
+/**
+ * Update accessibility settings for a user
+ * @param {number} accountId - user's account ID
+ * @param {object} settings - accessibility settings to save
+ * @param {string} settings.themeMode - theme mode value
+ * @param {string} settings.textSize - text size value
+ * @param {number} settings.highContrastEnabled - high contrast flag
+ * @returns {Promise<void>}
+ */
+const updateAccessibilitySettings = async (accountId, settings) => {
+    await pool.query(
+        `UPDATE user_accessibility_settings
+         SET theme_mode = ?,
+             text_size = ?,
+             high_contrast_enabled = ?
+         WHERE account_id = ?`,
+        [
+            settings.themeMode,
+            settings.textSize,
+            settings.highContrastEnabled,
+            accountId
+        ]
+    );
+};
+
+/**
+ * Update security question answers for a user
+ * @param {number} accountId - user's account ID
+ * @param {Array} securityQuestions - array of { questionId, answerHash }
+ * @returns {Promise<void>}
+ */
+const updateUserSecurityQuestionAnswers = async (accountId, securityQuestions) => {
+    const connection = await pool.getConnection();
+
+    try {
+        await connection.beginTransaction();
+
+        for (const question of securityQuestions) {
+            await connection.query(
+                `UPDATE user_security_questions
+                 SET answer_hash = ?
+                 WHERE account_id = ? AND question_id = ?`,
+                [question.answerHash, accountId, question.questionId]
+            );
+        }
+
+        await connection.commit();
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
+    }
+};
+
+/**
  * Update user's password
  * @param {number} accountId - User's account ID
  * @param {string} newPasswordHash - New hashed password
@@ -304,6 +396,10 @@ module.exports = {
     updateUserPassword,
     getUserPasswordHash,
     getUserSecurityQuestions,
+    getAccessibilitySettingsByAccountId,
+    ensureAccessibilitySettingsExist,
+    updateAccessibilitySettings,
+    updateUserSecurityQuestionAnswers,
     
     // User role functions
     getRoleIdByName,

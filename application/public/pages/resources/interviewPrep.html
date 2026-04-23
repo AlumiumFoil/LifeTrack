@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Interview Prep Workflow – LifeTrack</title>
+  <link rel="stylesheet" href="../../css/styles.css" />
+</head>
+<body>
+  <div class="dashboard-frame">
+
+    <header class="dashboard-header">
+      <a class="dashboard-header-brand" href="../../index.html">LifeTrack</a>
+      <div class="dashboard-header-actions">
+        <a class="dashboard-header-profile" href="../search.html">Search</a>
+        <a class="dashboard-header-profile" href="../profile.html">
+          <img
+            id="profilePreview"
+            class="dashboard-header-avatar"
+            src="https://placehold.co/120x120?text=User"
+            alt="Profile preview"
+          />
+          <span id="profileUsernameTop">Profile</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="dashboard-body">
+      <aside class="dashboard-sidebar">
+        <nav class="dashboard-nav">
+          <a class="dashboard-nav-link" href="../dashboard.html">Home</a>
+          <a class="dashboard-nav-link" href="../studying.html">Academic</a>
+          <a class="dashboard-nav-link active" href="../jobpreparation.html">Career</a>
+          <a class="dashboard-nav-link" href="../goals.html">Productivity</a>
+          <a class="dashboard-nav-link" href="../wellness.html">Wellness</a>
+        </nav>
+      </aside>
+
+      <main class="dashboard-main">
+
+        <section class="hero">
+          <h1>Interview Prep Workflow</h1>
+          <p>A step-by-step way to get ready for an interview. Work through each one and check it off when you're done.</p>
+        </section>
+
+        <div class="summary-row">
+          <div class="summary-card">
+            <div class="s-value" id="stat-total">6</div>
+            <div class="s-label">Total Steps</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value green" id="stat-done">0</div>
+            <div class="s-label">Done</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value accent" id="stat-remaining">6</div>
+            <div class="s-label">Remaining</div>
+          </div>
+        </div>
+
+        <div class="grid" id="checklist-grid">
+
+          <div class="card checklist-card" data-id="research">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-research" />
+              <label class="checklist-label" for="cb-research">Research the Company</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li>Check their website, mission, and any recent news</li>
+              <li>Look up your interviewer on LinkedIn if you can</li>
+              <li>Know 1 or 2 things that make you want to work there</li>
+            </ul>
+          </div>
+
+          <div class="card checklist-card" data-id="resume">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-resume" />
+              <label class="checklist-label" for="cb-resume">Review Your Resume</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li>Read every line out loud before you go in</li>
+              <li>Be ready to explain any project or job listed</li>
+              <li>Know which 2 or 3 experiences you'll talk about most</li>
+            </ul>
+          </div>
+
+          <div class="card checklist-card" data-id="stories">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-stories" />
+              <label class="checklist-label" for="cb-stories">Prepare Stories</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li>Pick 3 to 5 real stories from school or work</li>
+              <li>Use STAR format: <strong>Situation</strong>, <strong>Task</strong>, <strong>Action</strong>, <strong>Result</strong></li>
+              <li>Cover: a challenge solved, something learned fast, a team experience</li>
+            </ul>
+          </div>
+
+          <div class="card checklist-card" data-id="practice">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-practice" />
+              <label class="checklist-label" for="cb-practice">Practice Questions</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li>Say your answers out loud, not just in your head</li>
+              <li>Common ones: about yourself, why this company, a challenge you handled</li>
+              <li>Practice with a friend or record yourself on your phone</li>
+            </ul>
+          </div>
+
+          <div class="card checklist-card" data-id="questions">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-questions" />
+              <label class="checklist-label" for="cb-questions">Questions to Ask</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li>Prepare 2 or 3 questions in advance</li>
+              <li>Good topics: team culture, day-to-day work, current projects</li>
+              <li>Not asking anything makes you look disinterested</li>
+            </ul>
+          </div>
+
+          <div class="card checklist-card" data-id="followup">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-followup" />
+              <label class="checklist-label" for="cb-followup">Follow Up</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li>Send a thank-you email within 24 hours</li>
+              <li>Mention one specific thing from the conversation</li>
+              <li>Keep it short, 3 to 5 sentences is enough</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <div class="controls-bar" style="margin-top:1.5rem;">
+          <button class="btn" id="save-btn" type="button">Save Resource</button>
+          <a class="btn secondary" href="../dashboard.html">Back to Dashboard</a>
+        </div>
+
+        <p id="save-msg" style="display:none; margin-top:0.75rem; font-size:0.875rem; color:var(--green,#22c55e);"></p>
+
+        <div class="footer">Team 1 &middot; Spring 2026</div>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+
+    const checkboxes = document.querySelectorAll('.checklist-checkbox');
+    const statDone = document.getElementById('stat-done');
+    const statRemaining = document.getElementById('stat-remaining');
+    const total = checkboxes.length;
+
+    function updateCounts() {
+      const done = Array.from(checkboxes).filter(cb => cb.checked).length;
+      statDone.textContent = done;
+      statRemaining.textContent = total - done;
+    }
+
+    function applyCardStyle(cb) {
+      const card = cb.closest('.checklist-card');
+      if (cb.checked) {
+        card.style.opacity = '0.6';
+        card.querySelector('.checklist-label').style.textDecoration = 'line-through';
+      } else {
+        card.style.opacity = '1';
+        card.querySelector('.checklist-label').style.textDecoration = 'none';
+      }
+    }
+
+    checkboxes.forEach(cb => {
+      cb.addEventListener('change', () => {
+        applyCardStyle(cb);
+        updateCounts();
+      });
+    });
+
+    document.getElementById('save-btn').addEventListener('click', () => {
+      const done = Array.from(checkboxes).filter(cb => cb.checked).length;
+      const msg = document.getElementById('save-msg');
+      msg.textContent = `Saved — ${done} of ${total} steps completed.`;
+      msg.style.display = 'block';
+      setTimeout(() => { msg.style.display = 'none'; }, 3000);
+    });
+  </script>
+</body>
+</html>
