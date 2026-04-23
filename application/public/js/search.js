@@ -6,8 +6,10 @@
 
 //waits till page has finished loading before running JS
 //Stops errors if JS accesses elements before they exist in DOM
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const path = window.location.pathname;
+
+  await loadAccessibilitySettings();
 
   if (path.endsWith("results.html")) {
     loadSearchResults();
@@ -17,6 +19,55 @@ document.addEventListener("DOMContentLoaded", () => {
 //reads the saved token so logged in users can access personal search results
 function getAccessToken() {
   return localStorage.getItem("accessToken");
+}
+
+// loads saved accessibility settings for the logged-in user
+async function loadAccessibilitySettings() {
+  const token = getAccessToken();
+
+  // search/results can still be used without a token, so just do nothing if logged out
+  if (!token) return;
+
+  try {
+    const response = await fetch("/api/users/me/accessibility", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || "Could not load accessibility settings.");
+    }
+
+    applyAccessibilitySettings(data.accessibility);
+  } catch (error) {
+    console.error("Accessibility settings load error:", error.message || error);
+  }
+}
+
+// applies the user accessibility mode to the current page
+function applyAccessibilitySettings(accessibility) {
+  if (!accessibility) return;
+
+  const themeMode = accessibility.themeMode || "dark";
+  const textSize = accessibility.textSize || "normal";
+  const highContrastEnabled =
+    accessibility.highContrastEnabled === true ||
+    accessibility.highContrastEnabled === 1 ||
+    accessibility.highContrastEnabled === "1";
+
+  const isAccessibilityMode =
+    themeMode === "light" &&
+    textSize === "large" &&
+    highContrastEnabled;
+
+  document.body.setAttribute(
+    "data-accessibility-mode",
+    isAccessibilityMode ? "accessibility" : "default"
+  );
 }
 
 //Reads search values from URL & sends them to abckend, 

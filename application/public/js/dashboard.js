@@ -20,6 +20,54 @@ function getStoredUser() {
   }
 }
 
+// loads saved accessibility settings for the logged-in user
+async function loadAccessibilitySettings() {
+  const token = getAccessToken();
+
+  if (!token) return;
+
+  try {
+    const response = await fetch("/api/users/me/accessibility", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || "Could not load accessibility settings.");
+    }
+
+    applyAccessibilitySettings(data.accessibility);
+  } catch (error) {
+    console.error("Accessibility settings load error:", error.message || error);
+  }
+}
+
+// applies the user accessibility mode to the current page
+function applyAccessibilitySettings(accessibility) {
+  if (!accessibility) return;
+
+  const themeMode = accessibility.themeMode || "dark";
+  const textSize = accessibility.textSize || "normal";
+  const highContrastEnabled =
+    accessibility.highContrastEnabled === true ||
+    accessibility.highContrastEnabled === 1 ||
+    accessibility.highContrastEnabled === "1";
+
+  const isAccessibilityMode =
+    themeMode === "light" &&
+    textSize === "large" &&
+    highContrastEnabled;
+
+  document.body.setAttribute(
+    "data-accessibility-mode",
+    isAccessibilityMode ? "accessibility" : "default"
+  );
+}
+
 //helper function (shared) for showing success/error messages on the dash
 function showDashboardMessage(message, type = "success") {
   const dashboardMessage = document.getElementById("dashboardMessage");
@@ -70,6 +118,7 @@ function setWelcomeFromStoredUser() {
 //shows local fallback data first
 async function initializeDashboard() {
   setWelcomeFromStoredUser();
+  await loadAccessibilitySettings();
 
   const refreshButton = document.getElementById("refreshDashboardBtn");
   const logoutButton = document.getElementById("logoutBtn");
@@ -247,61 +296,10 @@ function renderWellness(items) {
   `).join("");
 }
 
-/*
-//takes care of our profile image upload in the front
-async function uploadProfileImage() {
-  const token = getAccessToken();
-  const fileInput = document.getElementById("profileImageInput");
-
-  //uploading is blocked if the user is not logged in
-  if (!token) {
-    showDashboardMessage("You must be logged in to upload a profile image.", "error");
-    return;
-  }
-
-  //prevents the sending of an empty request
-  if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-    showDashboardMessage("Please choose an image first.", "error");
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append("profileImage", fileInput.files[0]);
-
-  //sends image file to backend using multipart form data
-  try {
-    const response = await fetch("/api/users/me/profile-image", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`
-      },
-      body: formData
-    });
-
-    const data = await response.json();
-
-    if (!response.ok || !data.success) {
-      throw new Error(data.error || "Profile image upload failed.");
-    }
-
-    //if the upload was a success/loaded, it updates the image preview immediately w/o reload
-    if (data.image && data.image.profileThumbnailUrl) {
-      const profilePreview = document.getElementById("profilePreview");
-      if (profilePreview) {
-        profilePreview.src = data.image.profileThumbnailUrl;
-      }
-    }
-
-    showDashboardMessage("Profile image uploaded successfully.", "success");
-  } catch (error) {
-    showDashboardMessage(error.message || "An error occurred while uploading image.", "error");
-  }
-}
-*/
-
 //user logout
 function logoutUser() {
   localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
   localStorage.removeItem("user");
   window.location.href = "./auth.html";
 }
