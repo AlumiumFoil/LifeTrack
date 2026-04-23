@@ -1019,3 +1019,21 @@ body[data-accessibility-mode="accessibility"] .ctrl-select {
 body[data-accessibility-mode="accessibility"] .status-message {
   border-width: 2px;
 }
+
+body[data-accessibility-mode="accessibility"] .hero,
+body[data-accessibility-mode="accessibility"] .dashboard-panel,
+body[data-accessibility-mode="accessibility"] .checkin-card {
+  background: rgba(255,255,255,0.96);
+  color: var(--text);
+  border-color: rgba(15,23,42,0.2);
+  box-shadow: 0 10px 24px rgba(15,23,42,0.08);
+}
+
+body[data-accessibility-mode="accessibility"] .hero p,
+body[data-accessibility-mode="accessibility"] .hero h1,
+body[data-accessibility-mode="accessibility"] .dashboard-panel p,
+body[data-accessibility-mode="accessibility"] .dashboard-panel h2,
+body[data-accessibility-mode="accessibility"] .checkin-card p,
+body[data-accessibility-mode="accessibility"] .checkin-card h2 {
+  color: var(--text);
+}
