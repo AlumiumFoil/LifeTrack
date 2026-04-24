@@ -14,6 +14,7 @@ const userRoutes = require('./routes/userRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const goalRoutes = require('./routes/goalRoutes');
 const wellnessRoutes = require('./routes/wellnessRoutes');
+const academicRoutes = require('./routes/academicRoutes');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -75,6 +76,7 @@ app.use('/api/users', userRoutes);          // User-related routes
 app.use('/api/resources', searchRoutes);    // Resource search routes
 app.use('/api/goals', goalRoutes);          // Goals routes
 app.use('/api/wellness', wellnessRoutes);   // Wellness/Mood routes
+app.use('/api/academic', academicRoutes);   // Academic/Study/Task routes
 
 // Start the server
 app.listen(port, "127.0.0.1", () => {

@@ -1,5 +1,5 @@
 // controllers/wellnessController.js
-// Handles business logic for wellness features (mood check-ins, habits)
+// Handles business logic for wellness features
 
 const wellnessModel = require('../models/wellnessModel');
 

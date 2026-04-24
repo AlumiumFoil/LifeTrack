@@ -1,6 +1,5 @@
 // models/wellnessModel.js
 // Handles all database operations for wellness features
-// Tables: wellness_mood_entries, habits
 
 const pool = require('../config/db');
 
