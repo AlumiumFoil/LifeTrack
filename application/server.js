@@ -13,6 +13,7 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const goalRoutes = require('./routes/goalRoutes');
+const wellnessRoutes = require('./routes/wellnessRoutes');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -69,10 +70,11 @@ app.get('/api/db-test', async (req, res) => {
 });
 
 // Mount API routes
-app.use('/api/auth', authRoutes);        // Authentication routes
-app.use('/api/users', userRoutes);       // User-related routes
-app.use('/api/resources', searchRoutes); // Resource search routes
-app.use('/api/goals', goalRoutes);       // Goals routes
+app.use('/api/auth', authRoutes);           // Authentication routes
+app.use('/api/users', userRoutes);          // User-related routes
+app.use('/api/resources', searchRoutes);    // Resource search routes
+app.use('/api/goals', goalRoutes);          // Goals routes
+app.use('/api/wellness', wellnessRoutes);   // Wellness/Mood routes
 
 // Start the server
 app.listen(port, "127.0.0.1", () => {
