@@ -3,6 +3,18 @@
 
 const pool = require('../config/db');
 
+// Helper Function
+/**
+ * Format a date object to YYYY-MM-DD string
+ * @param {Date|null} date - Date object or null
+ * @returns {string|null} Formatted date string or null
+ */
+const formatDate = (date) => {
+    if (!date) return null;
+    const d = new Date(date);
+    return d.toISOString().split('T')[0]; // Returns YYYY-MM-DD
+};
+
 // Map frontend text values to database integers
 const MOOD_MAP = {
     'Great': 5,
@@ -114,7 +126,11 @@ const getUserHabits = async (accountId) => {
          ORDER BY created_at ASC`,
         [accountId]
     );
-    return habits;
+    
+    return habits.map(habit => ({
+        ...habit,
+        lastCompletedDate: formatDate(habit.lastCompletedDate)
+    }));
 };
 
 /**
@@ -140,7 +156,14 @@ const getHabitById = async (habitId, accountId) => {
          WHERE habit_id = ? AND account_id = ? AND status = 'active'`,
         [habitId, accountId]
     );
-    return habits.length > 0 ? habits[0] : null;
+    
+    if (habits.length === 0) return null;
+    
+    const habit = habits[0];
+    return {
+        ...habit,
+        lastCompletedDate: formatDate(habit.lastCompletedDate)
+    };
 };
 
 /**

@@ -3,6 +3,18 @@
 
 const pool = require('../config/db');
 
+// Helper Function
+/**
+ * Format a date object to YYYY-MM-DD string
+ * @param {Date|null} date - Date object or null
+ * @returns {string|null} Formatted date string or null
+ */
+const formatDate = (date) => {
+    if (!date) return null;
+    const d = new Date(date);
+    return d.toISOString().split('T')[0]; // Returns YYYY-MM-DD
+};
+
 /**
  * Get all goals for a specific user
  * @param {number} accountId - User's account ID
@@ -25,7 +37,12 @@ const getGoalsByUserId = async (accountId) => {
          ORDER BY target_date ASC, created_at DESC`,
         [accountId]
     );
-    return goals;
+    return goals.map(goal => ({
+        ...goal,
+        targetDate: formatDate(goal.targetDate),
+        createdAt: goal.createdAt,
+        updatedAt: goal.updatedAt
+    }));
 };
 
 /**
@@ -50,7 +67,16 @@ const getGoalById = async (goalId, accountId) => {
          WHERE goal_id = ? AND account_id = ?`,
         [goalId, accountId]
     );
-    return goals.length > 0 ? goals[0] : null;
+    
+    if (goals.length === 0) return null;
+    
+    const goal = goals[0];
+    return {
+        ...goal,
+        targetDate: formatDate(goal.targetDate),  // FIXED: added date formatting
+        createdAt: goal.createdAt,
+        updatedAt: goal.updatedAt
+    };
 };
 
 /**
