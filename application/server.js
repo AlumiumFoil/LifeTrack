@@ -12,10 +12,14 @@ const path = require('path');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const searchRoutes = require('./routes/searchRoutes');
+<<<<<<< HEAD
+const careerRoutes = require('./routes/careerRoutes');
+=======
 const goalRoutes = require('./routes/goalRoutes');
 const wellnessRoutes = require('./routes/wellnessRoutes');
 const academicRoutes = require('./routes/academicRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+>>>>>>> a474cc47bb81ae1d4453ccc5ea7cf18baf3f76fc
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -72,6 +76,12 @@ app.get('/api/db-test', async (req, res) => {
 });
 
 // Mount API routes
+<<<<<<< HEAD
+app.use('/api/auth', authRoutes);        // Authentication routes
+app.use('/api/users', userRoutes);       // User-related routes
+app.use('/api/resources', searchRoutes); // Resource search routes
+app.use('/api/career', careerRoutes);    // Career page routes
+=======
 app.use('/api/auth', authRoutes);           // Authentication routes
 app.use('/api/users', userRoutes);          // User-related routes
 app.use('/api/resources', searchRoutes);    // Resource search routes
@@ -79,6 +89,7 @@ app.use('/api/goals', goalRoutes);          // Goals routes
 app.use('/api/wellness', wellnessRoutes);   // Wellness/Mood routes
 app.use('/api/academic', academicRoutes);   // Academic/Study/Task routes
 app.use('/api/admin', adminRoutes);         // Admin routes
+>>>>>>> a474cc47bb81ae1d4453ccc5ea7cf18baf3f76fc
 
 // Start the server
 app.listen(port, "127.0.0.1", () => {
