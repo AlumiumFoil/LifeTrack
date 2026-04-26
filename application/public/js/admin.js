@@ -1,166 +1,425 @@
 'use strict';
-/* Admin Dashboard – demo data only, no backend calls */
 
-// ── Data ──────────────────────────────────────────────────────────────────────
+/*
+  Admin Dashboard
+  - Loads platform stats from /api/admin/stats
+  - Loads users from /api/admin/users
+  - Opens read-only user profile modal from /api/admin/users/:id
+*/
 
-let USERS = [
-  { id:1, username:'alex',      email:'ahernandez75@sfsu.edu',  role:'student', status:'active'    },
-  { id:2, username:'john',      email:'jnaraja@sfsu.edu',       role:'student', status:'active'    },
-  { id:3, username:'khaterina', email:'ksengchareune@sfsu.edu', role:'admin',   status:'active'    },
-  { id:4, username:'mohit',     email:'mkumar3@sfsu.edu',       role:'student', status:'active'    },
-  { id:5, username:'will',      email:'wbrust@sfsu.edu',        role:'student', status:'active'    },
-  { id:6, username:'lasiru',    email:'lweerasuriya@sfsu.edu',  role:'student', status:'active'    },
-  { id:7, username:'test_user', email:'testuser@sfsu.edu',      role:'student', status:'suspended' },
-];
+document.addEventListener('DOMContentLoaded', () => {
+  initializeAdminPage();
+});
 
-// Renamed from RESOURCES to CONTENT to avoid confusion with wellness resources
-let CONTENT = [
-  { id:1, title:'SFSU Tutoring Center Hours',        category:'Academic', status:'approved', author:'lasiru'    },
-  { id:2, title:'Free Online Python Course',         category:'Academic', status:'approved', author:'alex'      },
-  { id:3, title:'Campus Mental Health Workshops',    category:'Wellness', status:'pending',  author:'khaterina' },
-  { id:4, title:'Resume Writing Tips for Engineers', category:'Career',   status:'pending',  author:'john'      },
-  { id:5, title:'SF Public Library Access Guide',    category:'General',  status:'approved', author:'will'      },
-  { id:6, title:'Student Discount Software List',    category:'Tech',     status:'pending',  author:'mohit'     },
-];
+const API_BASE = '/api/admin';
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+let cachedUsers = [];
 
-function roleBadge(role) {
-  return role === 'admin'
-    ? '<span class="badge badge-paused">Admin</span>'
-    : '<span class="badge badge-not-started">Student</span>';
+function getAccessToken() {
+  return localStorage.getItem('accessToken');
+}
+
+function getSavedUser() {
+  try {
+    return JSON.parse(localStorage.getItem('user')) || null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function isAdminUser(user) {
+  if (!user || !Array.isArray(user.roles)) return false;
+
+  return user.roles.some((role) => {
+    const normalizedRole = String(role).toLowerCase();
+    return normalizedRole === 'admin' || normalizedRole === 'administrator';
+  });
+}
+
+function getAuthHeaders() {
+  const token = getAccessToken();
+
+  return {
+    Authorization: `Bearer ${token}`
+  };
+}
+
+function showAdminMessage(message, type = 'error') {
+  const messageEl = document.getElementById('adminMessage');
+  if (!messageEl) return;
+
+  messageEl.style.display = 'block';
+  messageEl.className = `status-message ${type}`;
+  messageEl.textContent = message;
+}
+
+function clearAdminMessage() {
+  const messageEl = document.getElementById('adminMessage');
+  if (!messageEl) return;
+
+  messageEl.style.display = 'none';
+  messageEl.className = 'status-message';
+  messageEl.textContent = '';
+}
+
+async function adminFetch(url) {
+  const token = getAccessToken();
+
+  if (!token) {
+    throw new Error('No active login session found. Please log in as an administrator.');
+  }
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: getAuthHeaders()
+  });
+
+  let data = null;
+
+  try {
+    data = await response.json();
+  } catch (error) {
+    throw new Error('The server returned an invalid response.');
+  }
+
+  if (!response.ok || !data.success) {
+    throw new Error(data.error || 'Admin request failed.');
+  }
+
+  return data;
+}
+
+function formatDate(dateValue) {
+  if (!dateValue) return 'N/A';
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return 'N/A';
+  }
+
+  return date.toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+}
+
+function formatRoles(roles) {
+  if (!Array.isArray(roles) || roles.length === 0) {
+    return 'N/A';
+  }
+
+  return roles.join(', ');
 }
 
 function statusBadge(status) {
-  const map = {
-    active:   '<span class="badge badge-completed">Active</span>',
-    suspended:'<span class="badge badge-overdue">Suspended</span>',
-    approved: '<span class="badge badge-completed">Approved</span>',
-    pending:  '<span class="badge badge-in-progress">Pending</span>',
-  };
-  return map[status] || `<span class="badge badge-not-started">${status}</span>`;
+  const normalizedStatus = String(status || 'unknown').toLowerCase();
+
+  if (normalizedStatus === 'active') {
+    return '<span class="badge badge-completed">Active</span>';
+  }
+
+  if (normalizedStatus === 'suspended') {
+    return '<span class="badge badge-overdue">Suspended</span>';
+  }
+
+  if (normalizedStatus === 'inactive') {
+    return '<span class="badge badge-not-started">Inactive</span>';
+  }
+
+  return `<span class="badge badge-not-started">${escapeHtml(status || 'Unknown')}</span>`;
 }
 
-// ── Summary cards — called after every mutation ───────────────────────────────
-
-function updateSummary() {
-  document.getElementById('stat-total-users').textContent  = USERS.length;
-  document.getElementById('stat-active-users').textContent = USERS.filter(u => u.status === 'active').length;
-  document.getElementById('stat-resources').textContent    = CONTENT.length;
-  document.getElementById('stat-pending').textContent      = CONTENT.filter(r => r.status === 'pending').length;
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
 }
 
-// ── User management ───────────────────────────────────────────────────────────
+function updateAdminHeader() {
+  const user = getSavedUser();
+  const usernameEl = document.getElementById('adminUsername');
 
-function renderUsers() {
-  const el = document.getElementById('user-list');
-  if (!USERS.length) {
-    el.innerHTML = '<p style="color:var(--muted);padding:12px 0">No users found.</p>';
+  if (usernameEl && user) {
+    usernameEl.textContent = user.username || user.email || 'Admin';
+  }
+}
+
+function updateStats(stats) {
+  document.getElementById('statTotalUsers').textContent = stats.totalUsers ?? '--';
+  document.getElementById('statActiveUsers').textContent = stats.activeUsers ?? '--';
+  document.getElementById('statTotalGoals').textContent = stats.totalGoals ?? '--';
+  document.getElementById('statTotalProjects').textContent = stats.totalProjects ?? '--';
+  document.getElementById('statAvgGoals').textContent = stats.averageGoalsPerUser ?? '--';
+}
+
+async function loadStats() {
+  const data = await adminFetch(`${API_BASE}/stats`);
+  updateStats(data.stats || {});
+}
+
+function renderRecentUsers(users) {
+  const tableBody = document.getElementById('recentUsersTableBody');
+  if (!tableBody) return;
+
+  const recentUsers = users.slice(0, 10);
+
+  if (recentUsers.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="4" class="admin-empty-state">No recent users found.</td>
+      </tr>
+    `;
     return;
   }
 
-  // data-* attributes drive event delegation; no inline onclick needed
-  el.innerHTML = USERS.map(u => `
-    <div class="assign-item">
-      <div class="assign-info">
-        <div class="assign-title">${u.username}</div>
-        <div class="assign-meta">${u.email}</div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        ${roleBadge(u.role)}
-        ${statusBadge(u.status)}
-      </div>
-      <div class="admin-actions">
-        <button class="btn secondary sm" data-toggle="${u.id}">
-          ${u.status === 'active' ? 'Disable' : 'Enable'}
-        </button>
-        <button class="btn danger sm" data-delete="${u.id}">Delete</button>
-      </div>
-    </div>
+  tableBody.innerHTML = recentUsers.map((user) => `
+    <tr>
+      <td>
+        <div class="admin-primary-text">${escapeHtml(user.username || 'N/A')}</div>
+        <div class="admin-muted-text">${escapeHtml(user.fullName || '')}</div>
+      </td>
+      <td>${escapeHtml(user.email || 'N/A')}</td>
+      <td>${formatDate(user.createdAt)}</td>
+      <td>${statusBadge(user.accountStatus)}</td>
+    </tr>
   `).join('');
 }
 
-function toggleUser(id) {
-  const u = USERS.find(x => x.id === id);
-  if (!u) return;
-  u.status = u.status === 'active' ? 'suspended' : 'active';
-  renderUsers();
-  updateSummary();
-}
+function renderUsersTable(users) {
+  const tableBody = document.getElementById('usersTableBody');
+  if (!tableBody) return;
 
-function deleteUser(id) {
-  const u = USERS.find(x => x.id === id);
-  if (!u) return;
-  if (!confirm(`Delete user "${u.username}"?\n\n(Demo only — no data is persisted)`)) return;
-  USERS = USERS.filter(x => x.id !== id);
-  renderUsers();
-  updateSummary();
-}
-
-// ── Content moderation ────────────────────────────────────────────────────────
-
-function renderContent() {
-  const el = document.getElementById('resource-list');
-  if (!CONTENT.length) {
-    el.innerHTML = '<p style="color:var(--muted);padding:12px 0">No resources found.</p>';
+  if (users.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="6" class="admin-empty-state">No users found.</td>
+      </tr>
+    `;
     return;
   }
 
-  el.innerHTML = CONTENT.map(r => `
-    <div class="assign-item">
-      <div class="assign-info">
-        <div class="assign-title">${r.title}</div>
-        <div class="assign-meta">${r.category} &nbsp;•&nbsp; Submitted by: ${r.author}</div>
-      </div>
-      ${statusBadge(r.status)}
-      <div class="admin-actions">
-        ${r.status === 'pending'
-          ? `<button class="btn sm" data-approve="${r.id}">Approve</button>`
-          : `<button class="btn secondary sm" disabled style="opacity:0.45;cursor:default;">Approved</button>`
-        }
-        <button class="btn danger sm" data-remove="${r.id}">Remove</button>
-      </div>
-    </div>
+  tableBody.innerHTML = users.map((user) => `
+    <tr>
+      <td>
+        <div class="admin-primary-text">${escapeHtml(user.username || 'N/A')}</div>
+        <div class="admin-muted-text">${escapeHtml(user.fullName || '')}</div>
+      </td>
+      <td>${escapeHtml(user.email || 'N/A')}</td>
+      <td>${formatDate(user.createdAt)}</td>
+      <td>${statusBadge(user.accountStatus)}</td>
+      <td>${escapeHtml(formatRoles(user.roles))}</td>
+      <td>
+        <div class="admin-table-actions">
+          <button
+            class="btn secondary sm"
+            type="button"
+            data-view-user-id="${escapeHtml(user.accountId)}"
+          >
+            View Profile
+          </button>
+        </div>
+      </td>
+    </tr>
   `).join('');
 }
 
-function approveContent(id) {
-  const r = CONTENT.find(x => x.id === id);
-  if (!r) return;
-  r.status = 'approved';
-  renderContent();
-  updateSummary();
+function getFilterQueryString() {
+  const params = new URLSearchParams();
+
+  const name = document.getElementById('filterName')?.value.trim();
+  const email = document.getElementById('filterEmail')?.value.trim();
+  const registrationDate = document.getElementById('filterRegistrationDate')?.value;
+  const status = document.getElementById('filterStatus')?.value;
+
+  if (name) params.set('name', name);
+  if (email) params.set('email', email);
+  if (registrationDate) params.set('registrationDate', registrationDate);
+  if (status) params.set('status', status);
+
+  const queryString = params.toString();
+  return queryString ? `?${queryString}` : '';
 }
 
-function removeContent(id) {
-  const r = CONTENT.find(x => x.id === id);
-  if (!r) return;
-  if (!confirm(`Remove "${r.title}"?\n\n(Demo only — no data is persisted)`)) return;
-  CONTENT = CONTENT.filter(x => x.id !== id);
-  renderContent();
-  updateSummary();
+async function loadUsers() {
+  const queryString = getFilterQueryString();
+  const data = await adminFetch(`${API_BASE}/users${queryString}`);
+
+  cachedUsers = data.users || [];
+
+  renderRecentUsers(cachedUsers);
+  renderUsersTable(cachedUsers);
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
+function openUserModal() {
+  document.getElementById('userModalOverlay')?.classList.add('open');
+}
 
-document.addEventListener('DOMContentLoaded', () => {
-  // User list — single delegated listener handles Disable/Enable and Delete
-  document.getElementById('user-list').addEventListener('click', e => {
-    const toggleBtn = e.target.closest('[data-toggle]');
-    const deleteBtn = e.target.closest('[data-delete]');
-    if (toggleBtn) toggleUser(+toggleBtn.dataset.toggle);
-    if (deleteBtn) deleteUser(+deleteBtn.dataset.delete);
+function closeUserModal() {
+  document.getElementById('userModalOverlay')?.classList.remove('open');
+}
+
+function renderUserDetails(user) {
+  const modalBody = document.getElementById('userModalBody');
+  if (!modalBody) return;
+
+  modalBody.innerHTML = `
+    <div class="admin-profile-row">
+      <div class="admin-profile-label">Username</div>
+      <div class="admin-profile-value">${escapeHtml(user.username || 'N/A')}</div>
+    </div>
+
+    <div class="admin-profile-row">
+      <div class="admin-profile-label">Full Name</div>
+      <div class="admin-profile-value">${escapeHtml(user.fullName || 'N/A')}</div>
+    </div>
+
+    <div class="admin-profile-row">
+      <div class="admin-profile-label">Email</div>
+      <div class="admin-profile-value">${escapeHtml(user.email || 'N/A')}</div>
+    </div>
+
+    <div class="admin-profile-row">
+      <div class="admin-profile-label">Status</div>
+      <div class="admin-profile-value">${statusBadge(user.accountStatus)}</div>
+    </div>
+
+    <div class="admin-profile-row">
+      <div class="admin-profile-label">Registered</div>
+      <div class="admin-profile-value">${formatDate(user.createdAt)}</div>
+    </div>
+
+    <div class="admin-profile-row">
+      <div class="admin-profile-label">University</div>
+      <div class="admin-profile-value">${escapeHtml(user.university || 'N/A')}</div>
+    </div>
+
+    <div class="admin-profile-row">
+      <div class="admin-profile-label">Major</div>
+      <div class="admin-profile-value">${escapeHtml(user.major || 'N/A')}</div>
+    </div>
+
+    <div class="admin-profile-row">
+      <div class="admin-profile-label">Academic Year</div>
+      <div class="admin-profile-value">${escapeHtml(user.academicYear || 'N/A')}</div>
+    </div>
+
+    <div class="admin-profile-row">
+      <div class="admin-profile-label">Roles</div>
+      <div class="admin-profile-value">${escapeHtml(formatRoles(user.roles))}</div>
+    </div>
+  `;
+}
+
+async function viewUserProfile(accountId) {
+  const modalBody = document.getElementById('userModalBody');
+
+  if (modalBody) {
+    modalBody.textContent = 'Loading user details...';
+  }
+
+  openUserModal();
+
+  try {
+    const data = await adminFetch(`${API_BASE}/users/${accountId}`);
+    renderUserDetails(data.user || {});
+  } catch (error) {
+    if (modalBody) {
+      modalBody.innerHTML = `
+        <p class="status-message error" style="display:block;">
+          ${escapeHtml(error.message || 'Unable to load user details.')}
+        </p>
+      `;
+    }
+  }
+}
+
+function setupAdminEvents() {
+  const filterForm = document.getElementById('adminFilterForm');
+  const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+  const usersTableBody = document.getElementById('usersTableBody');
+  const closeModalBtn = document.getElementById('closeUserModalBtn');
+  const modalOverlay = document.getElementById('userModalOverlay');
+  const logoutBtn = document.getElementById('adminLogoutBtn');
+
+  filterForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    try {
+      clearAdminMessage();
+      await loadUsers();
+    } catch (error) {
+      showAdminMessage(error.message || 'Unable to filter users.');
+    }
   });
 
-  // Resource list — single delegated listener handles Approve and Remove
-  document.getElementById('resource-list').addEventListener('click', e => {
-    const approveBtn = e.target.closest('[data-approve]');
-    const removeBtn  = e.target.closest('[data-remove]');
-    if (approveBtn) approveContent(+approveBtn.dataset.approve);
-    if (removeBtn)  removeContent(+removeBtn.dataset.remove);
+  clearFiltersBtn?.addEventListener('click', async () => {
+    document.getElementById('filterName').value = '';
+    document.getElementById('filterEmail').value = '';
+    document.getElementById('filterRegistrationDate').value = '';
+    document.getElementById('filterStatus').value = '';
+
+    try {
+      clearAdminMessage();
+      await loadUsers();
+    } catch (error) {
+      showAdminMessage(error.message || 'Unable to reload users.');
+    }
   });
 
-  renderUsers();
-  renderContent();
-  updateSummary();
-});
+  usersTableBody?.addEventListener('click', (event) => {
+    const viewButton = event.target.closest('[data-view-user-id]');
+    if (!viewButton) return;
+
+    viewUserProfile(viewButton.dataset.viewUserId);
+  });
+
+  closeModalBtn?.addEventListener('click', closeUserModal);
+
+  modalOverlay?.addEventListener('click', (event) => {
+    if (event.target === modalOverlay) {
+      closeUserModal();
+    }
+  });
+
+  logoutBtn?.addEventListener('click', () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+    window.location.href = './auth.html';
+  });
+}
+
+async function initializeAdminPage() {
+  const savedUser = getSavedUser();
+
+  updateAdminHeader();
+  setupAdminEvents();
+
+  if (!getAccessToken()) {
+    showAdminMessage('Please log in as an administrator to view this page.');
+    setTimeout(() => {
+      window.location.href = './auth.html';
+    }, 1200);
+    return;
+  }
+
+  if (savedUser && !isAdminUser(savedUser)) {
+    showAdminMessage('This page is only available to administrator accounts.');
+    return;
+  }
+
+  try {
+    clearAdminMessage();
+    await Promise.all([
+      loadStats(),
+      loadUsers()
+    ]);
+  } catch (error) {
+    showAdminMessage(error.message || 'Unable to load admin dashboard.');
+  }
+}
