@@ -101,11 +101,18 @@ function initializeLoginForm() {
       //If this runs the login has been successul, so we display a success message.
       loginMessage.style.display = "block";
       loginMessage.classList.add("success");
-      loginMessage.textContent = "Login successful. Redirecting to dashboard...";
+      loginMessage.textContent = "Login successful. Redirecting...";
 
-      //After a short pause we send the user to the dashboard
+      //After a short pause we send admins to admin.html and regular users to dashboard.html
       setTimeout(() => {
-        window.location.href = "./dashboard.html";
+        const roles = Array.isArray(data.user?.roles) ? data.user.roles : [];
+
+        const isAdmin = roles.some((role) => {
+          const normalizedRole = String(role).toLowerCase();
+          return normalizedRole === "admin" || normalizedRole === "administrator";
+        });
+
+        window.location.href = isAdmin ? "./admin.html" : "./dashboard.html";
       }, 900);
 
       //If something goes wrong such as a bad response, network failure, some backend error
