@@ -32,6 +32,6 @@ router.get('/users', authenticateJWT, authorizeAdmin, adminController.getAdminUs
  * Requires authentication and administrator access
  * Output: {success, user}
  */
-router.get('users/:id', authenticateJWT, authorizeAdmin, adminController.getAdminUserById);
+router.get('/users/:id', authenticateJWT, authorizeAdmin, adminController.getAdminUserById);
 
 module.exports = router;
