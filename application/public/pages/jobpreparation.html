@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Career – LifeTrack</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body>
+  <div class="dashboard-frame">
+
+    <header class="dashboard-header">
+      <a class="dashboard-header-brand" href="../index.html">LifeTrack</a>
+      <div class="dashboard-header-actions">
+        <a class="dashboard-header-profile" href="./search.html">Search</a>
+        <a class="dashboard-header-profile" href="./profile.html">
+          <img
+            id="profilePreview"
+            class="dashboard-header-avatar"
+            src="https://placehold.co/120x120?text=User"
+            alt="Profile preview"
+          />
+          <span id="profileUsernameTop">Profile</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="dashboard-body">
+      <aside class="dashboard-sidebar">
+        <nav class="dashboard-nav">
+          <a class="dashboard-nav-link" href="./dashboard.html">Home</a>
+          <a class="dashboard-nav-link" href="./studying.html">Academic</a>
+          <a class="dashboard-nav-link active" href="./jobpreparation.html">Career</a>
+          <a class="dashboard-nav-link" href="./goals.html">Productivity</a>
+          <a class="dashboard-nav-link" href="./wellness.html">Wellness</a>
+        </nav>
+      </aside>
+
+      <main class="dashboard-main">
+
+        <!-- Hero -->
+        <section class="hero">
+          <h1>Career</h1>
+          <p>Find resources, track your career goals, and stay prepared for what's next. Everything in one place.</p>
+        </section>
+
+        <!-- Career Resources section -->
+        <div class="section-heading" style="margin-bottom:0.75rem;">Career Resources</div>
+        <p style="font-size:0.875rem;color:var(--muted,#9ca3af);margin:0 0 1rem;">
+          Curated resources to help you with job applications, interviews, and career planning.
+        </p>
+
+        <!-- Status message shown when resources are empty or errored -->
+        <div id="career-resources-status" style="display:none; margin-bottom:1rem;"></div>
+
+        <!-- Resource cards injected here by jobpreparation.js -->
+        <div
+          class="grid"
+          id="career-resources-grid"
+          style="display:none; margin-bottom:2rem;"
+        ></div>
+
+        <!-- Starter Resources — always visible, links to static resource pages -->
+        <div class="section-heading" style="margin-bottom:0.75rem;">Starter Resources</div>
+        <p style="font-size:0.875rem;color:var(--muted,#9ca3af);margin:0 0 1rem;">
+          Get a head start with these ready-to-use career tools.
+        </p>
+        <div class="grid" style="margin-bottom:2rem;">
+
+          <div class="card">
+            <div class="card-body">
+              <h3 style="margin:0 0 0.4rem;">Resume Starter Template</h3>
+              <p style="margin:0 0 1rem;font-size:0.875rem;color:var(--muted,#9ca3af);">
+                A simple template to help you build your resume from scratch.
+              </p>
+              <a class="btn" href="./resources/resume.html">Open Resource</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body">
+              <h3 style="margin:0 0 0.4rem;">Portfolio Checklist</h3>
+              <p style="margin:0 0 1rem;font-size:0.875rem;color:var(--muted,#9ca3af);">
+                A quick checklist to make sure your portfolio is complete.
+              </p>
+              <a class="btn" href="./resources/portfolio.html">Open Resource</a>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body">
+              <h3 style="margin:0 0 0.4rem;">Interview Prep Workflow</h3>
+              <p style="margin:0 0 1rem;font-size:0.875rem;color:var(--muted,#9ca3af);">
+                A step-by-step guide to prepare for interviews.
+              </p>
+              <a class="btn" href="./resources/interviewPrep.html">Open Resource</a>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Career Goals section -->
+        <div class="section-heading" style="margin-bottom:0.75rem;">My Career Goals</div>
+        <p style="font-size:0.875rem;color:var(--muted,#9ca3af);margin:0 0 1rem;">
+          Your goals tagged as "Career" from the Goals page appear here. Log in to see them.
+        </p>
+
+        <!-- Status message for goals (empty / not logged in / error) -->
+        <div id="career-goals-status" style="display:none; margin-bottom:1rem;"></div>
+
+        <!-- Goal rows injected here by jobpreparation.js -->
+        <div id="career-goals-list" style="display:none; margin-bottom:2rem;"></div>
+
+        <div class="footer">Team 1 &middot; Spring 2026</div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="../js/jobpreparation.js"></script>
+</body>
+</html>
