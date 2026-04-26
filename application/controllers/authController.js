@@ -246,6 +246,9 @@ const login = async (req, res) => {
         const ipAddress = getClientIP(req);
         const accessToken = generateAccessToken(user.account_id, user.email, user.username, userAgent, ipAddress);
         const refreshToken = await generateRefreshToken(user.account_id);
+        //Get user roles - added roles/data for admin to work - Will
+        const rolesData = await userModel.getUserRoles(user.account_id);
+        const roles = rolesData.map(r => r.role_name);
 
         res.json({
             success: true,
@@ -256,7 +259,9 @@ const login = async (req, res) => {
                 account_id: user.account_id,
                 email: user.email,
                 username: user.username,
-                account_status: user.account_status
+                account_status: user.account_status,
+                //added roles for admin to work - Will
+                roles: roles
             }
         });
     } catch (error) {
