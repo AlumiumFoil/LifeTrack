@@ -171,9 +171,31 @@ function buildResultCard(item) {
   //prepare text values (safely/securly) so unexpected chars dont break html
   const title = escapeHtml(item.title || "Untitled Resource");
   const description = escapeHtml(item.description || "No description available.");
-  const category = escapeHtml(item.category || "Uncategorized");
-  const source = escapeHtml(item.source || "resource");
-  const contentType = escapeHtml(item.content_type || "Unknown Type");
+
+  const rawSource = item.source || "resource";
+  const rawCategory = item.category || "";
+  const rawContentType = item.content_type || "";
+
+  const displayCategory =
+    rawCategory ||
+    (rawSource === "goal" ? "productivity" :
+    rawSource === "project" ? "academic" :
+    rawSource === "milestone" ? "academic" :
+    "uncategorized");
+
+  const displayContentType =
+    rawContentType ||
+    (rawSource === "goal" ? "goal" :
+    rawSource === "project" ? "project" :
+    rawSource === "milestone" ? "milestone" :
+    "resource");
+
+  const displaySource =
+    rawSource === "resource" ? "public resource" : "your content";
+
+  const category = escapeHtml(displayCategory);
+  const source = escapeHtml(displaySource);
+  const contentType = escapeHtml(displayContentType);
   //if image provided exists use it, if not use placeholder img
   const imageUrl = item.image_url || "https://placehold.co/600x340?text=No+Image";
   //use resource link if exists, otherwise use # so btn does not break
