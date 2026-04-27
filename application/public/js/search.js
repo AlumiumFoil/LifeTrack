@@ -207,7 +207,7 @@ function buildResultCard(item) {
         <div style="margin-top:14px;">
           ${
             canOpenExternal
-              ? `<a class="btn" href="${safeUrl}" target="_blank" rel="noopener noreferrer">View Resource</a>`
+              ? `<a class="btn" href="${safeUrl}">View Resource</a>`
               : `<button class="btn secondary" type="button" disabled>No External Link</button>`
           }
         </div>
