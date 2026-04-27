@@ -220,6 +220,38 @@ body {
   padding: 18px;
 }
 
+.forgot-password-row {
+  margin-top: 10px;
+}
+
+.auth-actions-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.reset-step-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+#resetModal .modal {
+  max-width: 520px;
+  width: 90%;
+}
+
+#resetQuestions {
+  display: grid;
+  gap: 14px;
+}
+
+#resetMessage {
+  margin-top: 14px;
+}
+
 .status-message {
   margin-top: 14px;
   padding: 12px 14px;
