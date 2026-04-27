@@ -63,10 +63,16 @@
               />
             </div>
 
+            <div class="forgot-password-row">
+              <button type="button" id="forgotPasswordBtn" class="btn secondary">
+                Forgot Password?
+              </button>
+            </div>
+
             <!--message updated dynamically by auth.js-->
             <div id="loginMessage" class="status-message" style="display:none;"></div>
 
-            <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:18px;">
+            <div class="auth-actions-row">
               <button type="submit" class="btn">Login</button>
               <a class="btn secondary" href="../index.html">Back to Home</a>
             </div>
@@ -86,6 +92,60 @@
 
     <div class="footer">
       Team 1 • Authentication Page
+    </div>
+  </div>
+
+  <div id="resetModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal">
+      <h2>Reset Password</h2>
+
+      <form id="resetForm" class="vp-form">
+
+        <!-- STEP 1 -->
+        <div id="resetStep1">
+          <div class="form-group">
+            <label>Email or Username</label>
+            <input type="text" id="resetIdentifier" required />
+          </div>
+          <div class="reset-step-actions">
+            <button type="button" id="initiateResetBtn" class="btn">
+              Next
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div id="resetStep2" style="display:none;">
+          <div id="resetQuestions"></div>
+          <div class="reset-step-actions">
+            <button type="button" id="verifyAnswersBtn" class="btn">
+              Verify Answers
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div id="resetStep3" style="display:none;">
+          <div class="form-group">
+            <label>New Password</label>
+            <input type="password" id="resetNewPassword" required />
+          </div>
+          <div class="reset-step-actions">
+            <button type="submit" class="btn">
+              Reset Password
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" id="closeResetModalBtn" class="btn secondary">
+            Cancel
+          </button>
+        </div>
+
+        <div id="resetMessage" class="status-message" style="display:none;"></div>
+
+      </form>
     </div>
   </div>
 
