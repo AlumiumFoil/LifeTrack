@@ -41,30 +41,27 @@
 
         <section class="hero">
           <h1>Wellness Hub</h1>
-          <p>Log your mood, build daily habits, and keep your mental and physical wellbeing on track — all in one place.</p>
+          <p>Log your mood, build daily habits, and keep your mental and physical wellbeing on track all in one place.</p>
         </section>
 
-        <!-- Daily check-in — mood and stress entry -->
+        <!-- Daily check-in — mood + note only -->
         <div class="section-heading">Today's Check-In</div>
         <div class="checkin-card">
           <p style="margin:0 0 4px; font-weight:600;">How are you feeling today?</p>
           <p style="margin:0; font-size:13px; color:var(--muted);">Tap a mood to begin today's check-in</p>
           <div class="mood-grid" id="mood-grid"></div>
 
-          <div class="stress-bar-wrap" style="margin-top:6px;">
-            <div class="stress-label">Today's Stress Level</div>
-            <input type="range" id="stress-slider" min="1" max="10" value="4"
-                   style="width:100%; accent-color:var(--accent);"
-                   oninput="document.getElementById('stress-val').textContent = this.value" />
-            <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-top:4px;">
-              <span>Low (1)</span>
-              <span id="stress-val" style="color:var(--accent); font-weight:600;">4</span>
-              <span>High (10)</span>
-            </div>
+          <div style="margin-top:14px;">
+            <div class="stress-label" style="margin-bottom:6px;">Notes</div>
+            <textarea id="checkin-notes" rows="3"
+              placeholder="How are you feeling today?"
+              style="width:100%; padding:10px 12px; border-radius:12px; border:1px solid var(--border);
+                     background:rgba(11,18,32,0.9); color:var(--text); font:inherit;
+                     resize:vertical; line-height:1.5;"></textarea>
           </div>
 
           <div style="margin-top:18px; display:flex; gap:10px; flex-wrap:wrap;">
-            <button class="btn" onclick="submitCheckin()">Save Check-In</button>
+            <button class="btn" id="checkin-submit-btn" onclick="submitCheckin()">Save Check-In</button>
             <button class="btn secondary" onclick="resetCheckin()">Reset</button>
           </div>
         </div>
@@ -74,7 +71,7 @@
         <div class="habit-list" id="habit-list"></div>
 
         <!-- Check-in log — newest entries first -->
-        <div class="section-heading">Check-In History</div>
+        <div class="section-heading">Recent Check-Ins</div>
         <div class="history-list" id="history-list"></div>
 
         <!-- Curated wellness links and tips -->

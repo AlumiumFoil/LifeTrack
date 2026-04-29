@@ -1,14 +1,14 @@
 'use strict';
-/* Wellness page – demo data only, no backend calls */
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 
+// Mood labels match backend spec exactly: Great | Good | Okay | Low | Struggling
 const MOODS = [
-  { emoji:'😄', label:'Great'    },
-  { emoji:'🙂', label:'Good'     },
-  { emoji:'😐', label:'Okay'     },
-  { emoji:'😔', label:'Low'      },
-  { emoji:'😰', label:'Stressed' },
+  { emoji:'😄', label:'Great'      },
+  { emoji:'🙂', label:'Good'       },
+  { emoji:'😐', label:'Okay'       },
+  { emoji:'😔', label:'Low'        },
+  { emoji:'😰', label:'Struggling' },
 ];
 
 const HABITS = [
@@ -19,12 +19,13 @@ const HABITS = [
   { id:'screen',   label:'Limited screen time before bed',  streak:'0-day streak' },
 ];
 
+// Demo history shown when no API data is available (no token / not logged in)
 let HISTORY = [
-  { emoji:'😄', mood:'Great',    date:'Mon Apr 6', stress:3, note:'Finished milestone planning. Feeling productive.' },
-  { emoji:'🙂', mood:'Good',     date:'Sun Apr 5', stress:4, note:'Went for a long walk. Good rest day.'            },
-  { emoji:'😐', mood:'Okay',     date:'Sat Apr 4', stress:6, note:'Busy with assignments. Took breaks throughout.'  },
-  { emoji:'😰', mood:'Stressed', date:'Fri Apr 3', stress:8, note:'Deadline crunch. Skipped exercise.'              },
-  { emoji:'🙂', mood:'Good',     date:'Thu Apr 2', stress:3, note:'Study group session was very helpful.'           },
+  { emoji:'😄', mood:'Great',      date:'Mon Apr 6', note:'Finished milestone planning. Feeling productive.' },
+  { emoji:'🙂', mood:'Good',       date:'Sun Apr 5', note:'Went for a long walk. Good rest day.'            },
+  { emoji:'😐', mood:'Okay',       date:'Sat Apr 4', note:'Busy with assignments. Took breaks throughout.'  },
+  { emoji:'😰', mood:'Struggling', date:'Fri Apr 3', note:'Deadline crunch. Skipped exercise.'              },
+  { emoji:'🙂', mood:'Good',       date:'Thu Apr 2', note:'Study group session was very helpful.'           },
 ];
 
 const RESOURCES = [
@@ -44,6 +45,22 @@ const RESOURCES = [
     link:'#',
   },
 ];
+
+// ── Emoji lookup (used when mapping API history items back to emojis) ─────────
+
+const MOOD_EMOJI = {
+  'Great':      '😄',
+  'Good':       '🙂',
+  'Okay':       '😐',
+  'Low':        '😔',
+  'Struggling': '😰',
+};
+
+function formatCheckinDate(isoString) {
+  if (!isoString) return '';
+  const d = new Date(isoString);
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
 
 // ── State ─────────────────────────────────────────────────────────────────────
 
@@ -113,36 +130,73 @@ function renderMoods() {
 
 // ── Check-in ──────────────────────────────────────────────────────────────────
 
+// Maps HTTP status codes to user-friendly messages
+function checkinErrorMessage(status, backendMsg) {
+  if (status === 401) return 'Your session has expired. Please log in again.';
+  if (status === 409) return 'You have already checked in today. Come back tomorrow!';
+  if (status === 400) return backendMsg || 'Invalid check-in data. Please try again.';
+  return 'Something went wrong. Please try again.';
+}
+
 // Called from HTML onclick
-function submitCheckin() {
+async function submitCheckin() {
   if (!selectedMood) {
     showCheckinMsg('Please select a mood first.', 'error');
     return;
   }
 
-  const stress  = document.getElementById('stress-slider').value;
+  const token = localStorage.getItem('accessToken');
+
+  if (!token) {
+    showCheckinMsg('Please log in to save your check-in.', 'error');
+    return;
+  }
+
+  // Payload matches backend spec exactly: { mood, note }
+  const note = document.getElementById('checkin-notes').value.trim() || null;
+  const payload = { mood: selectedMood, note };
+
   const moodObj = MOODS.find(m => m.label === selectedMood);
   const today   = new Date().toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
 
-  // Add the new check-in to the top of the history list
-  HISTORY.unshift({
-    emoji: moodObj ? moodObj.emoji : '🙂',
-    mood:  selectedMood,
-    date:  today,
-    stress: +stress,
-    note:  'Check-in saved.',
-  });
+  try {
+    const res = await fetch('/api/wellness/checkin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
 
-  showCheckinMsg(`Check-in saved! Mood: ${selectedMood}  •  Stress: ${stress}/10`, 'success');
-  resetCheckin();
-  renderHistory();
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      showCheckinMsg(checkinErrorMessage(res.status, data.error), 'error');
+      return;
+    }
+
+    // Prepend to local list for immediate UI feedback
+    HISTORY.unshift({
+      emoji: moodObj ? moodObj.emoji : '🙂',
+      mood:  selectedMood,
+      date:  today,
+      note:  note || '',
+    });
+
+    showCheckinMsg(`Check-in saved! Feeling ${selectedMood} today.`, 'success');
+    resetCheckin();
+    renderHistory();
+  } catch (err) {
+    console.error('Checkin error:', err);
+    showCheckinMsg('Unable to reach the server. Please try again.', 'error');
+  }
 }
 
 // Called from HTML onclick
 function resetCheckin() {
   selectedMood = null;
-  document.getElementById('stress-slider').value = 4;
-  document.getElementById('stress-val').textContent = '4';
+  document.getElementById('checkin-notes').value = '';
   renderMoods();
 }
 
@@ -183,13 +237,72 @@ function syncHabitClass(id) {
 
 // ── Check-in history ──────────────────────────────────────────────────────────
 
+async function loadCheckinHistory() {
+  const list  = document.getElementById('history-list');
+  const token = localStorage.getItem('accessToken');
+
+  if (!token) {
+    list.innerHTML = '<p style="color:var(--muted); padding:4px 0">Log in to see your recent check-ins here.</p>';
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/wellness/checkins', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!res.ok) {
+      list.innerHTML = '<p style="color:var(--muted); padding:4px 0">Unable to load check-in history.</p>';
+      return;
+    }
+
+    const data = await res.json();
+
+    // If the user already checked in today, disable the submit button
+    if (data.todayCheckin) {
+      const submitBtn = document.getElementById('checkin-submit-btn');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.title    = 'You have already checked in today.';
+        submitBtn.style.opacity = '0.55';
+        submitBtn.style.cursor  = 'not-allowed';
+      }
+      showCheckinMsg('You have already checked in today. See you tomorrow!', 'success');
+    }
+
+    if (data.success && Array.isArray(data.history) && data.history.length > 0) {
+      HISTORY = data.history.map(h => ({
+        emoji: MOOD_EMOJI[h.mood] || '🙂',
+        mood:  h.mood  || 'Okay',
+        date:  formatCheckinDate(h.createdAt),
+        note:  h.note  || '',
+      }));
+    } else {
+      HISTORY = [];
+    }
+  } catch (err) {
+    console.error('Load history error:', err);
+    list.innerHTML = '<p style="color:var(--muted); padding:4px 0">Unable to load check-in history.</p>';
+    return;
+  }
+
+  renderHistory();
+}
+
 function renderHistory() {
-  document.getElementById('history-list').innerHTML = HISTORY.map(h => `
+  const list = document.getElementById('history-list');
+
+  if (!HISTORY.length) {
+    list.innerHTML = '<p style="color:var(--muted); padding:4px 0">No check-ins recorded yet.</p>';
+    return;
+  }
+
+  list.innerHTML = HISTORY.map(h => `
     <div class="history-item">
       <div class="history-emoji">${h.emoji}</div>
       <div class="history-info">
-        <div class="history-note">${h.note}</div>
-        <div class="history-date">${h.date} &nbsp;•&nbsp; Mood: ${h.mood} &nbsp;•&nbsp; Stress: ${h.stress}/10</div>
+        <div class="history-note">${h.note || ''}</div>
+        <div class="history-date">${h.date} &nbsp;•&nbsp; Mood: ${h.mood}</div>
       </div>
     </div>
   `).join('');
@@ -232,11 +345,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     syncHabitClass(id);
   });
 
-  // The HTML already handles the stress slider display via inline oninput;
-  // no duplicate listener needed here.
-
   renderMoods();
   renderHabits();
-  renderHistory();
+  await loadCheckinHistory();
   renderResources();
 });
