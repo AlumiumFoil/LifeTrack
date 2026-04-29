@@ -30,19 +30,19 @@ let HISTORY = [
 
 const RESOURCES = [
   {
-    title:'Campus Counseling',
-    desc:'SFSU Student Health Services offers free counseling sessions for enrolled students. Book an appointment online.',
-    link:'#',
+    title: 'Focus Tips',
+    desc:  'Quick tips to help you reset, stay focused, and manage stress.',
+    link:  './resources/focusTips.html',
   },
   {
-    title:'5-Minute Breathing Exercise',
-    desc:'Box breathing: inhale 4 s, hold 4 s, exhale 4 s, hold 4 s. Repeat 4 times to reduce acute stress.',
-    link:'#',
+    title: 'Sleep Routine',
+    desc:  'Track your sleep habits and improve your sleep quality.',
+    link:  './resources/sleepRoutine.html',
   },
   {
-    title:'Healthy Sleep Tips',
-    desc:'Keep a consistent sleep schedule, avoid caffeine after 2 PM, and keep your room dark and cool for better rest.',
-    link:'#',
+    title: 'Breathing Exercise',
+    desc:  'Simple breathing techniques to reduce stress and calm your mind.',
+    link:  './resources/breathing.html',
   },
 ];
 
@@ -60,6 +60,30 @@ function formatCheckinDate(isoString) {
   if (!isoString) return '';
   const d = new Date(isoString);
   return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+// ── Mood ↔ slider mappings ────────────────────────────────────────────────────
+
+const MOOD_LEVEL = { 'Struggling': 1, 'Low': 2, 'Okay': 3, 'Good': 4, 'Great': 5 };
+const LEVEL_MOOD = { 1: 'Struggling', 2: 'Low', 3: 'Okay', 4: 'Good', 5: 'Great' };
+
+// Push the current selectedMood into the slider (called after button clicks)
+function syncSliderFromMood() {
+  const slider = document.getElementById('mood-slider');
+  const label  = document.getElementById('mood-slider-label');
+  if (!slider || !label) return;
+  const level = selectedMood ? (MOOD_LEVEL[selectedMood] ?? 3) : 3;
+  slider.value    = level;
+  label.textContent = LEVEL_MOOD[level] || 'Okay';
+}
+
+// Push the slider value into selectedMood + re-render buttons (called on slider input)
+function syncMoodFromSlider(val) {
+  const mood  = LEVEL_MOOD[+val] || 'Okay';
+  const label = document.getElementById('mood-slider-label');
+  if (label) label.textContent = mood;
+  selectedMood = mood;
+  renderMoods();
 }
 
 // ── State ─────────────────────────────────────────────────────────────────────
@@ -196,7 +220,11 @@ async function submitCheckin() {
 // Called from HTML onclick
 function resetCheckin() {
   selectedMood = null;
-  document.getElementById('checkin-notes').value = '';
+  document.getElementById('checkin-notes').value    = '';
+  const slider = document.getElementById('mood-slider');
+  const label  = document.getElementById('mood-slider-label');
+  if (slider) slider.value        = 3;
+  if (label)  label.textContent   = 'Okay';
   renderMoods();
 }
 
@@ -330,6 +358,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!btn) return;
     selectedMood = btn.dataset.mood;
     renderMoods();
+    syncSliderFromMood();
+  });
+
+  // Mood slider — keep buttons in sync
+  document.getElementById('mood-slider').addEventListener('input', e => {
+    syncMoodFromSlider(e.target.value);
   });
 
   // Habit row click — clicking anywhere on the row toggles the checkbox.

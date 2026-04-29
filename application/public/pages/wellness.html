@@ -52,6 +52,17 @@
           <div class="mood-grid" id="mood-grid"></div>
 
           <div style="margin-top:14px;">
+            <div class="stress-label" style="margin-bottom:6px;">Mood Slider</div>
+            <input type="range" id="mood-slider" min="1" max="5" value="3"
+                   style="width:100%; accent-color:var(--accent);" />
+            <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-top:4px;">
+              <span>Struggling</span>
+              <span id="mood-slider-label" style="color:var(--accent); font-weight:600;">Okay</span>
+              <span>Great</span>
+            </div>
+          </div>
+
+          <div style="margin-top:14px;">
             <div class="stress-label" style="margin-bottom:6px;">Notes</div>
             <textarea id="checkin-notes" rows="3"
               placeholder="How are you feeling today?"
