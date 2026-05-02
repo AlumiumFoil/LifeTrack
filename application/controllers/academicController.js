@@ -588,12 +588,12 @@ const getWeekRange = (date) => {
     const refDate = new Date(date);
     const dayOfWeek = refDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
     
-    // Calculate start of the week
+    // Calculate start of the week (Sunday)
     const startDate = new Date(refDate);
     let offset = dayOfWeek === 6 ? 0 : -(dayOfWeek + 1);
     startDate.setDate(refDate.getDate() + offset);
     
-    // Calculate end of the week
+    // Calculate end of the week (Saturday)
     const endDate = new Date(startDate);
     endDate.setDate(startDate.getDate() + 6);
     
