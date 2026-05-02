@@ -564,6 +564,400 @@ const getAcademicStats = async (req, res) => {
     }
 };
 
+/**
+ * Valid categories for planner items
+ */
+const VALID_CATEGORIES = ['Academic', 'Wellness', 'Productivity', 'Miscellaneous'];
+
+/**
+ * Valid status values for planner items
+ */
+const VALID_PLANNER_STATUSES = ['pending', 'completed'];
+
+/**
+ * Valid recurring patterns
+ */
+const VALID_RECURRING_PATTERNS = ['daily', 'weekly', 'monthly'];
+
+/**
+ * Get start and end dates for a week based on a given date
+ * @param {string} date - Reference date (YYYY-MM-DD)
+ * @returns {object} { startDate, endDate }
+ */
+const getWeekRange = (date) => {
+    const refDate = new Date(date);
+    const dayOfWeek = refDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    
+    // Calculate start of the week
+    const startDate = new Date(refDate);
+    let offset = dayOfWeek === 6 ? 0 : -(dayOfWeek + 1);
+    startDate.setDate(refDate.getDate() + offset);
+    
+    // Calculate end of the week
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 6);
+    
+    return {
+        startDate: startDate.toISOString().split('T')[0],
+        endDate: endDate.toISOString().split('T')[0]
+    };
+};
+
+/**
+ * Get weekly planner
+ * Requires authentication
+ * GET /api/academic/weekly-planner
+ * Query param: weekStart (optional, YYYY-MM-DD) - defaults to current week
+ * Output: { success, weekStart, weekEnd, items }
+ */
+const getWeeklyPlanner = async (req, res) => {
+    try {
+        const accountId = req.user.account_id;
+        let { weekStart } = req.query;
+        
+        // If no weekStart provided, use current week
+        if (!weekStart) {
+            const today = new Date().toISOString().split('T')[0];
+            const range = getWeekRange(today);
+            weekStart = range.startDate;
+        }
+        
+        const range = getWeekRange(weekStart);
+        
+        const items = await academicModel.getWeeklyPlanner(accountId, range.startDate, range.endDate);
+        
+        res.json({
+            success: true,
+            weekStart: range.startDate,
+            weekEnd: range.endDate,
+            items
+        });
+    } catch (error) {
+        console.error('Get weekly planner error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'An error occurred while fetching weekly planner'
+        });
+    }
+};
+
+/**
+ * Get all planner items for a date range
+ * Requires authentication
+ * GET /api/academic/planner-items
+ * Query params: startDate, endDate (YYYY-MM-DD)
+ * Output: { success, items }
+ */
+const getPlannerItems = async (req, res) => {
+    try {
+        const accountId = req.user.account_id;
+        const { startDate, endDate } = req.query;
+        
+        if (!startDate || !endDate) {
+            return res.status(400).json({
+                success: false,
+                error: 'startDate and endDate are required'
+            });
+        }
+        
+        const items = await academicModel.getPlannerItemsByDateRange(accountId, startDate, endDate);
+        
+        res.json({
+            success: true,
+            items
+        });
+    } catch (error) {
+        console.error('Get planner items error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'An error occurred while fetching planner items'
+        });
+    }
+};
+
+/**
+ * Get a single planner item by ID
+ * Requires authentication
+ * GET /api/academic/planner-items/:id
+ * Output: { success, item }
+ */
+const getPlannerItemById = async (req, res) => {
+    try {
+        const accountId = req.user.account_id;
+        const itemId = req.params.id;
+        
+        const item = await academicModel.getPlannerItemById(itemId, accountId);
+        
+        if (!item) {
+            return res.status(404).json({
+                success: false,
+                error: 'Planner item not found'
+            });
+        }
+        
+        res.json({
+            success: true,
+            item
+        });
+    } catch (error) {
+        console.error('Get planner item by ID error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'An error occurred while fetching the planner item'
+        });
+    }
+};
+
+/**
+ * Create a new planner item
+ * Requires authentication
+ * POST /api/academic/planner-items
+ * Input: { title, description, category, dueDate, status, isRecurring, recurringPattern, recurringEndDate }
+ * Output: { success, message, itemId }
+ */
+const createPlannerItem = async (req, res) => {
+    try {
+        const accountId = req.user.account_id;
+        const { 
+            title, 
+            description, 
+            category, 
+            dueDate, 
+            status, 
+            isRecurring, 
+            recurringPattern, 
+            recurringEndDate 
+        } = req.body;
+        
+        // Validate required fields
+        if (!title || title.trim() === '') {
+            return res.status(400).json({
+                success: false,
+                error: 'Title is required'
+            });
+        }
+        
+        if (title.length > 255) {
+            return res.status(400).json({
+                success: false,
+                error: 'Title must not exceed 255 characters'
+            });
+        }
+        
+        if (!category) {
+            return res.status(400).json({
+                success: false,
+                error: 'Category is required'
+            });
+        }
+        
+        if (!VALID_CATEGORIES.includes(category)) {
+            return res.status(400).json({
+                success: false,
+                error: `Invalid category. Allowed: ${VALID_CATEGORIES.join(', ')}`
+            });
+        }
+        
+        if (!dueDate) {
+            return res.status(400).json({
+                success: false,
+                error: 'Due date is required'
+            });
+        }
+        
+        if (status && !VALID_PLANNER_STATUSES.includes(status)) {
+            return res.status(400).json({
+                success: false,
+                error: `Invalid status. Allowed: ${VALID_PLANNER_STATUSES.join(', ')}`
+            });
+        }
+        
+        if (isRecurring && recurringPattern && !VALID_RECURRING_PATTERNS.includes(recurringPattern)) {
+            return res.status(400).json({
+                success: false,
+                error: `Invalid recurring pattern. Allowed: ${VALID_RECURRING_PATTERNS.join(', ')}`
+            });
+        }
+        
+        const itemId = await academicModel.createPlannerItem(accountId, {
+            title: title.trim(),
+            description: description ? description.trim() : null,
+            category,
+            dueDate,
+            status: status || 'pending',
+            isRecurring: isRecurring || false,
+            recurringPattern: recurringPattern || null,
+            recurringEndDate: recurringEndDate || null
+        });
+        
+        res.status(201).json({
+            success: true,
+            message: 'Planner item created successfully',
+            itemId: itemId
+        });
+    } catch (error) {
+        console.error('Create planner item error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'An error occurred while creating the planner item'
+        });
+    }
+};
+
+/**
+ * Update an existing planner item
+ * Requires authentication
+ * PUT /api/academic/planner-items/:id
+ * Input: { title, description, category, dueDate, status, isRecurring, recurringPattern, recurringEndDate }
+ * Output: { success, message }
+ */
+const updatePlannerItem = async (req, res) => {
+    try {
+        const accountId = req.user.account_id;
+        const itemId = req.params.id;
+        const { 
+            title, 
+            description, 
+            category, 
+            dueDate, 
+            status, 
+            isRecurring, 
+            recurringPattern, 
+            recurringEndDate 
+        } = req.body;
+        
+        // Check if item exists
+        const existingItem = await academicModel.getPlannerItemById(itemId, accountId);
+        if (!existingItem) {
+            return res.status(404).json({
+                success: false,
+                error: 'Planner item not found'
+            });
+        }
+        
+        // Validate title length if provided
+        if (title !== undefined && title.length > 255) {
+            return res.status(400).json({
+                success: false,
+                error: 'Title must not exceed 255 characters'
+            });
+        }
+        
+        // Validate category if provided
+        if (category && !VALID_CATEGORIES.includes(category)) {
+            return res.status(400).json({
+                success: false,
+                error: `Invalid category. Allowed: ${VALID_CATEGORIES.join(', ')}`
+            });
+        }
+        
+        // Validate status if provided
+        if (status && !VALID_PLANNER_STATUSES.includes(status)) {
+            return res.status(400).json({
+                success: false,
+                error: `Invalid status. Allowed: ${VALID_PLANNER_STATUSES.join(', ')}`
+            });
+        }
+        
+        // Validate recurring pattern if provided
+        if (recurringPattern && !VALID_RECURRING_PATTERNS.includes(recurringPattern)) {
+            return res.status(400).json({
+                success: false,
+                error: `Invalid recurring pattern. Allowed: ${VALID_RECURRING_PATTERNS.join(', ')}`
+            });
+        }
+        
+        await academicModel.updatePlannerItem(itemId, accountId, {
+            title: title !== undefined ? title.trim() : undefined,
+            description: description !== undefined ? (description ? description.trim() : null) : undefined,
+            category: category !== undefined ? category : undefined,
+            dueDate: dueDate !== undefined ? dueDate : undefined,
+            status: status !== undefined ? status : undefined,
+            isRecurring: isRecurring !== undefined ? isRecurring : undefined,
+            recurringPattern: recurringPattern !== undefined ? recurringPattern : undefined,
+            recurringEndDate: recurringEndDate !== undefined ? recurringEndDate : undefined
+        });
+        
+        res.json({
+            success: true,
+            message: 'Planner item updated successfully'
+        });
+    } catch (error) {
+        console.error('Update planner item error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'An error occurred while updating the planner item'
+        });
+    }
+};
+
+/**
+ * Delete a planner item
+ * Requires authentication
+ * DELETE /api/academic/planner-items/:id
+ * Output: { success, message }
+ */
+const deletePlannerItem = async (req, res) => {
+    try {
+        const accountId = req.user.account_id;
+        const itemId = req.params.id;
+        
+        const deleted = await academicModel.deletePlannerItem(itemId, accountId);
+        
+        if (!deleted) {
+            return res.status(404).json({
+                success: false,
+                error: 'Planner item not found'
+            });
+        }
+        
+        res.json({
+            success: true,
+            message: 'Planner item deleted successfully'
+        });
+    } catch (error) {
+        console.error('Delete planner item error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'An error occurred while deleting the planner item'
+        });
+    }
+};
+
+/**
+ * Mark planner item as completed
+ * Requires authentication
+ * PATCH /api/academic/planner-items/:id/complete
+ * Output: { success, message }
+ */
+const completePlannerItem = async (req, res) => {
+    try {
+        const accountId = req.user.account_id;
+        const itemId = req.params.id;
+        
+        const existingItem = await academicModel.getPlannerItemById(itemId, accountId);
+        if (!existingItem) {
+            return res.status(404).json({
+                success: false,
+                error: 'Planner item not found'
+            });
+        }
+        
+        await academicModel.updatePlannerItem(itemId, accountId, { status: 'completed' });
+        
+        res.json({
+            success: true,
+            message: 'Planner item marked as completed'
+        });
+    } catch (error) {
+        console.error('Complete planner item error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'An error occurred while completing the planner item'
+        });
+    }
+};
+
 module.exports = {
     // Assignments
     getAssignments,
@@ -587,5 +981,19 @@ module.exports = {
     getCourses,
     
     // Stats
-    getAcademicStats
+    getAcademicStats,
+
+    // Weekly Planner
+    getWeeklyPlanner,
+    getPlannerItems,
+    getPlannerItemById,
+    createPlannerItem,
+    updatePlannerItem,
+    deletePlannerItem,
+    completePlannerItem,
+
+    // Valid values for Weekly Planner
+    VALID_CATEGORIES,
+    VALID_PLANNER_STATUSES,
+    VALID_RECURRING_PATTERNS
 };
