@@ -175,3 +175,11 @@
     flex-direction: column;
   }
 }
+
+.assignment-clickable .assign-title {
+  color: var(--text);
+}
+
+.assignment-clickable .assign-meta {
+  color: var(--muted);
+}
