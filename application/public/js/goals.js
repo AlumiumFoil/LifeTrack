@@ -36,54 +36,64 @@ function getAuthHeaders(includeJson = false) {
 
 // ── Profile header ────────────────────────────────────────────────────────────
 
-async function loadProfileHeader() {
-  const usernameEl = document.getElementById('profileUsernameTop');
-  const avatarEl = document.getElementById('profilePreview');
+function getStoredUser() {
+  try {
+    const rawUser = localStorage.getItem("user");
+    return rawUser ? JSON.parse(rawUser) : null;
+  } catch (error) {
+    return null;
+  }
+}
 
-  const storedUser = localStorage.getItem('user');
+function setProfileHeaderFromStoredUser() {
+  const storedUser = getStoredUser();
+  const profileUsernameTop = document.getElementById("profileUsernameTop");
 
-  if (storedUser && usernameEl) {
-    try {
-      const user = JSON.parse(storedUser);
-      usernameEl.textContent =
-        user.username ||
-        user.name ||
-        user.firstName ||
-        'Profile';
-    } catch {
-      usernameEl.textContent = 'Profile';
-    }
+  if (!profileUsernameTop) return;
+
+  if (!storedUser) {
+    profileUsernameTop.textContent = "Profile";
+    return;
   }
 
+  profileUsernameTop.textContent = storedUser.username || "Profile";
+}
+
+async function loadProfileHeader() {
+  setProfileHeaderFromStoredUser();
+
   const token = getAccessToken();
-  if (!token || !avatarEl) return;
+  if (!token) return;
 
   try {
-    const response = await fetch('/api/users/me/dashboard', {
-      method: 'GET',
-      headers: getAuthHeaders()
+    const response = await fetch("/api/users/me/dashboard", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
     });
 
     const data = await response.json();
 
     if (!response.ok || !data.success) {
-      throw new Error(data.error || 'Could not load profile preview.');
+      throw new Error(data.error || "Could not load dashboard profile.");
     }
 
-    const profile = data.user || data.profile || data.dashboard || data;
+    const dashboard = data.dashboard || {};
+    const profile = dashboard.profile || {};
 
-    if (profile.username && usernameEl) {
-      usernameEl.textContent = profile.username;
+    const profileUsernameTop = document.getElementById("profileUsernameTop");
+    const profilePreview = document.getElementById("profilePreview");
+
+    if (profileUsernameTop) {
+      profileUsernameTop.textContent = profile.username || "Profile";
     }
 
-    if (profile.profilePicture || profile.profileImage || profile.avatarUrl) {
-      avatarEl.src =
-        profile.profilePicture ||
-        profile.profileImage ||
-        profile.avatarUrl;
+    if (profilePreview && profile.profileThumbnailUrl) {
+      profilePreview.src = profile.profileThumbnailUrl;
     }
   } catch (error) {
-    console.error('Profile header load error:', error.message || error);
+    console.error("Profile header load error:", error.message || error);
   }
 }
 
