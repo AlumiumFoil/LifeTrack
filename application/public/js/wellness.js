@@ -90,6 +90,66 @@ function getAccessToken() {
   return localStorage.getItem("accessToken");
 }
 
+function getStoredUser() {
+  try {
+    const rawUser = localStorage.getItem('user');
+    return rawUser ? JSON.parse(rawUser) : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function setProfileHeaderFromStoredUser() {
+  const storedUser = getStoredUser();
+  const profileUsernameTop = document.getElementById('profileUsernameTop');
+
+  if (!profileUsernameTop) return;
+
+  if (!storedUser) {
+    profileUsernameTop.textContent = 'Profile';
+    return;
+  }
+
+  profileUsernameTop.textContent = storedUser.username || 'Profile';
+}
+
+async function loadProfileHeader() {
+  const token = getAccessToken();
+
+  setProfileHeaderFromStoredUser();
+
+  if (!token) return;
+
+  try {
+    const response = await fetch('/api/users/me/dashboard', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Could not load profile header.');
+    }
+
+    const profile = data.dashboard?.profile || {};
+    const profileUsernameTop = document.getElementById('profileUsernameTop');
+    const profilePreview = document.getElementById('profilePreview');
+
+    if (profileUsernameTop) {
+      profileUsernameTop.textContent = profile.username || 'Profile';
+    }
+
+    if (profilePreview && profile.profileThumbnailUrl) {
+      profilePreview.src = profile.profileThumbnailUrl;
+    }
+  } catch (error) {
+    console.error('Profile header load error:', error.message || error);
+  }
+}
+
 function getAuthHeaders(includeJson = false) {
   const token = getAccessToken();
 
@@ -285,8 +345,6 @@ function showCheckinMsg(text, type) {
   clearTimeout(msg._hideTimer);
   msg._hideTimer = setTimeout(() => { msg.style.display = 'none'; }, 4000);
 }
-
-// ── Habit checklist ───────────────────────────────────────────────────────────
 
 // ── Habit checklist / CRUD ────────────────────────────────────────────────────
 
@@ -609,6 +667,7 @@ function renderResources() {
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', async () => {
+  await loadProfileHeader();
   await loadAccessibilitySettings();
   // Mood buttons — event delegation so re-renders don't drop handlers
   document.getElementById('mood-grid').addEventListener('click', e => {
