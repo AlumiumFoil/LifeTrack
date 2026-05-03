@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Profile – LifeTrack</title>
+
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/profile.css" />
+  <link rel="stylesheet" href="../css/admin.css" />
+</head>
+<body>
+  <div class="admin-page admin-profile-page">
+    <header class="admin-header">
+      <div>
+        <a class="admin-brand" href="./admin.html">LifeTrack</a>
+        <p class="admin-subtitle">Administrator Profile</p>
+      </div>
+
+      <div class="admin-header-actions">
+        <a class="admin-header-profile" href="./adminProfile.html">
+          <img
+            id="profilePreview"
+            class="dashboard-header-avatar"
+            src="https://placehold.co/120x120?text=User"
+            alt="Profile preview"
+          />
+          <span id="profileUsernameTop" class="admin-user-label">Profile</span>
+        </a>
+      </div>
+    </header>
+
+    <main class="admin-main admin-profile-main">
+      <section class="dashboard-page-title">
+        <h1>Profile</h1>
+      </section>
+
+      <div id="profileMessage" class="status-message" style="display: none;"></div>
+
+      <section class="grid">
+        <article class="card">
+          <div class="profile-header-layout">
+            <div class="profile-image-block">
+              <img
+                id="profilePageImage"
+                class="profile-page-avatar"
+                src="https://placehold.co/240x240?text=User"
+                alt="Profile image"
+              />
+
+              <div class="dashboard-upload-block">
+                <label for="profileImageInput" class="small">Choose Image</label>
+                <input type="file" id="profileImageInput" accept="image/*" />
+
+                <div class="dashboard-tool-actions">
+                  <button id="uploadProfileBtn" class="btn" type="button">Upload Image</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="profile-summary-block">
+              <h2 id="profileUsername">Username</h2>
+              <p id="profileEmail" class="small">Email address</p>
+
+              <div class="profile-meta-list">
+                <div class="profile-meta-row">
+                  <span class="small">Account Status</span>
+                  <strong id="profileStatus">active</strong>
+                </div>
+
+                <div class="profile-meta-row">
+                  <span class="small">Member Since</span>
+                  <strong id="profileMemberSince">--</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <h2>Account Settings</h2>
+          <p class="small">Manage login and security related settings for your administrator account.</p>
+
+          <div class="profile-settings-list">
+            <div class="profile-settings-item">
+              <div>
+                <strong>Change Password</strong>
+                <p class="small">Update your password using your current password and security answers.</p>
+              </div>
+              <button id="openPasswordModalBtn" class="btn secondary" type="button">Change Password</button>
+            </div>
+
+            <div class="profile-settings-item">
+              <div>
+                <strong>Security Questions</strong>
+                <p class="small">Review the questions currently tied to your account.</p>
+              </div>
+              <button id="loadSecurityQuestionsBtn" class="btn secondary" type="button">View Questions</button>
+            </div>
+
+            <div class="profile-settings-item">
+              <div>
+                <strong>Accessibility Mode</strong>
+                <p class="small">Switch between the standard interface and a more accessible high-contrast, larger-text view.</p>
+              </div>
+
+              <div class="accessibility-toggle-group" role="group" aria-label="Accessibility mode">
+                <button id="defaultModeBtn" class="btn secondary" type="button">Default</button>
+                <button id="accessibilityModeBtn" class="btn secondary" type="button">Accessibility</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="securityQuestionsBlock" class="profile-security-block" style="display: none;">
+            <h3>Saved Security Questions</h3>
+            <div id="securityQuestionsList" class="dashboard-list">
+              <p class="small">No security questions loaded yet.</p>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <div class="admin-profile-footer-actions">
+        <a class="btn secondary" href="./admin.html">Back to Admin Dashboard</a>
+        <button id="logoutBtn" class="dashboard-logout-btn admin-profile-logout-btn" type="button">Logout</button>
+      </div>
+
+      <div class="footer">Team 1 • Spring 2026</div>
+    </main>
+  </div>
+
+  <div id="passwordModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal">
+      <h2>Change Password</h2>
+
+      <form id="changePasswordForm" class="vp-form">
+        <div class="form-group">
+          <label for="currentPassword">Current Password</label>
+          <input
+            type="password"
+            id="currentPassword"
+            name="currentPassword"
+            placeholder="Enter current password"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="newPassword">New Password</label>
+          <input
+            type="password"
+            id="newPassword"
+            name="newPassword"
+            placeholder="Enter new password"
+          />
+        </div>
+
+        <div id="securityAnswerFields" class="vp-form">
+          <!-- security question answer inputs will be inserted by profile.js -->
+        </div>
+
+        <div class="modal-actions">
+          <button id="cancelPasswordBtn" class="btn secondary" type="button">Cancel</button>
+          <button id="savePasswordBtn" class="btn" type="submit">Update Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../js/profile.js"></script>
+</body>
+</html>

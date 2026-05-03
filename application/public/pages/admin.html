@@ -12,12 +12,21 @@
   <div class="admin-page">
     <header class="admin-header">
       <div>
-        <a class="admin-brand" href="../index.html">LifeTrack</a>
+        <a class="admin-brand">LifeTrack</a>
         <p class="admin-subtitle">Administrator Dashboard</p>
       </div>
 
       <div class="admin-header-actions">
-        <span id="adminUsername" class="admin-user-label">Admin</span>
+        <a class="admin-header-profile" href="./adminProfile.html">
+          <img
+            id="profilePreview"
+            class="dashboard-header-avatar"
+            src="https://placehold.co/120x120?text=User"
+            alt="Profile preview"
+          />
+          <span id="adminUsername" class="admin-user-label">Admin</span>
+        </a>
+
         <button id="adminLogoutBtn" class="btn secondary sm" type="button">Logout</button>
       </div>
     </header>
