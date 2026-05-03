@@ -160,6 +160,103 @@ function updateAdminHeader() {
   }
 }
 
+async function loadAdminHeaderProfile() {
+  const token = getAccessToken();
+  const usernameEl = document.getElementById('adminUsername');
+  const profilePreview = document.getElementById('profilePreview');
+
+  if (!token) return;
+
+  try {
+    const response = await fetch('/api/users/me/profile', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Could not load admin profile header.');
+    }
+
+    const profile = data.profile || {};
+    const username = profile.username || getSavedUser()?.username || 'Admin';
+
+    const thumbnailUrl =
+      profile.profile_thumbnail_url ||
+      profile.profileThumbnailUrl ||
+      profile.profile_image_url ||
+      profile.profileImageUrl;
+
+    if (usernameEl) {
+      usernameEl.textContent = username;
+    }
+
+    if (profilePreview && thumbnailUrl) {
+      profilePreview.src = thumbnailUrl;
+    }
+
+    const currentUser = getSavedUser() || {};
+    localStorage.setItem('user', JSON.stringify({
+      ...currentUser,
+      username,
+      email: profile.email || currentUser.email,
+      profile_thumbnail_url: thumbnailUrl || currentUser.profile_thumbnail_url,
+      profileThumbnailUrl: thumbnailUrl || currentUser.profileThumbnailUrl
+    }));
+  } catch (error) {
+    console.warn('Admin header profile load failed:', error);
+  }
+}
+
+async function loadAdminAccessibilitySettings() {
+  const token = getAccessToken();
+
+  if (!token) return;
+
+  try {
+    const response = await fetch('/api/users/me/accessibility', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Could not load accessibility settings.');
+    }
+
+    applyAdminAccessibilitySettings(data.accessibility);
+  } catch (error) {
+    console.warn('Admin accessibility load failed:', error);
+  }
+}
+
+function applyAdminAccessibilitySettings(accessibility) {
+  if (!accessibility) return;
+
+  const themeMode = accessibility.themeMode || 'dark';
+  const textSize = accessibility.textSize || 'normal';
+  const highContrastEnabled =
+    accessibility.highContrastEnabled === true ||
+    accessibility.highContrastEnabled === 1 ||
+    accessibility.highContrastEnabled === '1';
+
+  const isAccessibilityMode =
+    themeMode === 'light' &&
+    textSize === 'large' &&
+    highContrastEnabled;
+
+  document.body.setAttribute(
+    'data-accessibility-mode',
+    isAccessibilityMode ? 'accessibility' : 'default'
+  );
+}
+
 function updateStats(stats) {
   document.getElementById('statTotalUsers').textContent = stats.totalUsers ?? '--';
   document.getElementById('statActiveUsers').textContent = stats.activeUsers ?? '--';
@@ -427,6 +524,8 @@ async function initializeAdminPage() {
   try {
     clearAdminMessage();
     await Promise.all([
+      loadAdminHeaderProfile(),
+      loadAdminAccessibilitySettings(),
       loadStats(),
       loadUsers()
     ]);
