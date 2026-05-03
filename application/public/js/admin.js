@@ -143,9 +143,20 @@ function escapeHtml(value) {
 function updateAdminHeader() {
   const user = getSavedUser();
   const usernameEl = document.getElementById('adminUsername');
+  const profilePreview = document.getElementById('profilePreview');
 
   if (usernameEl && user) {
     usernameEl.textContent = user.username || user.email || 'Admin';
+  }
+
+  const thumbnailUrl =
+    user?.profile_thumbnail_url ||
+    user?.profileThumbnailUrl ||
+    user?.profile_image_url ||
+    user?.profileImageUrl;
+
+  if (profilePreview && thumbnailUrl) {
+    profilePreview.src = thumbnailUrl;
   }
 }
 

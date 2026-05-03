@@ -231,3 +231,46 @@ body[data-accessibility-mode="accessibility"] .admin-profile-label {
     gap: 4px;
   }
 }
+
+.admin-header-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.admin-header-profile:hover .admin-user-label {
+  color: var(--text);
+}
+
+.admin-header-profile .dashboard-header-avatar {
+  width: 46px;
+  height: 46px;
+}
+
+.admin-profile-main .grid {
+  margin-top: 18px;
+}
+
+.admin-profile-footer-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.admin-profile-logout-btn {
+  width: auto;
+  min-width: 140px;
+  text-align: center;
+}
+
+.admin-profile-page .profile-header-layout {
+  max-width: 100%;
+}
+
+.admin-profile-page .card {
+  background: rgba(17,26,46,0.6);
+}
