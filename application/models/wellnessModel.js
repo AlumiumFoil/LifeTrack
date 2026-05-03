@@ -256,7 +256,7 @@ const completeHabit = async (habitId, accountId) => {
     if (!habit) return { completed: false, alreadyCompleted: false };
     
     const today = new Date().toISOString().slice(0, 10);
-    const lastCompleted = habit.lastCompletedDate ? habit.lastCompletedDate.toISOString().slice(0, 10) : null;
+    const lastCompleted = habit.lastCompletedDate || null;
     
     // Already completed today
     if (lastCompleted === today) {

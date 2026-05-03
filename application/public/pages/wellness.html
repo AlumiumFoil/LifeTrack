@@ -14,12 +14,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Wellness Hub – LifeTrack</title>
   <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/wellness.css" />
 </head>
 <body>
   <div class="dashboard-frame">
 
     <header class="dashboard-header">
-      <a class="dashboard-header-brand" href="../index.html">LifeTrack</a>
+      <a class="dashboard-header-brand">LifeTrack</a>
       <div class="dashboard-header-actions">
         <a class="dashboard-header-profile" href="./search.html">Search</a>
         <a class="dashboard-header-profile" href="./profile.html">
@@ -86,8 +87,16 @@
           </div>
         </div>
 
-        <!-- Habit checklist — toggled by wellness.js -->
+        <!-- Habit checklist — loaded from backend by wellness.js -->
         <div class="section-heading">Daily Habits</div>
+
+        <div class="wellness-section-toolbar">
+          <p class="wellness-section-note">
+            Build healthy routines and mark each habit complete once per day.
+          </p>
+          <button class="btn sm" id="add-habit-btn" type="button">+ New Habit</button>
+        </div>
+
         <div class="habit-list" id="habit-list"></div>
 
         <!-- Check-in log — newest entries first -->
@@ -97,6 +106,71 @@
         <!-- Curated wellness links and tips -->
         <div class="section-heading">Wellness Resources</div>
         <div class="grid" id="resources-grid"></div>
+
+        <!-- Add/Edit Habit Modal -->
+        <div id="habit-modal" class="modal-overlay">
+          <div class="modal">
+            <div class="wellness-modal-header">
+              <div>
+                <h2 id="habit-modal-title">New Habit</h2>
+                <p class="wellness-section-note">
+                  Add a habit you want to track in your wellness routine.
+                </p>
+              </div>
+              <button class="btn secondary sm" id="close-habit-modal-btn" type="button">Close</button>
+            </div>
+
+            <div class="wellness-form-group">
+              <label class="stress-label" for="habit-title">Habit Name</label>
+              <input
+                id="habit-title"
+                class="wellness-input"
+                type="text"
+                maxlength="255"
+                placeholder="Example: Drink 8 glasses of water"
+              />
+            </div>
+
+            <div class="wellness-form-group">
+              <label class="stress-label" for="habit-category">Category</label>
+              <input
+                id="habit-category"
+                class="wellness-input"
+                type="text"
+                placeholder="Example: Health, Sleep, Fitness"
+              />
+            </div>
+
+            <div class="wellness-form-group">
+              <label class="stress-label" for="habit-frequency">Frequency</label>
+              <select id="habit-frequency" class="wellness-input">
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+              </select>
+            </div>
+
+            <div class="wellness-form-group">
+              <label class="stress-label" for="habit-description">Description</label>
+              <textarea
+                id="habit-description"
+                class="wellness-textarea"
+                rows="3"
+                placeholder="Optional notes about this habit"
+              ></textarea>
+            </div>
+
+            <div id="habit-modal-msg" class="status-message wellness-hidden"></div>
+
+            <div class="wellness-modal-actions">
+              <button class="btn danger" id="delete-habit-btn" type="button" hidden>Delete Habit</button>
+
+              <div class="wellness-modal-actions-right">
+                <button class="btn secondary" id="cancel-habit-btn" type="button">Cancel</button>
+                <button class="btn" id="save-habit-btn" type="button">Save Habit</button>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div class="footer">Team 1 • Spring 2026</div>
 

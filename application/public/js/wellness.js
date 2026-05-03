@@ -11,13 +11,8 @@ const MOODS = [
   { emoji:'😰', label:'Struggling' },
 ];
 
-const HABITS = [
-  { id:'sleep',    label:'Slept 7–9 hours',                 streak:'4-day streak' },
-  { id:'water',    label:'Drank 8 glasses of water',        streak:'2-day streak' },
-  { id:'exercise', label:'30 min of exercise',              streak:'1-day streak' },
-  { id:'mindful',  label:'10 min mindfulness / meditation', streak:'3-day streak' },
-  { id:'screen',   label:'Limited screen time before bed',  streak:'0-day streak' },
-];
+let HABITS = [];
+let editingHabitId = null;
 
 // Demo history shown when no API data is available (no token / not logged in)
 let HISTORY = [
@@ -90,11 +85,57 @@ function syncMoodFromSlider(val) {
 
 let selectedMood = null;
 
-// helper function - accessibility
+
 function getAccessToken() {
   return localStorage.getItem("accessToken");
 }
 
+function getAuthHeaders(includeJson = false) {
+  const token = getAccessToken();
+
+  const headers = {};
+
+  if (includeJson) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  return headers;
+}
+
+function isHabitCompletedToday(habit) {
+  if (!habit || !habit.lastCompletedDate) return false;
+
+  const today = new Date().toISOString().slice(0, 10);
+  return habit.lastCompletedDate === today;
+}
+
+function formatHabitStreak(streakCount) {
+  const streak = Number(streakCount) || 0;
+  return `${streak}-day streak`;
+}
+
+function showHabitModalMsg(text, type = 'error') {
+  const msg = document.getElementById('habit-modal-msg');
+  if (!msg) return;
+
+  msg.textContent = text;
+  msg.className = `status-message ${type}`;
+  msg.classList.remove('wellness-hidden');
+}
+
+function clearHabitModalMsg() {
+  const msg = document.getElementById('habit-modal-msg');
+  if (!msg) return;
+
+  msg.textContent = '';
+  msg.className = 'status-message wellness-hidden';
+}
+
+// helper function - accessibility
 async function loadAccessibilitySettings() {
   const token = getAccessToken();
   if (!token) return;
@@ -247,20 +288,237 @@ function showCheckinMsg(text, type) {
 
 // ── Habit checklist ───────────────────────────────────────────────────────────
 
-function renderHabits() {
-  document.getElementById('habit-list').innerHTML = HABITS.map(h => `
-    <div class="habit-item" id="habit-item-${h.id}">
-      <input type="checkbox" id="chk-${h.id}" />
-      <span class="habit-label">${h.label}</span>
-      <span class="habit-streak">${h.streak}</span>
-    </div>
-  `).join('');
+// ── Habit checklist / CRUD ────────────────────────────────────────────────────
+
+async function loadHabits() {
+  const list = document.getElementById('habit-list');
+  const token = getAccessToken();
+
+  if (!list) return;
+
+  if (!token) {
+    list.innerHTML = '<p style="color:var(--muted); padding:4px 0">Log in to track your habits here.</p>';
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/wellness/habits', {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || !data.success) {
+      list.innerHTML = '<p style="color:var(--muted); padding:4px 0">Unable to load habits.</p>';
+      return;
+    }
+
+    HABITS = Array.isArray(data.habits) ? data.habits : [];
+    renderHabits();
+  } catch (err) {
+    console.error('Load habits error:', err);
+    list.innerHTML = '<p style="color:var(--muted); padding:4px 0">Unable to reach the server.</p>';
+  }
 }
 
-function syncHabitClass(id) {
-  const chk  = document.getElementById('chk-' + id);
-  const item = document.getElementById('habit-item-' + id);
-  if (chk && item) item.classList.toggle('checked', chk.checked);
+function renderHabits() {
+  const list = document.getElementById('habit-list');
+  if (!list) return;
+
+  if (!HABITS.length) {
+    list.innerHTML = `
+      <div class="habit-item">
+        <span class="habit-label">No habits yet. Add your first wellness habit to get started.</span>
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = HABITS.map(habit => {
+    const completedToday = isHabitCompletedToday(habit);
+    const checkedAttr = completedToday ? 'checked' : '';
+    const disabledAttr = completedToday ? 'disabled' : '';
+    const checkedClass = completedToday ? ' checked' : '';
+
+    return `
+      <div class="habit-item${checkedClass}" id="habit-item-${habit.id}" data-habit-id="${habit.id}">
+        <input type="checkbox" id="chk-${habit.id}" ${checkedAttr} ${disabledAttr} />
+        <span class="habit-label">
+          ${habit.title || 'Untitled Habit'}
+          ${habit.description ? `<span class="habit-description">${habit.description}</span>` : ''}
+        </span>
+        <span class="habit-streak">${formatHabitStreak(habit.streakCount)}</span>
+        <button class="btn secondary sm habit-edit-btn" type="button" data-edit-habit-id="${habit.id}">
+          Edit
+        </button>
+      </div>
+    `;
+  }).join('');
+}
+
+async function completeHabit(habitId) {
+  const token = getAccessToken();
+
+  if (!token) {
+    showCheckinMsg('Please log in to complete habits.', 'error');
+    return;
+  }
+
+  const habit = HABITS.find(h => String(h.id) === String(habitId));
+  if (!habit || isHabitCompletedToday(habit)) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/wellness/habits/${habitId}/complete`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (res.status === 409) {
+      await loadHabits();
+      showCheckinMsg('Habit already completed today.', 'success');
+      return;
+    }
+
+    if (!res.ok || !data.success) {
+      showCheckinMsg(data.error || 'Unable to complete habit.', 'error');
+      await loadHabits();
+      return;
+    }
+
+    await loadHabits();
+    showCheckinMsg('Habit marked complete for today!', 'success');
+  } catch (err) {
+    console.error('Complete habit error:', err);
+    showCheckinMsg('Unable to reach the server.', 'error');
+    await loadHabits();
+  }
+}
+
+function openHabitModal(habit = null) {
+  const modal = document.getElementById('habit-modal');
+  const title = document.getElementById('habit-modal-title');
+  const deleteBtn = document.getElementById('delete-habit-btn');
+
+  editingHabitId = habit ? habit.id : null;
+
+  clearHabitModalMsg();
+
+  document.getElementById('habit-title').value = habit?.title || '';
+  document.getElementById('habit-category').value = habit?.category || '';
+  document.getElementById('habit-frequency').value = habit?.frequency || 'daily';
+  document.getElementById('habit-description').value = habit?.description || '';
+
+  if (title) {
+    title.textContent = habit ? 'Edit Habit' : 'New Habit';
+  }
+
+  if (deleteBtn) {
+    deleteBtn.hidden = !habit;
+  }
+
+  if (modal) {
+    modal.classList.add('open');
+  }
+}
+
+function closeHabitModal() {
+  const modal = document.getElementById('habit-modal');
+
+  editingHabitId = null;
+  clearHabitModalMsg();
+
+  if (modal) {
+    modal.classList.remove('open');
+  }
+}
+
+function getHabitPayloadFromForm() {
+  return {
+    title: document.getElementById('habit-title').value.trim(),
+    category: document.getElementById('habit-category').value.trim() || null,
+    frequency: document.getElementById('habit-frequency').value || 'daily',
+    description: document.getElementById('habit-description').value.trim() || null,
+  };
+}
+
+async function saveHabit() {
+  const token = getAccessToken();
+
+  if (!token) {
+    showHabitModalMsg('Please log in to save habits.', 'error');
+    return;
+  }
+
+  const payload = getHabitPayloadFromForm();
+
+  if (!payload.title) {
+    showHabitModalMsg('Habit name is required.', 'error');
+    return;
+  }
+
+  const isEditing = editingHabitId !== null;
+  const url = isEditing
+    ? `/api/wellness/habits/${editingHabitId}`
+    : '/api/wellness/habits';
+
+  const method = isEditing ? 'PUT' : 'POST';
+
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: getAuthHeaders(true),
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || !data.success) {
+      showHabitModalMsg(data.error || 'Unable to save habit.', 'error');
+      return;
+    }
+
+    closeHabitModal();
+    await loadHabits();
+  } catch (err) {
+    console.error('Save habit error:', err);
+    showHabitModalMsg('Unable to reach the server.', 'error');
+  }
+}
+
+async function deleteHabit() {
+  const token = getAccessToken();
+
+  if (!token || editingHabitId === null) {
+    return;
+  }
+
+  const confirmed = confirm('Delete this habit? This will remove it from your active habit list.');
+  if (!confirmed) return;
+
+  try {
+    const res = await fetch(`/api/wellness/habits/${editingHabitId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || !data.success) {
+      showHabitModalMsg(data.error || 'Unable to delete habit.', 'error');
+      return;
+    }
+
+    closeHabitModal();
+    await loadHabits();
+  } catch (err) {
+    console.error('Delete habit error:', err);
+    showHabitModalMsg('Unable to reach the server.', 'error');
+  }
 }
 
 // ── Check-in history ──────────────────────────────────────────────────────────
@@ -369,18 +627,61 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Habit row click — clicking anywhere on the row toggles the checkbox.
   // If the click landed directly on the checkbox, its state already changed;
   // only manually flip it when the click was on the row background/label.
-  document.getElementById('habit-list').addEventListener('click', e => {
-    const item = e.target.closest('.habit-item');
-    if (!item) return;
-    const id  = item.id.replace('habit-item-', '');
-    const chk = document.getElementById('chk-' + id);
-    if (!chk) return;
-    if (e.target !== chk) chk.checked = !chk.checked; // row click: manual toggle
-    syncHabitClass(id);
-  });
+  const habitList = document.getElementById('habit-list');
+  if (habitList) {
+    habitList.addEventListener('click', async e => {
+      const editBtn = e.target.closest('[data-edit-habit-id]');
+      if (editBtn) {
+        const habitId = editBtn.dataset.editHabitId;
+        const habit = HABITS.find(h => String(h.id) === String(habitId));
+        if (habit) openHabitModal(habit);
+        return;
+      }
+
+      const item = e.target.closest('.habit-item');
+      if (!item || !item.dataset.habitId) return;
+
+      const habitId = item.dataset.habitId;
+      await completeHabit(habitId);
+    });
+  }
+
+  const addHabitBtn = document.getElementById('add-habit-btn');
+  if (addHabitBtn) {
+    addHabitBtn.addEventListener('click', () => openHabitModal());
+  }
+
+  const closeHabitModalBtn = document.getElementById('close-habit-modal-btn');
+  if (closeHabitModalBtn) {
+    closeHabitModalBtn.addEventListener('click', closeHabitModal);
+  }
+
+  const cancelHabitBtn = document.getElementById('cancel-habit-btn');
+  if (cancelHabitBtn) {
+    cancelHabitBtn.addEventListener('click', closeHabitModal);
+  }
+
+  const saveHabitBtn = document.getElementById('save-habit-btn');
+  if (saveHabitBtn) {
+    saveHabitBtn.addEventListener('click', saveHabit);
+  }
+
+  const deleteHabitBtn = document.getElementById('delete-habit-btn');
+  if (deleteHabitBtn) {
+    deleteHabitBtn.addEventListener('click', deleteHabit);
+  }
+
+  const habitModal = document.getElementById('habit-modal');
+  if (habitModal) {
+    habitModal.addEventListener('click', e => {
+      if (e.target === habitModal) {
+        closeHabitModal();
+      }
+    });
+  }
 
   renderMoods();
-  renderHabits();
+  await loadHabits();
   await loadCheckinHistory();
   renderResources();
 });
