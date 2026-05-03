@@ -11,7 +11,7 @@
   <div class="dashboard-frame">
 
     <header class="dashboard-header">
-      <a class="dashboard-header-brand" href="../index.html">LifeTrack</a>
+      <a class="dashboard-header-brand">LifeTrack</a>
       <div class="dashboard-header-actions">
         <a class="dashboard-header-profile" href="./search.html">Search</a>
         <a class="dashboard-header-profile" href="./profile.html">
@@ -70,7 +70,10 @@
         <div class="course-grid" id="course-grid"></div>
 
         <!-- Assignment tracker — tab-filtered by status -->
-        <div class="section-heading">Assignment Tracker</div>
+        <div class="section-heading assignment-heading-row">
+          <span>Assignment Tracker</span>
+          <button id="addAssignmentBtn" class="btn sm" type="button">Add Assignment</button>
+        </div>
         <div class="tab-bar">
           <button class="tab-btn active" onclick="filterAssign(this,'all')">All</button>
           <button class="tab-btn" onclick="filterAssign(this,'Upcoming')">Upcoming</button>
