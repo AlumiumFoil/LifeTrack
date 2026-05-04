@@ -1,16 +1,26 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- google analytics tag -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BKXMLJEGGQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BKXMLJEGGQ');
+  </script>
+  
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Wellness Hub – LifeTrack</title>
   <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/wellness.css" />
 </head>
 <body>
   <div class="dashboard-frame">
 
     <header class="dashboard-header">
-      <a class="dashboard-header-brand" href="../index.html">LifeTrack</a>
+      <a class="dashboard-header-brand">LifeTrack</a>
       <div class="dashboard-header-actions">
         <a class="dashboard-header-profile" href="./search.html">Search</a>
         <a class="dashboard-header-profile" href="./profile.html">
@@ -33,6 +43,7 @@
           <a class="dashboard-nav-link" href="./jobpreparation.html">Career</a>
           <a class="dashboard-nav-link" href="./goals.html">Productivity</a>
           <a class="dashboard-nav-link active" href="./wellness.html">Wellness</a>
+          <a class="dashboard-nav-link" href="./campus-map.html">Campus Map</a>
         </nav>
       </aside>
 
@@ -40,45 +51,126 @@
 
         <section class="hero">
           <h1>Wellness Hub</h1>
-          <p>Log your mood, build daily habits, and keep your mental and physical wellbeing on track — all in one place.</p>
+          <p>Log your mood, build daily habits, and keep your mental and physical wellbeing on track all in one place.</p>
         </section>
 
-        <!-- Daily check-in — mood and stress entry -->
+        <!-- Daily check-in — mood + note only -->
         <div class="section-heading">Today's Check-In</div>
         <div class="checkin-card">
           <p style="margin:0 0 4px; font-weight:600;">How are you feeling today?</p>
           <p style="margin:0; font-size:13px; color:var(--muted);">Tap a mood to begin today's check-in</p>
           <div class="mood-grid" id="mood-grid"></div>
 
-          <div class="stress-bar-wrap" style="margin-top:6px;">
-            <div class="stress-label">Today's Stress Level</div>
-            <input type="range" id="stress-slider" min="1" max="10" value="4"
-                   style="width:100%; accent-color:var(--accent);"
-                   oninput="document.getElementById('stress-val').textContent = this.value" />
+          <div style="margin-top:14px;">
+            <div class="stress-label" style="margin-bottom:6px;">Mood Slider</div>
+            <input type="range" id="mood-slider" min="1" max="5" value="3"
+                   style="width:100%; accent-color:var(--accent);" />
             <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-top:4px;">
-              <span>Low (1)</span>
-              <span id="stress-val" style="color:var(--accent); font-weight:600;">4</span>
-              <span>High (10)</span>
+              <span>Struggling</span>
+              <span id="mood-slider-label" style="color:var(--accent); font-weight:600;">Okay</span>
+              <span>Great</span>
             </div>
           </div>
 
+          <div style="margin-top:14px;">
+            <div class="stress-label" style="margin-bottom:6px;">Notes</div>
+            <textarea id="checkin-notes" rows="3"
+              placeholder="How are you feeling today?"
+              style="width:100%; padding:10px 12px; border-radius:12px; border:1px solid var(--border);
+                     background:rgba(11,18,32,0.9); color:var(--text); font:inherit;
+                     resize:vertical; line-height:1.5;"></textarea>
+          </div>
+
           <div style="margin-top:18px; display:flex; gap:10px; flex-wrap:wrap;">
-            <button class="btn" onclick="submitCheckin()">Save Check-In</button>
+            <button class="btn" id="checkin-submit-btn" onclick="submitCheckin()">Save Check-In</button>
             <button class="btn secondary" onclick="resetCheckin()">Reset</button>
           </div>
         </div>
 
-        <!-- Habit checklist — toggled by wellness.js -->
+        <!-- Habit checklist — loaded from backend by wellness.js -->
         <div class="section-heading">Daily Habits</div>
+
+        <div class="wellness-section-toolbar">
+          <p class="wellness-section-note">
+            Build healthy routines and mark each habit complete once per day.
+          </p>
+          <button class="btn sm" id="add-habit-btn" type="button">+ New Habit</button>
+        </div>
+
         <div class="habit-list" id="habit-list"></div>
 
         <!-- Check-in log — newest entries first -->
-        <div class="section-heading">Check-In History</div>
+        <div class="section-heading">Recent Check-Ins</div>
         <div class="history-list" id="history-list"></div>
 
         <!-- Curated wellness links and tips -->
         <div class="section-heading">Wellness Resources</div>
         <div class="grid" id="resources-grid"></div>
+
+        <!-- Add/Edit Habit Modal -->
+        <div id="habit-modal" class="modal-overlay">
+          <div class="modal">
+            <div class="wellness-modal-header">
+              <div>
+                <h2 id="habit-modal-title">New Habit</h2>
+                <p class="wellness-section-note">
+                  Add a habit you want to track in your wellness routine.
+                </p>
+              </div>
+              <button class="btn secondary sm" id="close-habit-modal-btn" type="button">Close</button>
+            </div>
+
+            <div class="wellness-form-group">
+              <label class="stress-label" for="habit-title">Habit Name</label>
+              <input
+                id="habit-title"
+                class="wellness-input"
+                type="text"
+                maxlength="255"
+                placeholder="Example: Drink 8 glasses of water"
+              />
+            </div>
+
+            <div class="wellness-form-group">
+              <label class="stress-label" for="habit-category">Category</label>
+              <input
+                id="habit-category"
+                class="wellness-input"
+                type="text"
+                placeholder="Example: Health, Sleep, Fitness"
+              />
+            </div>
+
+            <div class="wellness-form-group">
+              <label class="stress-label" for="habit-frequency">Frequency</label>
+              <select id="habit-frequency" class="wellness-input">
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+              </select>
+            </div>
+
+            <div class="wellness-form-group">
+              <label class="stress-label" for="habit-description">Description</label>
+              <textarea
+                id="habit-description"
+                class="wellness-textarea"
+                rows="3"
+                placeholder="Optional notes about this habit"
+              ></textarea>
+            </div>
+
+            <div id="habit-modal-msg" class="status-message wellness-hidden"></div>
+
+            <div class="wellness-modal-actions">
+              <button class="btn danger" id="delete-habit-btn" type="button" hidden>Delete Habit</button>
+
+              <div class="wellness-modal-actions-right">
+                <button class="btn secondary" id="cancel-habit-btn" type="button">Cancel</button>
+                <button class="btn" id="save-habit-btn" type="button">Save Habit</button>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div class="footer">Team 1 • Spring 2026</div>
 
@@ -87,5 +179,6 @@
   </div>
 
   <script src="../js/wellness.js"></script>
+  <script src="../js/headerProfile.js"></script>
 </body>
 </html>

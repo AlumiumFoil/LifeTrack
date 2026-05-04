@@ -16,6 +16,7 @@ const searchPublicResources = async (searchTerm, category, contentType) => {
     // Base query that only looks at publicly available resources
     let sql = `
         SELECT
+            0 as result_group,
             'resource' as source,
             resource_id as id,
             title,
@@ -64,13 +65,14 @@ const searchPublicResources = async (searchTerm, category, contentType) => {
  * @param {string} searchTerm - Search term
  * @returns {Promise<Object>} SQL query and parameters for user content
  */
-const searchUserContent = async (accountId, searchTerm) => {
+const searchUserContent = async (accountId, searchTerm, category) => {
     let sql = '';
     const params = [accountId];
 
     // Search for goals
     sql += `
-        SELECT 
+        SELECT
+            1 as result_group, 
             'goal' as source,
             goal_id as id,
             title,
@@ -81,7 +83,7 @@ const searchUserContent = async (accountId, searchTerm) => {
             NULL as url,
             NULL as image_url,
             NULL as content_type,
-            category,
+            'productivity' as category,
             created_at as item_created_at
         FROM goals
         WHERE account_id = ?
@@ -94,10 +96,15 @@ const searchUserContent = async (accountId, searchTerm) => {
         params.push(likeTerm, likeTerm);
     }
 
+    if (category && category.trim() && category.trim() !== "productivity") {
+        sql += ` AND 1 = 0`;
+    }
+
     // Search for projects
     sql += `
         UNION ALL
-        SELECT 
+        SELECT
+            1 as result_group, 
             'project' as source,
             project_id as id,
             title,
@@ -108,7 +115,7 @@ const searchUserContent = async (accountId, searchTerm) => {
             NULL as url,
             NULL as image_url,
             NULL as content_type,
-            NULL as category,
+            'academic' as category,
             created_at as item_created_at
         FROM projects
         WHERE account_id = ?
@@ -121,11 +128,16 @@ const searchUserContent = async (accountId, searchTerm) => {
         params.push(likeTerm, likeTerm);
     }
 
+    if (category && category.trim() && category.trim() !== "academic") {
+        sql += ` AND 1 = 0`;
+    }
+
     // Search for milestones
     // Milestones are linked to projects, so we join to filter by account_id by checking the project_id
     sql += `
         UNION ALL
-        SELECT 
+        SELECT
+            1 as result_group, 
             'milestone' as source,
             milestone_id as id,
             m.title,
@@ -136,7 +148,7 @@ const searchUserContent = async (accountId, searchTerm) => {
             NULL as url,
             NULL as image_url,
             NULL as content_type,
-            NULL as category,
+            'academic' as category,
             m.created_at as item_created_at
         FROM milestones m
         JOIN projects p ON m.project_id = p.project_id
@@ -148,6 +160,10 @@ const searchUserContent = async (accountId, searchTerm) => {
         const likeTerm = `%${searchTerm.trim()}%`;
         sql += ` AND (m.title LIKE ? OR COALESCE(m.description, '') LIKE ?)`;
         params.push(likeTerm, likeTerm);
+    }
+
+    if (category && category.trim() && category.trim() !== "academic") {
+        sql += ` AND 1 = 0`;
     }
 
     return { sql, params };
@@ -171,13 +187,13 @@ const executeSearch = async (searchTerm, category, contentType, accountId) => {
 
         // Add user-specific content to search results if authenticated
         if (accountId) {
-            const { sql: userSql, params: userParams } = await searchUserContent(accountId, searchTerm);
+            const { sql: userSql, params: userParams } = await searchUserContent(accountId, searchTerm, category);
             finalSql += ` UNION ALL ${userSql}`;
             finalParams.push(...userParams);
         }
 
         // Order by newest first, limited to 50 results
-        finalSql += ` ORDER BY item_created_at DESC LIMIT 50`;
+        finalSql += ` ORDER BY result_group ASC, item_created_at DESC LIMIT 50`;
 
         const [results] = await pool.query(finalSql, finalParams);
         return results;
