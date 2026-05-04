@@ -642,28 +642,39 @@ const getWeeklyPlanner = async (req, res) => {
 };
 
 /**
- * Get all planner items for a date range
+ * Get all planner items
  * Requires authentication
  * GET /api/academic/planner-items
- * Query params: startDate, endDate (YYYY-MM-DD)
+ * Query params: 
+ *   - startDate (optional, YYYY-MM-DD) - defaults to current week start (Sunday)
+ *   - endDate (optional, YYYY-MM-DD) - defaults to current week end (Saturday)
+ *   - category (optional) - filter by category
  * Output: { success, items }
  */
 const getPlannerItems = async (req, res) => {
     try {
         const accountId = req.user.account_id;
-        const { startDate, endDate } = req.query;
+        let { startDate, endDate, category } = req.query;
         
+        // If no dates provided, default to current week
         if (!startDate || !endDate) {
-            return res.status(400).json({
-                success: false,
-                error: 'startDate and endDate are required'
-            });
+            const today = new Date().toISOString().split('T')[0];
+            const weekRange = getWeekRange(today);
+            startDate = weekRange.startDate;
+            endDate = weekRange.endDate;
         }
         
-        const items = await academicModel.getPlannerItemsByDateRange(accountId, startDate, endDate);
+        let items = await academicModel.getPlannerItemsByDateRange(accountId, startDate, endDate);
+        
+        // Filter by category if provided
+        if (category && VALID_CATEGORIES.includes(category)) {
+            items = items.filter(item => item.category === category);
+        }
         
         res.json({
             success: true,
+            weekStart: startDate,
+            weekEnd: endDate,
             items
         });
     } catch (error) {
