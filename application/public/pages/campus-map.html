@@ -126,7 +126,7 @@
   <header class="dashboard-header">
     <a class="dashboard-header-brand" href="./dashboard.html">LifeTrack</a>
     <div class="dashboard-header-actions">
-      <a class="dashboard-header-link" href="./search.html">Search</a>
+      <a class="dashboard-header-profile" href="./search.html">Search</a>
       <a class="dashboard-header-profile" href="./profile.html">
         <img id="profilePreview" class="dashboard-header-avatar"
           src="https://placehold.co/120x120?text=User" alt="Profile" />
@@ -206,6 +206,79 @@
     localStorage.removeItem("user");
     window.location.href = "./auth.html";
   });
+
+  // load accessibility settings
+  async function loadAccessibilitySettings() {
+    const token = getAccessToken();
+    if (!token) return;
+
+    try {
+      const response = await fetch("/api/users/me/accessibility", {
+        method: "GET",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.success) return;
+      applyAccessibilitySettings(data.accessibility);
+    } catch (error) {
+      console.error("Accessibility settings load error:", error.message || error);
+    }
+  }
+
+  function applyAccessibilitySettings(accessibility) {
+    if (!accessibility) return;
+
+    const themeMode = accessibility.themeMode || "dark";
+    const textSize = accessibility.textSize || "normal";
+    const highContrastEnabled =
+      accessibility.highContrastEnabled === true ||
+      accessibility.highContrastEnabled === 1 ||
+      accessibility.highContrastEnabled === "1";
+
+    const isAccessibilityMode =
+      themeMode === "light" &&
+      textSize === "large" &&
+      highContrastEnabled;
+
+    document.body.setAttribute(
+      "data-accessibility-mode",
+      isAccessibilityMode ? "accessibility" : "default"
+    );
+  }
+
+  loadAccessibilitySettings();
+
+  // load profile image from backend
+  async function loadProfileImage() {
+    const token = getAccessToken();
+    if (!token) return;
+
+    try {
+      const response = await fetch("/api/users/me/profile", {
+        method: "GET",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.success) return;
+
+      const profilePreview = document.getElementById("profilePreview");
+      const profileUsernameTop = document.getElementById("profileUsernameTop");
+
+      if (profilePreview && data.profile.profileThumbnailUrl) {
+        profilePreview.src = data.profile.profileThumbnailUrl;
+      }
+
+      if (profileUsernameTop && data.profile.username) {
+        profileUsernameTop.textContent = data.profile.username;
+      }
+    } catch (error) {
+      console.error("Profile load error:", error.message || error);
+    }
+  }
+
+  loadProfileImage();
 
   // all campus locations
   const allLocations = [
