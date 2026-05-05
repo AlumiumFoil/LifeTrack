@@ -3,9 +3,23 @@
 
 const academicModel = require('../models/academicModel');
 
-// Helper functions
 /**
- * Validate assignment status
+ * Valid categories for planner items
+ */
+const VALID_CATEGORIES = ['Academic', 'Wellness', 'Productivity', 'Miscellaneous'];
+
+/**
+ * Valid status values for planner items
+ */
+const VALID_PLANNER_STATUSES = ['pending', 'completed'];
+
+/**
+ * Valid recurring patterns
+ */
+const VALID_RECURRING_PATTERNS = ['daily', 'weekly', 'monthly'];
+
+/**
+ * Helper: Validate assignment status
  * @param {string} status - Status to validate
  * @returns {boolean} True if valid
  */
@@ -15,7 +29,7 @@ const isValidAssignmentStatus = (status) => {
 };
 
 /**
- * Validate task status
+ * Helper: Validate task status
  * @param {string} status - Status to validate
  * @returns {boolean} True if valid
  */
@@ -563,21 +577,6 @@ const getAcademicStats = async (req, res) => {
         });
     }
 };
-
-/**
- * Valid categories for planner items
- */
-const VALID_CATEGORIES = ['Academic', 'Wellness', 'Productivity', 'Miscellaneous'];
-
-/**
- * Valid status values for planner items
- */
-const VALID_PLANNER_STATUSES = ['pending', 'completed'];
-
-/**
- * Valid recurring patterns
- */
-const VALID_RECURRING_PATTERNS = ['daily', 'weekly', 'monthly'];
 
 /**
  * Get start and end dates for a week based on a given date
