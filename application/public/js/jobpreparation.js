@@ -42,6 +42,16 @@ function applyAccessibilitySettings(accessibility) {
 
 // ── Career Resources ──────────────────────────────────────────────────────────
 
+// Converts a backend-relative URL like "resources/resume.html" to a path that
+// works from jobpreparation.html in pages/: "./resources/resume.html".
+// Full external URLs (http/https) and already-prefixed paths are left unchanged.
+function resolveResourceUrl(url) {
+  if (!url) return null;
+  if (/^https?:\/\//i.test(url)) return url;          // external link
+  if (url.startsWith('/') || url.startsWith('./') || url.startsWith('../')) return url;
+  return './' + url;                                   // bare relative path
+}
+
 async function loadCareerResources() {
   const container = document.getElementById('careerResources');
 
@@ -54,7 +64,8 @@ async function loadCareerResources() {
     }
 
     const data = await res.json();
-    const resources = Array.isArray(data) ? data : (data.resources || []);
+    // API returns { success, resources: [...] }
+    const resources = data.resources || [];
 
     if (!resources.length) {
       container.innerHTML = '<p style="color:var(--muted)">Career resources are not available right now.</p>';
@@ -62,9 +73,12 @@ async function loadCareerResources() {
     }
 
     container.innerHTML = resources.map(r => {
-      const pill = r.type || r.category || '';
-      const viewBtn = r.url
-        ? `<a class="btn secondary sm" href="${r.url}" target="_blank" rel="noopener noreferrer">View Resource</a>`
+      // API field is contentType; fall back to category as secondary label
+      const pill = r.contentType || r.category || '';
+      const href = resolveResourceUrl(r.url);
+      const isExternal = href && /^https?:\/\//i.test(href);
+      const viewBtn = href
+        ? `<a class="btn secondary sm" href="${href}"${isExternal ? ' target="_blank" rel="noopener noreferrer"' : ''}>View Resource</a>`
         : '';
 
       return `
@@ -110,13 +124,19 @@ async function loadCareerGoals() {
       headers: { Authorization: `Bearer ${token}` },
     });
 
+    if (res.status === 401) {
+      container.innerHTML = '<p style="color:var(--muted)">Your session has expired. Please log in again.</p>';
+      return;
+    }
+
     if (!res.ok) {
       container.innerHTML = '<p style="color:var(--muted)">Unable to load career goals.</p>';
       return;
     }
 
     const data = await res.json();
-    const goals = Array.isArray(data) ? data : (data.goals || []);
+    // API returns { success, goals: [...] }
+    const goals = data.goals || [];
 
     if (!goals.length) {
       container.innerHTML = '<p style="color:var(--muted)">No career goals found. Add some from the Goals page.</p>';
@@ -124,18 +144,20 @@ async function loadCareerGoals() {
     }
 
     container.innerHTML = goals.map(g => {
-      const status   = g.status   || '';
-      const category = g.category || '';
-      const notes    = g.description || g.notes || '';
+      const status     = g.status     || '';
+      const targetRole = g.targetRole || '';
+      const targetDate = g.targetDate ? new Date(g.targetDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+      const desc       = g.description || '';
 
       return `
         <div class="card">
           <div class="goal-card-meta">
-            ${status   ? `<span class="badge ${goalBadgeClass(status)}">${status}</span>` : ''}
-            ${category ? `<span class="small">${category}</span>` : ''}
+            ${status     ? `<span class="badge ${goalBadgeClass(status)}">${status}</span>` : ''}
+            ${targetRole ? `<span class="small">${targetRole}</span>` : ''}
           </div>
           <h2 class="card-title">${g.title || 'Untitled Goal'}</h2>
-          ${notes ? `<p class="card-desc">${notes}</p>` : ''}
+          ${desc       ? `<p class="card-desc">${desc}</p>` : ''}
+          ${targetDate ? `<p class="small" style="margin-top:8px">Target: ${targetDate}</p>` : ''}
         </div>
       `;
     }).join('');
