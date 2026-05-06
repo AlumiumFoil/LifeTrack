@@ -389,7 +389,7 @@ const getAllMilestones = async (accountId) => {
             m.updated_at AS updatedAt
          FROM milestones m
          JOIN projects p ON m.project_id = p.project_id
-         WHERE m.account_id = ? AND p.status = 'active'
+         WHERE m.account_id = ?
          ORDER BY m.due_date ASC, m.sort_order ASC`,
         [accountId]
     );

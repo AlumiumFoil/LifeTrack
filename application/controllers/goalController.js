@@ -502,7 +502,7 @@ const getMilestonesByProject = async (req, res) => {
 const getAllMilestones = async (req, res) => {
     try {
         const accountId = req.user.account_id;
-        const milestones = await goalModel.getAllMilestones(accountId);
+        let milestones = await goalModel.getAllMilestones(accountId);
         
         res.json({
             success: true,
