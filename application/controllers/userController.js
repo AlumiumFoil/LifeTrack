@@ -80,16 +80,8 @@ const buildDashboardSummary = (
         (milestone) => milestone.status === 'completed'
     ).length;
 
-    const averageAcademicProgress = academicProgress.length
-        ? Number(
-              (
-                  academicProgress.reduce(
-                      (sum, item) => sum + Number(item.progressPercent || 0),
-                      0
-                  ) / academicProgress.length
-              ).toFixed(2)
-          )
-        : null;
+    const averageAcademicProgress = null;
+    const academicCourseCount = academicProgress.length || 0;
 
     const averageMoodValue = wellnessEntries.length
         ? Number(
@@ -106,7 +98,7 @@ const buildDashboardSummary = (
         goalCount: goals.length,
         projectCount: projects.length,
         milestoneCount: milestones.length,
-        academicCourseCount: academicProgress.length,
+        academicCourseCount,
         wellnessEntryCount: wellnessEntries.length,
         completedGoals,
         completedProjects,
@@ -456,7 +448,7 @@ const getDashboard = async (req, res) => {
             dashboardModel.getGoalsByAccountId(accountId),
             dashboardModel.getProjectsByAccountId(accountId),
             dashboardModel.getMilestonesByAccountId(accountId),
-            dashboardModel.getAcademicProgressByAccountId(accountId),
+            dashboardModel.getCoursesByAccountId(accountId),
             dashboardModel.getWellnessEntriesByAccountId(accountId)
         ]);
 

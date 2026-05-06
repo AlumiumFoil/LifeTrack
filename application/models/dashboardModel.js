@@ -155,21 +155,24 @@ const getMilestonesByAccountId = async (accountId) => {
 };
 
 /**
- * Get academic course progress rows for the current user
+ * Get course rows for the current user
  * @param {number} accountId - Authenticated user's account id
- * @returns {Promise<object[]>} Array of academic progress rows
+ * @returns {Promise<object[]>} Array of course rows
  */
-const getAcademicProgressByAccountId = async (accountId) => {
+const getCoursesByAccountId = async (accountId) => {
     const [rows] = await pool.query(
         `SELECT
-            progress_id AS progressId,
+            course_id AS courseId,
             account_id AS accountId,
-            course_name AS courseName,
-            progress_percent AS progressPercent,
+            course_title AS courseTitle,
+            course_code AS courseCode,
+            current_grade AS currentGrade,
+            instructor_name AS instructorName,
+            term,
             updated_at AS updatedAt
-         FROM academic_course_progress
+         FROM courses
          WHERE account_id = ?
-         ORDER BY updated_at DESC, course_name ASC, progress_id DESC`,
+         ORDER BY course_code ASC, course_id DESC`,
         [accountId]
     );
 
@@ -205,6 +208,6 @@ module.exports = {
     getGoalsByAccountId,
     getProjectsByAccountId,
     getMilestonesByAccountId,
-    getAcademicProgressByAccountId,
+    getCoursesByAccountId,
     getWellnessEntriesByAccountId
 };
