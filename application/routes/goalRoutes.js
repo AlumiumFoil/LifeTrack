@@ -13,7 +13,7 @@ router.use(authenticateJWT);
 
 /**
  * GET /api/goals/projects/stats
- * Get project statistics
+ * Get project and milestone statistics
  * Requires authentication
  * Output: { success, stats }
  */
