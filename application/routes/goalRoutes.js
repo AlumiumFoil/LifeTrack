@@ -12,6 +12,98 @@ const router = express.Router();
 router.use(authenticateJWT);
 
 /**
+ * GET /api/goals/projects/stats
+ * Get project statistics
+ * Requires authentication
+ * Output: { success, stats }
+ */
+router.get('/projects/stats', goalController.getProjectStats);
+
+/**
+ * GET /api/goals/projects
+ * Get all projects for authenticated user
+ * Requires authentication
+ * Output: { success, projects }
+ */
+router.get('/projects', goalController.getProjects);
+
+/**
+ * GET /api/goals/projects/:id
+ * Get a single project by ID
+ * Requires authentication
+ * Output: { success, project }
+ */
+router.get('/projects/:id', goalController.getProjectById);
+
+/**
+ * POST /api/goals/projects
+ * Create a new project
+ * Requires authentication
+ * Input: { title, description, groupMembers, memberRoles, gitUrl }
+ * Output: { success, message, projectId }
+ */
+router.post('/projects', goalController.createProject);
+
+/**
+ * PUT /api/goals/projects/:id
+ * Update an existing project
+ * Requires authentication
+ * Input: { title, description, groupMembers, memberRoles, gitUrl, status }
+ * Output: { success, message }
+ */
+router.put('/projects/:id', goalController.updateProject);
+
+/**
+ * DELETE /api/goals/projects/:id
+ * Delete a project (soft delete)
+ * Requires authentication
+ * Output: { success, message }
+ */
+router.delete('/projects/:id', goalController.deleteProject);
+
+/**
+ * GET /api/goals/projects/:projectId/milestones
+ * Get all milestones for a specific project
+ * Requires authentication
+ * Output: { success, milestones }
+ */
+router.get('/projects/:projectId/milestones', goalController.getMilestonesByProject);
+
+/**
+ * POST /api/goals/projects/:projectId/milestones
+ * Create a new milestone for a project
+ * Requires authentication
+ * Input: { title, description, dueDate, status, sortOrder }
+ * Output: { success, message, milestoneId }
+ */
+router.post('/projects/:projectId/milestones', goalController.createMilestone);
+
+/**
+ * GET /api/goals/milestones
+ * Get all milestones for authenticated user (across all projects)
+ * Requires authentication
+ * Output: { success, milestones }
+ */
+router.get('/milestones', goalController.getAllMilestones);
+
+/**
+ * PUT /api/goals/milestones/:id
+ * Update an existing milestone
+ * Requires authentication
+ * Input: { title, description, dueDate, status, sortOrder }
+ * Output: { success, message }
+ */
+router.put('/milestones/:id', goalController.updateMilestone);
+
+/**
+ * DELETE /api/goals/milestones/:id
+ * Delete a milestone
+ * Requires authentication
+ * Output: { success, message }
+ */
+router.delete('/milestones/:id', goalController.deleteMilestone);
+
+/**
  * GET /api/goals
  * Get all goals for authenticated user
  * Returns goals sorted by target date (soonest first) and creation date
