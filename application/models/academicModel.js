@@ -426,6 +426,234 @@ const getAcademicStats = async (accountId) => {
     };
 };
 
+/**
+ * Get all planner items for a user within a date range
+ * @param {number} accountId - User's account ID
+ * @param {string} startDate - Start date (YYYY-MM-DD)
+ * @param {string} endDate - End date (YYYY-MM-DD)
+ * @returns {Promise<Array>} Array of planner item objects
+ */
+const getPlannerItemsByDateRange = async (accountId, startDate, endDate) => {
+    const [items] = await pool.query(
+        `SELECT 
+            item_id AS id,
+            account_id AS accountId,
+            title,
+            description,
+            category,
+            due_date AS dueDate,
+            status,
+            is_recurring AS isRecurring,
+            recurring_pattern AS recurringPattern,
+            recurring_end_date AS recurringEndDate,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+         FROM planner_items
+         WHERE account_id = ? AND due_date BETWEEN ? AND ?
+         ORDER BY due_date ASC, created_at ASC`,
+        [accountId, startDate, endDate]
+    );
+    
+    return items.map(item => ({
+        ...item,
+        dueDate: formatDate(item.dueDate),
+        recurringEndDate: formatDate(item.recurringEndDate)
+    }));
+};
+
+/**
+ * Get a single planner item by ID
+ * @param {number} itemId - Planner item ID
+ * @param {number} accountId - User's account ID
+ * @returns {Promise<object|null>} Planner item object or null
+ */
+const getPlannerItemById = async (itemId, accountId) => {
+    const [items] = await pool.query(
+        `SELECT 
+            item_id AS id,
+            account_id AS accountId,
+            title,
+            description,
+            category,
+            due_date AS dueDate,
+            status,
+            is_recurring AS isRecurring,
+            recurring_pattern AS recurringPattern,
+            recurring_end_date AS recurringEndDate,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+         FROM planner_items
+         WHERE item_id = ? AND account_id = ?`,
+        [itemId, accountId]
+    );
+    
+    if (items.length === 0) return null;
+    
+    const item = items[0];
+    return {
+        ...item,
+        dueDate: formatDate(item.dueDate),
+        recurringEndDate: formatDate(item.recurringEndDate)
+    };
+};
+
+/**
+ * Create a new planner item
+ * @param {number} accountId - User's account ID
+ * @param {object} data - Planner item data
+ * @returns {Promise<number>} Inserted item ID
+ */
+const createPlannerItem = async (accountId, data) => {
+    const { title, description, category, dueDate, status, isRecurring, recurringPattern, recurringEndDate } = data;
+    
+    const [result] = await pool.query(
+        `INSERT INTO planner_items (
+            account_id, title, description, category, due_date, 
+            status, is_recurring, recurring_pattern, recurring_end_date,
+            created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+        [accountId, title, description || null, category, dueDate, status || 'pending', 
+         isRecurring || false, recurringPattern || null, recurringEndDate || null]
+    );
+    return result.insertId;
+};
+
+/**
+ * Update an existing planner item
+ * @param {number} itemId - Planner item ID
+ * @param {number} accountId - User's account ID
+ * @param {object} data - Updated planner item data
+ * @returns {Promise<boolean>} True if updated
+ */
+const updatePlannerItem = async (itemId, accountId, data) => {
+    const { title, description, category, dueDate, status, isRecurring, recurringPattern, recurringEndDate } = data;
+    
+    const updates = [];
+    const values = [];
+    
+    if (title !== undefined) {
+        updates.push('title = ?');
+        values.push(title);
+    }
+    if (description !== undefined) {
+        updates.push('description = ?');
+        values.push(description);
+    }
+    if (category !== undefined) {
+        updates.push('category = ?');
+        values.push(category);
+    }
+    if (dueDate !== undefined) {
+        updates.push('due_date = ?');
+        values.push(dueDate);
+    }
+    if (status !== undefined) {
+        updates.push('status = ?');
+        values.push(status);
+    }
+    if (isRecurring !== undefined) {
+        updates.push('is_recurring = ?');
+        values.push(isRecurring);
+    }
+    if (recurringPattern !== undefined) {
+        updates.push('recurring_pattern = ?');
+        values.push(recurringPattern);
+    }
+    if (recurringEndDate !== undefined) {
+        updates.push('recurring_end_date = ?');
+        values.push(recurringEndDate);
+    }
+    
+    updates.push('updated_at = NOW()');
+    values.push(itemId, accountId);
+    
+    const [result] = await pool.query(
+        `UPDATE planner_items SET ${updates.join(', ')} WHERE item_id = ? AND account_id = ?`,
+        values
+    );
+    return result.affectedRows > 0;
+};
+
+/**
+ * Delete a planner item
+ * @param {number} itemId - Planner item ID
+ * @param {number} accountId - User's account ID
+ * @returns {Promise<boolean>} True if deleted
+ */
+const deletePlannerItem = async (itemId, accountId) => {
+    const [result] = await pool.query(
+        `DELETE FROM planner_items WHERE item_id = ? AND account_id = ?`,
+        [itemId, accountId]
+    );
+    return result.affectedRows > 0;
+};
+
+/**
+ * Get assignments for weekly planner
+ * @param {number} accountId - User's account ID
+ * @param {string} startDate - Start date (YYYY-MM-DD)
+ * @param {string} endDate - End date (YYYY-MM-DD)
+ * @returns {Promise<Array>} Array of assignment objects
+ */
+const getAssignmentsForPlanner = async (accountId, startDate, endDate) => {
+    const [assignments] = await pool.query(
+        `SELECT 
+            assignment_id AS id,
+            title,
+            description,
+            course_name AS courseName,
+            due_date AS dueDate,
+            'assignment' AS source,
+            'Academic' AS category,
+            status
+         FROM assignments
+         WHERE account_id = ? AND due_date BETWEEN ? AND ?
+         ORDER BY due_date ASC`,
+        [accountId, startDate, endDate]
+    );
+    
+    return assignments.map(assignment => ({
+        ...assignment,
+        dueDate: formatDate(assignment.dueDate),
+        source: 'assignment',
+        category: 'Academic'
+    }));
+};
+
+/**
+ * Get weekly planner
+ * @param {number} accountId - User's account ID
+ * @param {string} startDate - Start date (YYYY-MM-DD)
+ * @param {string} endDate - End date (YYYY-MM-DD)
+ * @returns {Promise<Array>} Combined and sorted array of all items
+ */
+const getWeeklyPlanner = async (accountId, startDate, endDate) => {
+    // Get assignments
+    const assignments = await getAssignmentsForPlanner(accountId, startDate, endDate);
+    
+    // Get planner items
+    const plannerItems = await getPlannerItemsByDateRange(accountId, startDate, endDate);
+    
+    // Format planner items to match assignment structure
+    const formattedPlannerItems = plannerItems.map(item => ({
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        dueDate: item.dueDate,
+        source: 'planner',
+        category: item.category,
+        status: item.status,
+        isRecurring: item.isRecurring,
+        recurringPattern: item.recurringPattern
+    }));
+    
+    // Combine and sort by due date
+    const allItems = [...assignments, ...formattedPlannerItems];
+    allItems.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+    
+    return allItems;
+};
+
 module.exports = {
     // Assignment functions
     getAssignments,
@@ -452,5 +680,14 @@ module.exports = {
     getAcademicStats,
     
     // Status values
-    STATUS_VALUES
+    STATUS_VALUES,
+
+    // Weekly Planner functions
+    getPlannerItemsByDateRange,
+    getPlannerItemById,
+    createPlannerItem,
+    updatePlannerItem,
+    deletePlannerItem,
+    getAssignmentsForPlanner,
+    getWeeklyPlanner
 };

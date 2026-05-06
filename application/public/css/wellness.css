@@ -1,0 +1,135 @@
+/* Wellness page-specific styles */
+
+.wellness-card-lead {
+  margin: 0 0 4px;
+  font-weight: 600;
+}
+
+.wellness-card-subtitle,
+.wellness-section-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.wellness-field-group,
+.wellness-form-group {
+  margin-top: 14px;
+}
+
+.wellness-slider {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.wellness-slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.wellness-slider-current {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.wellness-input,
+.wellness-textarea {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(11, 18, 32, 0.9);
+  color: var(--text);
+  font: inherit;
+}
+
+.wellness-textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.wellness-input::placeholder,
+.wellness-textarea::placeholder {
+  color: var(--muted);
+}
+
+.wellness-input:focus,
+.wellness-textarea:focus {
+  outline: none;
+  border-color: rgba(77, 163, 255, 0.8);
+  box-shadow: 0 0 0 3px rgba(77, 163, 255, 0.15);
+}
+
+.wellness-actions-row,
+.wellness-section-toolbar,
+.wellness-modal-header,
+.wellness-modal-actions,
+.wellness-modal-actions-right {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.wellness-actions-row {
+  margin-top: 18px;
+}
+
+.wellness-section-toolbar {
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.wellness-modal-header {
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.wellness-modal-header h2 {
+  margin: 0 0 6px;
+}
+
+.wellness-modal-actions {
+  justify-content: space-between;
+  margin-top: 18px;
+}
+
+.wellness-modal-actions-right {
+  margin-left: auto;
+}
+
+.wellness-hidden {
+  display: none;
+}
+
+#delete-habit-btn[hidden] {
+  display: none !important;
+}
+
+body[data-accessibility-mode="accessibility"] .wellness-input,
+body[data-accessibility-mode="accessibility"] .wellness-textarea {
+  background: #ffffff;
+  color: var(--text);
+  border-color: rgba(15, 23, 42, 0.22);
+}
+
+.habit-description {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.habit-edit-btn {
+  margin-left: auto;
+}
+
+.habit-item input[type="checkbox"]:disabled {
+  cursor: not-allowed;
+}

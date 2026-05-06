@@ -128,4 +128,64 @@ router.get('/courses', academicController.getCourses);
  */
 router.get('/stats', academicController.getAcademicStats);
 
+/**
+ * GET /api/academic/weekly-planner
+ * Get weekly planner (assignments + planner items)
+ * Query param: weekStart (optional, YYYY-MM-DD) - defaults to current week
+ * Requires authentication
+ * Output: { success, weekStart, weekEnd, items }
+ */
+router.get('/weekly-planner', academicController.getWeeklyPlanner);
+
+/**
+ * GET /api/academic/planner-items
+ * Get all planner items for a date range
+ * Query params: startDate, endDate (YYYY-MM-DD)
+ * Requires authentication
+ * Output: { success, items }
+ */
+router.get('/planner-items', academicController.getPlannerItems);
+
+/**
+ * GET /api/academic/planner-items/:id
+ * Get a single planner item by ID
+ * Requires authentication
+ * Output: { success, item }
+ */
+router.get('/planner-items/:id', academicController.getPlannerItemById);
+
+/**
+ * POST /api/academic/planner-items
+ * Create a new planner item
+ * Requires authentication
+ * Input: { title, description, category, dueDate, status, isRecurring, recurringPattern, recurringEndDate }
+ * Output: { success, message, itemId }
+ */
+router.post('/planner-items', academicController.createPlannerItem);
+
+/**
+ * PUT /api/academic/planner-items/:id
+ * Update an existing planner item
+ * Requires authentication
+ * Input: { title, description, category, dueDate, status, isRecurring, recurringPattern, recurringEndDate }
+ * Output: { success, message }
+ */
+router.put('/planner-items/:id', academicController.updatePlannerItem);
+
+/**
+ * DELETE /api/academic/planner-items/:id
+ * Delete a planner item
+ * Requires authentication
+ * Output: { success, message }
+ */
+router.delete('/planner-items/:id', academicController.deletePlannerItem);
+
+/**
+ * PATCH /api/academic/planner-items/:id/complete
+ * Mark planner item as completed
+ * Requires authentication
+ * Output: { success, message }
+ */
+router.patch('/planner-items/:id/complete', academicController.completePlannerItem);
+
 module.exports = router;

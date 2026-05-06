@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- google analytics tag -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BKXMLJEGGQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BKXMLJEGGQ');
+  </script>
+  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Career – LifeTrack</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body>
+  <div class="dashboard-frame">
+
+    <header class="dashboard-header">
+      <a class="dashboard-header-brand" href="../index.html">LifeTrack</a>
+      <div class="dashboard-header-actions">
+        <a class="dashboard-header-profile" href="./search.html">Search</a>
+        <a class="dashboard-header-profile" href="./profile.html">
+          <img
+            id="profilePreview"
+            class="dashboard-header-avatar"
+            src="https://placehold.co/120x120?text=User"
+            alt="Profile preview"
+          />
+          <span id="profileUsernameTop">Profile</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="dashboard-body">
+      <aside class="dashboard-sidebar">
+        <nav class="dashboard-nav">
+          <a class="dashboard-nav-link" href="./dashboard.html">Home</a>
+          <a class="dashboard-nav-link" href="./studying.html">Academic</a>
+          <a class="dashboard-nav-link active" href="./jobpreparation.html">Career</a>
+          <a class="dashboard-nav-link" href="./goals.html">Productivity</a>
+          <a class="dashboard-nav-link" href="./wellness.html">Wellness</a>
+          <a class="dashboard-nav-link" href="./campus-map.html">Campus Map</a>
+        </nav>
+      </aside>
+
+      <main class="dashboard-main">
+
+        <section class="hero">
+          <h1>Career</h1>
+          <p>Find resources, track your career goals, and stay prepared for what's next.</p>
+        </section>
+
+        <!-- Career Resources — populated by jobpreparation.js -->
+        <div class="section-heading">Career Resources</div>
+        <div class="grid" id="careerResources">
+          <p style="color:var(--muted)">Loading career resources…</p>
+        </div>
+
+        <!-- Starter Resources — always rendered, static links -->
+        <div class="section-heading">Starter Resources</div>
+        <div class="grid">
+          <div class="card">
+            <h2 class="card-title">Resume Starter Template</h2>
+            <p class="card-desc">A simple template to help you build your resume from scratch.</p>
+            <a class="btn secondary sm" href="./resources/resume.html">Open Resource</a>
+          </div>
+          <div class="card">
+            <h2 class="card-title">Portfolio Checklist</h2>
+            <p class="card-desc">A quick checklist to make sure your portfolio is complete.</p>
+            <a class="btn secondary sm" href="./resources/portfolio.html">Open Resource</a>
+          </div>
+          <div class="card">
+            <h2 class="card-title">Interview Prep Workflow</h2>
+            <p class="card-desc">A step-by-step guide to prepare for interviews.</p>
+            <a class="btn secondary sm" href="./resources/interviewPrep.html">Open Resource</a>
+          </div>
+        </div>
+
+        <!-- Career Goals — populated by jobpreparation.js -->
+        <div class="section-heading">My Career Goals</div>
+        <div class="grid" id="careerGoals">
+          <p style="color:var(--muted)">Loading career goals…</p>
+        </div>
+
+        <div class="footer">Team 1 • Spring 2026</div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="../js/jobpreparation.js"></script>
+  <script src="../js/headerProfile.js"></script>
+</body>
+</html>

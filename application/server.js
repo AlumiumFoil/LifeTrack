@@ -17,6 +17,8 @@ const wellnessRoutes = require('./routes/wellnessRoutes');
 const academicRoutes = require('./routes/academicRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const resourceRoutes = require('./routes/resourceRoutes');
+const careerRoutes = require('./routes/careerRoutes');
+
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -81,6 +83,7 @@ app.use('/api/wellness', wellnessRoutes);   // Wellness/Mood routes
 app.use('/api/academic', academicRoutes);   // Academic/Study/Task routes
 app.use('/api/admin', adminRoutes);         // Admin routes
 app.use('/api/resources', resourceRoutes);  // Resource module routes
+app.use('/api/career', careerRoutes);       // Career page routes
 
 // Start the server
 app.listen(port, "127.0.0.1", () => {

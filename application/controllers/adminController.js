@@ -53,7 +53,7 @@ const getAdminStats = async (req, res) => {
  * @param {object} res
  * @returns {Promise<void>}
  */
-const getAdminUsers = async (res,req) => {
+const getAdminUsers = async (req,res) => {
     try {
         const name = typeof req.query.name === 'string' && req.query.name.trim()
         ? req.query.name.trim() : undefined;

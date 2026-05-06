@@ -3,80 +3,182 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Admin – LifeTrack</title>
+  <title>Admin Dashboard – LifeTrack</title>
+
   <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/admin.css" />
 </head>
 <body>
-  <div class="dashboard-frame">
+  <div class="admin-page">
+    <header class="admin-header">
+      <div>
+        <a class="admin-brand">LifeTrack</a>
+        <p class="admin-subtitle">Administrator Dashboard</p>
+      </div>
 
-    <header class="dashboard-header">
-      <a class="dashboard-header-brand" href="../index.html">LifeTrack</a>
-      <div class="dashboard-header-actions">
-        <a class="dashboard-header-profile" href="./search.html">Search</a>
-        <a class="dashboard-header-profile" href="./profile.html">
+      <div class="admin-header-actions">
+        <a class="admin-header-profile" href="./adminProfile.html">
           <img
             id="profilePreview"
             class="dashboard-header-avatar"
             src="https://placehold.co/120x120?text=User"
             alt="Profile preview"
           />
-          <span id="profileUsernameTop">Profile</span>
+          <span id="adminUsername" class="admin-user-label">Admin</span>
         </a>
+
+        <button id="adminLogoutBtn" class="btn secondary sm" type="button">Logout</button>
       </div>
     </header>
 
-    <div class="dashboard-body">
-      <aside class="dashboard-sidebar">
-        <nav class="dashboard-nav">
-          <a class="dashboard-nav-link" href="./dashboard.html">Home</a>
-          <a class="dashboard-nav-link" href="./studying.html">Academic</a>
-          <a class="dashboard-nav-link" href="./jobpreparation.html">Career</a>
-          <a class="dashboard-nav-link" href="./goals.html">Productivity</a>
-          <a class="dashboard-nav-link" href="./wellness.html">Wellness</a>
-        </nav>
-      </aside>
+    <main class="admin-main">
+      <section class="hero admin-hero">
+        <h1>Admin Dashboard</h1>
+        <p>
+          Review platform analytics, search user accounts, and view user profile
+          details without logging in as that user.
+        </p>
+      </section>
 
-      <main class="dashboard-main">
+      <div id="adminMessage" class="status-message" style="display:none;"></div>
 
-        <section class="hero">
-          <h1>Admin Dashboard</h1>
-          <p>Manage user accounts, review submitted content, and keep the LifeTrack platform running smoothly.</p>
-        </section>
+      <section class="summary-row admin-stats-grid" aria-label="Admin statistics">
+        <article class="summary-card">
+          <div class="s-value" id="statTotalUsers">--</div>
+          <div class="s-label">Total Users</div>
+        </article>
 
-        <!-- Section 1: Summary Cards -->
-        <div class="summary-row">
-          <div class="summary-card">
-            <div class="s-value" id="stat-total-users">7</div>
-            <div class="s-label">Total Users</div>
-          </div>
-          <div class="summary-card">
-            <div class="s-value green" id="stat-active-users">6</div>
-            <div class="s-label">Active Users</div>
-          </div>
-          <div class="summary-card">
-            <div class="s-value accent" id="stat-resources">6</div>
-            <div class="s-label">Submitted Resources</div>
-          </div>
-          <div class="summary-card">
-            <div class="s-value amber" id="stat-pending">3</div>
-            <div class="s-label">Pending Review</div>
-          </div>
+        <article class="summary-card">
+          <div class="s-value green" id="statActiveUsers">--</div>
+          <div class="s-label">Active Accounts</div>
+        </article>
+
+        <article class="summary-card">
+          <div class="s-value accent" id="statTotalGoals">--</div>
+          <div class="s-label">Total Goals</div>
+        </article>
+
+        <article class="summary-card">
+          <div class="s-value amber" id="statTotalProjects">--</div>
+          <div class="s-label">Total Projects</div>
+        </article>
+
+        <article class="summary-card">
+          <div class="s-value accent2" id="statAvgGoals">--</div>
+          <div class="s-label">Avg Goals Per User</div>
+        </article>
+      </section>
+
+      <section class="admin-section">
+        <div class="section-heading">Recent Users</div>
+
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Registered</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="recentUsersTableBody">
+              <tr>
+                <td colspan="4">Loading recent users...</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+      </section>
 
-        <!-- User list — toggle/delete actions rendered by admin.js -->
+      <section class="admin-section">
         <div class="section-heading">User Management</div>
-        <div class="assign-list" id="user-list"></div>
 
-        <!-- Submitted resource queue — approve or remove -->
-        <div class="section-heading">Content Moderation</div>
-        <div class="assign-list" id="resource-list"></div>
+        <form id="adminFilterForm" class="admin-filter-card">
+          <div class="form-group">
+            <label for="filterName">Name or Username</label>
+            <input
+              id="filterName"
+              class="ctrl-input"
+              type="text"
+              placeholder="Search by name or username"
+            />
+          </div>
 
-        <div class="footer">Team 1 • Spring 2026</div>
+          <div class="form-group">
+            <label for="filterEmail">Email</label>
+            <input
+              id="filterEmail"
+              class="ctrl-input"
+              type="text"
+              placeholder="Search by email"
+            />
+          </div>
 
-      </main>
+          <div class="form-group">
+            <label for="filterRegistrationDate">Registration Date</label>
+            <input
+              id="filterRegistrationDate"
+              class="ctrl-input"
+              type="date"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="filterStatus">Status</label>
+            <select id="filterStatus" class="ctrl-select">
+              <option value="">Any status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="suspended">Suspended</option>
+            </select>
+          </div>
+
+          <div class="admin-filter-actions">
+            <button class="btn sm" type="submit">Search</button>
+            <button id="clearFiltersBtn" class="btn secondary sm" type="button">Clear</button>
+          </div>
+        </form>
+
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Registration Date</th>
+                <th>Status</th>
+                <th>Roles</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <tr>
+                <td colspan="6">Loading users...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="footer">Team 1 • Spring 2026</div>
+    </main>
+  </div>
+
+  <div id="userModalOverlay" class="modal-overlay">
+    <div class="modal admin-modal" role="dialog" aria-modal="true" aria-labelledby="userModalTitle">
+      <div class="admin-modal-header">
+        <h2 id="userModalTitle">User Profile</h2>
+        <button id="closeUserModalBtn" class="btn secondary sm" type="button">Close</button>
+      </div>
+
+      <div id="userModalBody" class="admin-profile-details">
+        Loading user details...
+      </div>
     </div>
   </div>
 
   <script src="../js/admin.js"></script>
+  <script src="../js/headerProfile.js"></script>
 </body>
 </html>

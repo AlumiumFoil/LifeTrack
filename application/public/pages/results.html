@@ -6,6 +6,15 @@ It loads query vals from the URL & relies on search.js to fetch & render matchin
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- google analytics tag -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BKXMLJEGGQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BKXMLJEGGQ');
+  </script>
+  
   <meta charset="utf-8" />
   <!--Helps page scale correctly on tablets/phones-->
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -22,7 +31,6 @@ It loads query vals from the URL & relies on search.js to fetch & render matchin
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <a href="./dashboard.html">Dashboard</a>
         <a href="./search.html">Search</a>
-        <a href="../index.html">Home</a>
       </div>
     </div>
 
@@ -45,7 +53,6 @@ It loads query vals from the URL & relies on search.js to fetch & render matchin
 
         <div style="display:flex; gap:12px; flex-wrap:wrap;">
           <a class="btn secondary" href="./search.html">New Search</a>
-          <a class="btn secondary" href="./dashboard.html">Dashboard</a>
         </div>
       </div>
     </section>

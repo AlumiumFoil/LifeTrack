@@ -1,10 +1,148 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- google analytics tag -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BKXMLJEGGQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BKXMLJEGGQ');
+  </script>
+  
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Resume Starter Template – LifeTrack</title>
+  <title>Resume Builder – LifeTrack</title>
   <link rel="stylesheet" href="../../css/styles.css" />
+  <style>
+    /* ── textarea inherits the same look as text inputs ─────────────────── */
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(11, 18, 32, 0.9);
+      color: var(--text);
+      font: inherit;
+      resize: vertical;
+      min-height: 90px;
+      line-height: 1.55;
+    }
+    .form-group textarea::placeholder { color: var(--muted); }
+    .form-group textarea:focus {
+      outline: none;
+      border-color: rgba(77, 163, 255, 0.8);
+      box-shadow: 0 0 0 3px rgba(77, 163, 255, 0.15);
+    }
+
+    /* ── Two-column builder layout ───────────────────────────────────────── */
+    .resume-builder {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      align-items: start;
+      margin-top: 8px;
+    }
+
+    /* ── Scrollable form panel ───────────────────────────────────────────── */
+    .resume-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    /* ── White-paper preview ─────────────────────────────────────────────── */
+    .resume-preview-wrap {
+      position: sticky;
+      top: 24px;
+    }
+
+    .resume-preview {
+      background: #fff;
+      color: #111;
+      border-radius: 10px;
+      padding: 36px 38px;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 13.5px;
+      line-height: 1.6;
+      min-height: 560px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.45);
+      overflow-wrap: break-word;
+    }
+
+    /* Preview typography */
+    .rp-name {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      margin: 0 0 4px;
+      color: #111;
+    }
+    .rp-contact {
+      font-size: 12.5px;
+      color: #444;
+      margin: 0 0 2px;
+      line-height: 1.5;
+    }
+    .rp-divider {
+      border: none;
+      border-top: 1.5px solid #222;
+      margin: 10px 0 10px;
+    }
+    .rp-section-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #111;
+      margin: 14px 0 4px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 2px;
+    }
+    .rp-body {
+      font-size: 12.5px;
+      color: #222;
+      white-space: pre-wrap;
+      margin: 4px 0 0;
+    }
+    .rp-placeholder {
+      color: #bbb;
+      font-style: italic;
+      font-family: system-ui, sans-serif;
+      font-size: 12px;
+    }
+
+    /* ── Responsive: stack on narrow viewports ───────────────────────────── */
+    @media (max-width: 860px) {
+      .resume-builder { grid-template-columns: 1fr; }
+      .resume-preview-wrap { position: static; }
+    }
+
+    /* ── Print: show only the white preview, hide everything else ────────── */
+    @media print {
+      body { background: #fff !important; }
+      .dashboard-frame { display: block !important; }
+      .dashboard-header,
+      .dashboard-sidebar,
+      .hero,
+      .controls-bar,
+      .resume-form,
+      .section-heading:not(.print-heading),
+      .footer { display: none !important; }
+      .dashboard-body { display: block !important; }
+      .dashboard-main { padding: 0 !important; overflow: visible !important; }
+      .resume-builder { display: block !important; }
+      .resume-preview-wrap { position: static !important; }
+      .resume-preview {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        min-height: unset !important;
+      }
+      /* hide the "Live Preview" section heading too */
+      .resume-preview-wrap > .section-heading { display: none !important; }
+    }
+  </style>
 </head>
 <body>
   <div class="dashboard-frame">
@@ -33,115 +171,115 @@
           <a class="dashboard-nav-link active" href="../jobpreparation.html">Career</a>
           <a class="dashboard-nav-link" href="../goals.html">Productivity</a>
           <a class="dashboard-nav-link" href="../wellness.html">Wellness</a>
+          <a class="dashboard-nav-link" href="../campus-map.html">Campus Map</a>
         </nav>
       </aside>
 
       <main class="dashboard-main">
 
         <section class="hero">
-          <h1>Resume Starter Template</h1>
-          <p>A simple way to build your resume without overthinking it. Fill in each section with your own info and check it off when you're done.</p>
+          <h1>Resume Builder</h1>
+          <p>Fill in your details on the left and watch your resume take shape on the right. Print or download when you're ready.</p>
         </section>
 
-        <div class="summary-row">
-          <div class="summary-card">
-            <div class="s-value" id="stat-total">6</div>
-            <div class="s-label">Total Sections</div>
-          </div>
-          <div class="summary-card">
-            <div class="s-value green" id="stat-done">0</div>
-            <div class="s-label">Filled In</div>
-          </div>
-          <div class="summary-card">
-            <div class="s-value accent" id="stat-remaining">6</div>
-            <div class="s-label">Remaining</div>
-          </div>
+        <!-- Action buttons -->
+        <div class="controls-bar" style="margin-top:1.4rem">
+          <button class="btn" id="btn-print" type="button">Print Resume</button>
+          <button class="btn" id="btn-pdf" type="button">Download PDF</button>
+          <button class="btn secondary" id="btn-doc" type="button">Download .doc</button>
+          <button class="btn secondary" id="btn-reset" type="button">Reset Form</button>
+          <a class="btn secondary" href="../jobpreparation.html">← Back to Career</a>
         </div>
 
-        <div class="grid" id="checklist-grid">
+        <!-- Two-column builder -->
+        <div class="resume-builder">
 
-          <div class="card checklist-card" data-id="contact">
-            <div class="checklist-card-top">
-              <input type="checkbox" class="checklist-checkbox" id="cb-contact" />
-              <label class="checklist-label" for="cb-contact">Contact Info</label>
+          <!-- LEFT — fillable form ──────────────────────────────────────── -->
+          <div class="resume-form">
+
+            <div class="section-heading">Contact Info</div>
+            <div class="vp-form">
+              <div class="form-group">
+                <label for="f-name">Full Name</label>
+                <input id="f-name" type="text" placeholder="Jane Smith" />
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="f-email">Email</label>
+                  <input id="f-email" type="email" placeholder="jane@example.com" />
+                </div>
+                <div class="form-group">
+                  <label for="f-phone">Phone</label>
+                  <input id="f-phone" type="text" placeholder="(415) 555-0100" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="f-location">Location</label>
+                <input id="f-location" type="text" placeholder="San Francisco, CA" />
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="f-linkedin">LinkedIn</label>
+                  <input id="f-linkedin" type="text" placeholder="linkedin.com/in/janesmith" />
+                </div>
+                <div class="form-group">
+                  <label for="f-github">GitHub</label>
+                  <input id="f-github" type="text" placeholder="github.com/janesmith" />
+                </div>
+              </div>
             </div>
-            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
-              <li><strong>Full Name</strong> &middot; City, State &middot; Phone &middot; Email</li>
-              <li>LinkedIn: linkedin.com/in/yourname</li>
-              <li>GitHub: github.com/yourname</li>
-            </ul>
+
+            <div class="section-heading">Summary</div>
+            <div class="vp-form">
+              <div class="form-group">
+                <label for="f-summary">Professional Summary</label>
+                <textarea id="f-summary" rows="4" placeholder="Computer Science student at SFSU graduating May 2026. Experienced in full-stack development with a focus on clean, maintainable code. Seeking a software engineering internship or new-grad role."></textarea>
+              </div>
+            </div>
+
+            <div class="section-heading">Education</div>
+            <div class="vp-form">
+              <div class="form-group">
+                <label for="f-education">Education Details</label>
+                <textarea id="f-education" rows="4" placeholder="San Francisco State University — B.S. Computer Science&#10;Expected: May 2026 | GPA: 3.4 / 4.0&#10;Relevant Coursework: Data Structures, Software Engineering, Databases"></textarea>
+              </div>
+            </div>
+
+            <div class="section-heading">Experience</div>
+            <div class="vp-form">
+              <div class="form-group">
+                <label for="f-experience">Work Experience</label>
+                <textarea id="f-experience" rows="6" placeholder="Software Engineering Intern – Example Co. | Jun – Aug 2025&#10;• Built and maintained REST API endpoints using Node.js and Express&#10;• Reduced page load time 18% through query optimization&#10;• Collaborated in two-week Agile sprint cycles"></textarea>
+              </div>
+            </div>
+
+            <div class="section-heading">Projects</div>
+            <div class="vp-form">
+              <div class="form-group">
+                <label for="f-projects">Projects</label>
+                <textarea id="f-projects" rows="5" placeholder="LifeTrack – Student life management platform | React · Node.js · MySQL&#10;• Built Goals and Wellness modules with habit tracking and progress views&#10;• github.com/janesmith/lifetrack"></textarea>
+              </div>
+            </div>
+
+            <div class="section-heading">Skills</div>
+            <div class="vp-form">
+              <div class="form-group">
+                <label for="f-skills">Skills</label>
+                <textarea id="f-skills" rows="4" placeholder="Languages: JavaScript, Python, Java, SQL&#10;Frameworks & Tools: React, Node.js, Express, Git, Docker, MySQL&#10;Concepts: REST APIs, Agile, responsive design, version control"></textarea>
+              </div>
+            </div>
+
+          </div><!-- /resume-form -->
+
+          <!-- RIGHT — live preview ──────────────────────────────────────── -->
+          <div class="resume-preview-wrap">
+            <div class="section-heading">Live Preview</div>
+            <div class="resume-preview" id="resume-preview" aria-live="polite">
+              <!-- Rendered by JS -->
+            </div>
           </div>
 
-          <div class="card checklist-card" data-id="summary">
-            <div class="checklist-card-top">
-              <input type="checkbox" class="checklist-checkbox" id="cb-summary" />
-              <label class="checklist-label" for="cb-summary">Summary</label>
-            </div>
-            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
-              <li>State your degree, school, and expected graduation year</li>
-              <li>Mention 1 or 2 areas you're strong in or enjoy</li>
-              <li>Say what kind of role or opportunity you're looking for</li>
-            </ul>
-          </div>
-
-          <div class="card checklist-card" data-id="education">
-            <div class="checklist-card-top">
-              <input type="checkbox" class="checklist-checkbox" id="cb-education" />
-              <label class="checklist-label" for="cb-education">Education</label>
-            </div>
-            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
-              <li><strong>San Francisco State University</strong> &mdash; B.S. Computer Science</li>
-              <li>Expected: May 2026 &nbsp;|&nbsp; GPA: 3.4 / 4.0</li>
-              <li>Coursework: Data Structures, Software Engineering, Databases, Operating Systems</li>
-            </ul>
-          </div>
-
-          <div class="card checklist-card" data-id="experience">
-            <div class="checklist-card-top">
-              <input type="checkbox" class="checklist-checkbox" id="cb-experience" />
-              <label class="checklist-label" for="cb-experience">Experience</label>
-            </div>
-            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
-              <li><strong>Software Engineering Intern</strong> – Example Co. &nbsp;|&nbsp; Jun – Aug 2025</li>
-              <li>Built and maintained REST API endpoints using Node.js and Express</li>
-              <li>Reduced page load time by 18% through query optimization</li>
-              <li>Worked in two-week Agile sprint cycles with a small team</li>
-            </ul>
-          </div>
-
-          <div class="card checklist-card" data-id="projects">
-            <div class="checklist-card-top">
-              <input type="checkbox" class="checklist-checkbox" id="cb-projects" />
-              <label class="checklist-label" for="cb-projects">Projects</label>
-            </div>
-            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
-              <li><strong>LifeTrack</strong> – Student life management platform &nbsp;|&nbsp; React &middot; Node.js &middot; MySQL</li>
-              <li>Built the Goals and Wellness modules with habit tracking and progress views</li>
-              <li>Built responsive UI components used across all dashboard pages</li>
-              <li>github.com/yourname/lifetrack</li>
-            </ul>
-          </div>
-
-          <div class="card checklist-card" data-id="skills">
-            <div class="checklist-card-top">
-              <input type="checkbox" class="checklist-checkbox" id="cb-skills" />
-              <label class="checklist-label" for="cb-skills">Skills</label>
-            </div>
-            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
-              <li><strong>Languages:</strong> JavaScript, Python, Java, SQL</li>
-              <li><strong>Frameworks &amp; Tools:</strong> React, Node.js, Express, Git, Docker, MySQL</li>
-              <li><strong>Concepts:</strong> REST APIs, Agile, responsive design, version control</li>
-            </ul>
-          </div>
-
-        </div>
-
-        <div class="controls-bar" style="margin-top:1.5rem;">
-          <button class="btn" id="save-btn" type="button">Save Resource</button>
-          <a class="btn secondary" href="../dashboard.html">Back to Dashboard</a>
-        </div>
-
-        <p id="save-msg" style="display:none; margin-top:0.75rem; font-size:0.875rem; color:var(--green,#22c55e);"></p>
+        </div><!-- /resume-builder -->
 
         <div class="footer">Team 1 &middot; Spring 2026</div>
 
@@ -149,48 +287,151 @@
     </div>
   </div>
 
-  <!--currently charing accessibility setting JS file with other static resource files.
-  When resume.js is created for backend support either migrate this script source or add your own-->
   <script src="../../js/staticResources.js"></script>
   <script>
     'use strict';
 
-    const checkboxes = document.querySelectorAll('.checklist-checkbox');
-    const statDone = document.getElementById('stat-done');
-    const statRemaining = document.getElementById('stat-remaining');
-    const total = checkboxes.length;
+    // ── Helpers ────────────────────────────────────────────────────────────
 
-    function updateCounts() {
-      const done = Array.from(checkboxes).filter(cb => cb.checked).length;
-      statDone.textContent = done;
-      statRemaining.textContent = total - done;
+    function esc(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
     }
 
-    function applyCardStyle(cb) {
-      const card = cb.closest('.checklist-card');
-      if (cb.checked) {
-        card.style.opacity = '0.6';
-        card.querySelector('.checklist-label').style.textDecoration = 'line-through';
-      } else {
-        card.style.opacity = '1';
-        card.querySelector('.checklist-label').style.textDecoration = 'none';
+    // Wrap escaped text in a <span> that renders line-breaks; safe for innerHTML.
+    function safeBlock(str) {
+      return '<span style="white-space:pre-wrap">' + esc(str) + '</span>';
+    }
+
+    // ── Field references ───────────────────────────────────────────────────
+
+    const fields = {
+      name:       document.getElementById('f-name'),
+      email:      document.getElementById('f-email'),
+      phone:      document.getElementById('f-phone'),
+      location:   document.getElementById('f-location'),
+      linkedin:   document.getElementById('f-linkedin'),
+      github:     document.getElementById('f-github'),
+      summary:    document.getElementById('f-summary'),
+      education:  document.getElementById('f-education'),
+      experience: document.getElementById('f-experience'),
+      projects:   document.getElementById('f-projects'),
+      skills:     document.getElementById('f-skills'),
+    };
+
+    // ── Live preview renderer ──────────────────────────────────────────────
+
+    function buildPreviewHTML() {
+      const v = {};
+      for (const key in fields) v[key] = fields[key].value.trim();
+
+      const nameLine = v.name
+        ? `<p class="rp-name">${esc(v.name)}</p>`
+        : `<p class="rp-name rp-placeholder">Your Name</p>`;
+
+      const contactParts = [v.email, v.phone, v.location].filter(Boolean);
+      const linkParts    = [v.linkedin, v.github].filter(Boolean);
+      const contactLine  = contactParts.length
+        ? `<p class="rp-contact">${contactParts.map(esc).join(' &nbsp;|&nbsp; ')}</p>`
+        : '';
+      const linkLine = linkParts.length
+        ? `<p class="rp-contact">${linkParts.map(esc).join(' &nbsp;|&nbsp; ')}</p>`
+        : '';
+
+      function section(title, content) {
+        if (!content) return '';
+        return `
+          <p class="rp-section-title">${esc(title)}</p>
+          <p class="rp-body">${safeBlock(content)}</p>
+        `;
       }
+
+      const hasAnyContent = Object.values(v).some(Boolean);
+
+      return `
+        ${nameLine}
+        ${contactLine}
+        ${linkLine}
+        <hr class="rp-divider" />
+        ${section('Summary',    v.summary)}
+        ${section('Education',  v.education)}
+        ${section('Experience', v.experience)}
+        ${section('Projects',   v.projects)}
+        ${section('Skills',     v.skills)}
+        ${!hasAnyContent ? '<p class="rp-placeholder" style="margin-top:24px">Start filling in the form to see your resume here.</p>' : ''}
+      `;
     }
 
-    checkboxes.forEach(cb => {
-      cb.addEventListener('change', () => {
-        applyCardStyle(cb);
-        updateCounts();
-      });
+    function updatePreview() {
+      document.getElementById('resume-preview').innerHTML = buildPreviewHTML();
+    }
+
+    // Attach live listeners to all fields
+    Object.values(fields).forEach(el => el.addEventListener('input', updatePreview));
+
+    // Initial render
+    updatePreview();
+
+    // ── Actions ────────────────────────────────────────────────────────────
+
+    document.getElementById('btn-print').addEventListener('click', () => {
+      window.print();
     });
 
-    document.getElementById('save-btn').addEventListener('click', () => {
-      const done = Array.from(checkboxes).filter(cb => cb.checked).length;
-      const msg = document.getElementById('save-msg');
-      msg.textContent = `Saved — ${done} of ${total} sections filled in.`;
-      msg.style.display = 'block';
-      setTimeout(() => { msg.style.display = 'none'; }, 3000);
+    document.getElementById('btn-pdf').addEventListener('click', () => {
+      // Instruct the user, then open print dialog (Save as PDF is a standard browser option)
+      window.print();
+    });
+
+    document.getElementById('btn-doc').addEventListener('click', () => {
+      const previewHTML = document.getElementById('resume-preview').innerHTML;
+      const name = fields.name.value.trim() || 'resume';
+      const filename = name.toLowerCase().replace(/\s+/g, '-') + '.doc';
+
+      const docContent = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office"
+              xmlns:w="urn:schemas-microsoft-com:office:word"
+              xmlns="http://www.w3.org/TR/REC-html40">
+        <head>
+          <meta charset="utf-8">
+          <title>${esc(name)}</title>
+          <!--[if gte mso 9]>
+          <xml><w:WordDocument><w:View>Print</w:View></w:WordDocument></xml>
+          <![endif]-->
+          <style>
+            body { font-family: Georgia, serif; font-size: 11pt; color: #111; margin: 1in; }
+            .rp-name { font-size: 20pt; font-weight: bold; margin: 0 0 4px; }
+            .rp-contact { font-size: 10pt; color: #444; margin: 0 0 2px; }
+            .rp-divider { border: none; border-top: 1.5pt solid #222; margin: 8pt 0; }
+            .rp-section-title { font-size: 10pt; font-weight: bold; letter-spacing: 1pt; text-transform: uppercase; border-bottom: 1pt solid #ccc; padding-bottom: 2pt; margin: 12pt 0 4pt; }
+            .rp-body { font-size: 10pt; white-space: pre-wrap; margin: 2pt 0 0; }
+            .rp-placeholder { display: none; }
+          </style>
+        </head>
+        <body>${previewHTML}</body>
+        </html>
+      `.trim();
+
+      const blob = new Blob([docContent], { type: 'application/msword' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      if (!confirm('Reset all fields? This cannot be undone.')) return;
+      Object.values(fields).forEach(el => { el.value = ''; });
+      updatePreview();
     });
   </script>
+  <script src="../../js/headerProfile.js"></script>
 </body>
 </html>

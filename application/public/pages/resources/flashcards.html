@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- google analytics tag -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BKXMLJEGGQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BKXMLJEGGQ');
+  </script>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Flashcard Template - LifeTrack</title>
+  <link rel="stylesheet" href="../../css/styles.css" />
+
+  <style>
+    /* flashcard builder layout */
+    .flashcard-builder {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      align-items: start;
+      margin-top: 8px;
+    }
+
+    /* form side */
+    .flashcard-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .flashcard-grid {
+      display: grid;
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .flashcard-card {
+      display: grid;
+      gap: 12px;
+    }
+
+    .flashcard-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .flashcard-card-number {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .flashcard-label {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .flashcard-input,
+    .flashcard-textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(11, 18, 32, 0.9);
+      color: var(--text);
+      font: inherit;
+    }
+
+    .flashcard-textarea {
+      min-height: 130px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .flashcard-input:focus,
+    .flashcard-textarea:focus {
+      outline: none;
+      border-color: rgba(77, 163, 255, 0.8);
+      box-shadow: 0 0 0 3px rgba(77, 163, 255, 0.15);
+    }
+
+    /* preview side */
+    .flashcard-preview-wrap {
+      position: sticky;
+      top: 24px;
+    }
+
+    .flashcard-preview-shell {
+      display: grid;
+      gap: 18px;
+    }
+
+    .flashcard-sheet {
+      background: #ffffff;
+      color: #111111;
+      border-radius: 10px;
+      padding: 24px;
+      min-height: 280px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.45);
+    }
+
+    .flashcard-sheet-title {
+      margin: 0 0 16px;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #111111;
+    }
+
+    .flashcard-print-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .flashcard-print-card {
+      border: 1.5px solid #222222;
+      border-radius: 8px;
+      min-height: 140px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: #ffffff;
+      overflow-wrap: break-word;
+    }
+
+    .flashcard-front-text {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #111111;
+      white-space: pre-wrap;
+    }
+
+    .flashcard-back-text {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #222222;
+      white-space: pre-wrap;
+    }
+
+    .flashcard-preview-placeholder {
+      font-family: system-ui, sans-serif;
+      font-size: 13px;
+      color: #777777;
+      font-style: italic;
+    }
+
+    .flashcard-preview-note {
+      margin: 0;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    body[data-accessibility-mode="accessibility"] .flashcard-input,
+    body[data-accessibility-mode="accessibility"] .flashcard-textarea {
+      background: #ffffff;
+      color: var(--text);
+      border-color: rgba(15, 23, 42, 0.22);
+    }
+
+    @media (max-width: 860px) {
+      .flashcard-builder {
+        grid-template-columns: 1fr;
+      }
+
+      .flashcard-preview-wrap {
+        position: static;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .flashcard-print-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* print only the printable flashcard sheets */
+    @media print {
+      body {
+        background: #ffffff !important;
+      }
+
+      .dashboard-header,
+      .dashboard-sidebar,
+      .hero,
+      .summary-row,
+      .controls-bar,
+      .flashcard-form,
+      .footer,
+      #save-msg,
+      .flashcard-preview-note,
+      .flashcard-preview-wrap > .section-heading {
+        display: none !important;
+      }
+
+      .dashboard-frame,
+      .dashboard-body,
+      .dashboard-main,
+      .flashcard-builder,
+      .flashcard-preview-wrap,
+      .flashcard-preview-shell {
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: visible !important;
+      }
+
+      .flashcard-sheet {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        padding: 20px 0 !important;
+        min-height: unset !important;
+        page-break-after: always;
+      }
+
+      .flashcard-sheet:last-child {
+        page-break-after: auto;
+      }
+
+      .flashcard-print-grid {
+        gap: 12px;
+      }
+
+      .flashcard-print-card {
+        min-height: 180px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-frame">
+
+    <header class="dashboard-header">
+      <a class="dashboard-header-brand" href="../../index.html">LifeTrack</a>
+      <div class="dashboard-header-actions">
+        <a class="dashboard-header-profile" href="../search.html">Search</a>
+        <a class="dashboard-header-profile" href="../profile.html">
+          <img
+            id="profilePreview"
+            class="dashboard-header-avatar"
+            src="https://placehold.co/120x120?text=User"
+            alt="Profile preview"
+          />
+          <span id="profileUsernameTop">Profile</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="dashboard-body">
+      <aside class="dashboard-sidebar">
+        <nav class="dashboard-nav">
+          <a class="dashboard-nav-link" href="../dashboard.html">Home</a>
+          <a class="dashboard-nav-link active" href="../studying.html">Academic</a>
+          <a class="dashboard-nav-link" href="../jobpreparation.html">Career</a>
+          <a class="dashboard-nav-link" href="../goals.html">Productivity</a>
+          <a class="dashboard-nav-link" href="../wellness.html">Wellness</a>
+          <a class="dashboard-nav-link" href="../campus-map.html">Campus Map</a>
+        </nav>
+      </aside>
+
+      <main class="dashboard-main">
+
+        <section class="hero">
+          <h1>Flashcard Template</h1>
+          <p>Use this page to make simple flashcards for terms and concepts. You can add as many cards as you want, preview printable front and back pages, save your draft in this browser, and download it as a PDF by printing.</p>
+        </section>
+
+        <!-- summary stats -->
+        <div class="summary-row">
+          <div class="summary-card">
+            <div class="s-value" id="stat-total">0</div>
+            <div class="s-label">Total Cards</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value accent" id="stat-filled">0</div>
+            <div class="s-label">Filled Cards</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value green" id="stat-empty">0</div>
+            <div class="s-label">Cards Left</div>
+          </div>
+        </div>
+
+        <!-- page actions -->
+        <div class="controls-bar">
+          <button class="btn" id="add-card-btn" type="button">Add Card</button>
+          <button class="btn secondary" id="save-btn" type="button">Save Draft</button>
+          <button class="btn secondary" id="download-btn" type="button">Download PDF</button>
+          <a class="btn secondary" href="../dashboard.html">Back to Dashboard</a>
+        </div>
+
+        <!-- two column builder -->
+        <div class="flashcard-builder">
+
+          <!-- left side form -->
+          <div class="flashcard-form">
+            <div class="section-heading">Create Flashcards</div>
+            <div class="flashcard-grid" id="flashcard-grid"></div>
+          </div>
+
+          <!-- right side live preview -->
+          <div class="flashcard-preview-wrap">
+            <div class="section-heading">Live Preview</div>
+
+            <div class="flashcard-preview-shell" id="flashcard-preview" aria-live="polite"></div>
+
+            <p class="flashcard-preview-note">
+              The first sheet shows the front side with terms. The second sheet shows the back side with definitions in the same order so it is easier to print double sided and save as PDF.
+            </p>
+          </div>
+
+        </div>
+
+        <p id="save-msg" style="display:none; margin-top:0.75rem; font-size:0.875rem; color:var(--green,#22c55e);"></p>
+
+        <div class="footer">Team 1 &middot; Spring 2026</div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="../../js/staticResources.js"></script>
+  <script>
+    'use strict';
+
+    const flashcardGrid = document.getElementById('flashcard-grid');
+    const flashcardPreview = document.getElementById('flashcard-preview');
+    const addCardBtn = document.getElementById('add-card-btn');
+    const saveBtn = document.getElementById('save-btn');
+    const downloadBtn = document.getElementById('download-btn');
+    const saveMsg = document.getElementById('save-msg');
+
+    const statTotal = document.getElementById('stat-total');
+    const statFilled = document.getElementById('stat-filled');
+    const statEmpty = document.getElementById('stat-empty');
+
+    const storageKey = 'lifetrack_flashcard_template';
+
+    // updatecounts updates the summary cards for total and filled flashcards
+    function updateCounts() {
+      const cards = Array.from(document.querySelectorAll('.flashcard-card'));
+      const filled = cards.filter(card => {
+        const term = card.querySelector('.flashcard-term').value.trim();
+        const definition = card.querySelector('.flashcard-definition').value.trim();
+        return term !== '' || definition !== '';
+      }).length;
+
+      statTotal.textContent = cards.length;
+      statFilled.textContent = filled;
+      statEmpty.textContent = cards.length - filled;
+    }
+
+    // buildflashcard creates one new flashcard block on the form side
+    function buildFlashcard(cardNumber, termValue = '', definitionValue = '') {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'card flashcard-card';
+
+      wrapper.innerHTML = `
+        <div class="flashcard-card-top">
+          <span class="flashcard-card-number">flashcard ${cardNumber}</span>
+          <button class="btn secondary btn sm remove-card-btn" type="button">Remove</button>
+        </div>
+
+        <div>
+          <label class="flashcard-label" for="term-${cardNumber}">Term</label>
+          <input class="flashcard-input flashcard-term" id="term-${cardNumber}" type="text" placeholder="example: key term" value="${escapeHtml(termValue)}" />
+        </div>
+
+        <div>
+          <label class="flashcard-label" for="definition-${cardNumber}">Definition or answer</label>
+          <textarea class="flashcard-textarea flashcard-definition" id="definition-${cardNumber}" placeholder="write the meaning, explanation, or answer here">${escapeHtml(definitionValue)}</textarea>
+        </div>
+      `;
+
+      return wrapper;
+    }
+
+    // refreshcardnumbers keeps labels and ids in order after add or remove
+    function refreshCardNumbers() {
+      const cards = Array.from(document.querySelectorAll('.flashcard-card'));
+
+      cards.forEach((card, index) => {
+        const cardNumber = index + 1;
+        const numberLabel = card.querySelector('.flashcard-card-number');
+        const termLabel = card.querySelectorAll('.flashcard-label')[0];
+        const definitionLabel = card.querySelectorAll('.flashcard-label')[1];
+        const termInput = card.querySelector('.flashcard-term');
+        const definitionInput = card.querySelector('.flashcard-definition');
+
+        numberLabel.textContent = `flashcard ${cardNumber}`;
+
+        termLabel.setAttribute('for', `term-${cardNumber}`);
+        definitionLabel.setAttribute('for', `definition-${cardNumber}`);
+
+        termInput.id = `term-${cardNumber}`;
+        definitionInput.id = `definition-${cardNumber}`;
+      });
+    }
+
+    // bindinputevents attaches live update listeners to all card fields
+    function bindInputEvents() {
+      const inputs = document.querySelectorAll('.flashcard-term, .flashcard-definition');
+      const removeButtons = document.querySelectorAll('.remove-card-btn');
+
+      inputs.forEach(input => {
+        input.oninput = () => {
+          updateCounts();
+          updatePreview();
+        };
+      });
+
+      removeButtons.forEach(button => {
+        button.onclick = () => {
+          const cards = document.querySelectorAll('.flashcard-card');
+
+          if (cards.length === 1) {
+            const termInput = cards[0].querySelector('.flashcard-term');
+            const definitionInput = cards[0].querySelector('.flashcard-definition');
+
+            termInput.value = '';
+            definitionInput.value = '';
+          } else {
+            button.closest('.flashcard-card').remove();
+            refreshCardNumbers();
+          }
+
+          updateCounts();
+          updatePreview();
+        };
+      });
+    }
+
+    // getflashcarddata reads all flashcard values into a plain array
+    function getFlashcardData() {
+      const cards = Array.from(document.querySelectorAll('.flashcard-card'));
+
+      return cards.map((card, index) => ({
+        number: index + 1,
+        term: card.querySelector('.flashcard-term').value.trim(),
+        definition: card.querySelector('.flashcard-definition').value.trim()
+      }));
+    }
+
+    // buildsheetcards creates one group of printable cards
+    function buildSheetCards(cards, side) {
+      return cards.map(card => {
+        const content = side === 'front'
+          ? (card.term || 'Untitled term')
+          : (card.definition || 'No definition yet.');
+
+        const className = side === 'front'
+          ? 'flashcard-front-text'
+          : 'flashcard-back-text';
+
+        return `
+          <div class="flashcard-print-card">
+            <div class="${className}">${escapeHtml(content)}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // buildpreviewhtml creates the printable front and back preview sheets
+    function buildPreviewHtml() {
+      const data = getFlashcardData();
+      const filledCards = data.filter(card => card.term !== '' || card.definition !== '');
+
+      if (filledCards.length === 0) {
+        return `
+          <div class="flashcard-sheet">
+            <p class="flashcard-preview-placeholder">Start typing on the left to preview your printable flashcard sheets here.</p>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="flashcard-sheet">
+          <h2 class="flashcard-sheet-title">Flashcard Fronts</h2>
+          <div class="flashcard-print-grid">
+            ${buildSheetCards(filledCards, 'front')}
+          </div>
+        </div>
+
+        <div class="flashcard-sheet">
+          <h2 class="flashcard-sheet-title">Flashcard Backs</h2>
+          <div class="flashcard-print-grid">
+            ${buildSheetCards(filledCards, 'back')}
+          </div>
+        </div>
+      `;
+    }
+
+    // updatepreview redraws the live preview based on current input values
+    function updatePreview() {
+      flashcardPreview.innerHTML = buildPreviewHtml();
+    }
+
+    // saveflashcards stores the current draft in local storage
+    function saveFlashcards() {
+      const data = getFlashcardData();
+      localStorage.setItem(storageKey, JSON.stringify(data));
+
+      const filled = data.filter(card => card.term !== '' || card.definition !== '').length;
+      saveMsg.textContent = `Saved - ${filled} flashcard${filled === 1 ? '' : 's'} filled.`;
+      saveMsg.style.display = 'block';
+
+      setTimeout(() => {
+        saveMsg.style.display = 'none';
+      }, 3000);
+    }
+
+    // loadflashcards loads the saved draft back into the page
+    function loadFlashcards() {
+      const saved = localStorage.getItem(storageKey);
+
+      if (!saved) {
+        flashcardGrid.innerHTML = '';
+        flashcardGrid.appendChild(buildFlashcard(1));
+        bindInputEvents();
+        updateCounts();
+        updatePreview();
+        return;
+      }
+
+      try {
+        const data = JSON.parse(saved);
+
+        flashcardGrid.innerHTML = '';
+
+        if (!Array.isArray(data) || data.length === 0) {
+          flashcardGrid.appendChild(buildFlashcard(1));
+        } else {
+          data.forEach((card, index) => {
+            flashcardGrid.appendChild(
+              buildFlashcard(index + 1, card.term || '', card.definition || '')
+            );
+          });
+        }
+
+        bindInputEvents();
+        updateCounts();
+        updatePreview();
+      } catch (error) {
+        flashcardGrid.innerHTML = '';
+        flashcardGrid.appendChild(buildFlashcard(1));
+        bindInputEvents();
+        updateCounts();
+        updatePreview();
+      }
+    }
+
+    // downloadflashcards opens the print dialog so users can save as pdf
+    function downloadFlashcards() {
+      window.print();
+    }
+
+    // escapehtml protects typed text before placing it into html
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    addCardBtn.addEventListener('click', () => {
+      const nextCardNumber = document.querySelectorAll('.flashcard-card').length + 1;
+      flashcardGrid.appendChild(buildFlashcard(nextCardNumber));
+      bindInputEvents();
+      updateCounts();
+      updatePreview();
+    });
+
+    saveBtn.addEventListener('click', saveFlashcards);
+    downloadBtn.addEventListener('click', downloadFlashcards);
+
+    loadFlashcards();
+  </script>
+  <script src="../../js/headerProfile.js"></script>
+</body>
+</html>
