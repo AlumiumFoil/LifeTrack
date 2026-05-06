@@ -388,6 +388,15 @@ const updateProject = async (req, res) => {
             });
         }
         
+        // Only allow 'active' and 'completed' status values via update
+        const ALLOWED_STATUSES = ['active', 'completed'];
+        if (status !== undefined && !ALLOWED_STATUSES.includes(status)) {
+            return res.status(400).json({
+                success: false,
+                error: `Invalid status. Allowed values: ${ALLOWED_STATUSES.join(', ')}.`
+            });
+        }
+        
         if (title !== undefined && title.length > 255) {
             return res.status(400).json({
                 success: false,
@@ -663,7 +672,7 @@ const deleteMilestone = async (req, res) => {
 };
 
 /**
- * Get project statistics
+ * Get project and milestone statistics
  * Requires authentication
  * GET /api/goals/projects/stats
  * Output: { success, stats }

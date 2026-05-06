@@ -208,7 +208,7 @@ const getProjects = async (accountId) => {
             created_at AS createdAt,
             updated_at AS updatedAt
          FROM projects
-         WHERE account_id = ? AND status = 'active'
+         WHERE account_id = ? AND status != 'archived'
          ORDER BY created_at DESC`,
         [accountId]
     );
@@ -240,7 +240,7 @@ const getProjectById = async (projectId, accountId) => {
             created_at AS createdAt,
             updated_at AS updatedAt
          FROM projects
-         WHERE project_id = ? AND account_id = ? AND status = 'active'`,
+         WHERE project_id = ? AND account_id = ? AND status != 'archived'`,
         [projectId, accountId]
     );
     
@@ -510,7 +510,7 @@ const deleteMilestone = async (milestoneId, accountId) => {
 };
 
 /**
- * Get project statistics (milestone counts)
+ * Get project and milestone statistics
  * @param {number} accountId - User's account ID
  * @returns {Promise<object>} Statistics object
  */
@@ -518,7 +518,8 @@ const getProjectStats = async (accountId) => {
     const [projectStats] = await pool.query(
         `SELECT 
             COUNT(*) AS totalProjects,
-            SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) AS activeProjects
+            SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) AS activeProjects,
+            SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS completedProjects
          FROM projects
          WHERE account_id = ?`,
         [accountId]
@@ -537,7 +538,8 @@ const getProjectStats = async (accountId) => {
     return {
         projects: {
             total: Number(projectStats[0].totalProjects) || 0,
-            active: Number(projectStats[0].activeProjects) || 0
+            active: Number(projectStats[0].activeProjects) || 0,
+            completed: Number(projectStats[0].completedProjects) || 0
         },
         milestones: {
             total: Number(milestoneStats[0].totalMilestones) || 0,
