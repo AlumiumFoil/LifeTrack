@@ -1,4 +1,4 @@
-// models/resourceModuleModel.js
+// models/resourceModel.js
 // Handles resource module data
 // Includes resume, wellness module, and sleep routine module queries
 

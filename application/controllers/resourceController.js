@@ -1,8 +1,8 @@
-// controllers/resourceModuleController.js
+// controllers/resourceController.js
 // Handles resource module endpoints
 // Includes Resume, Wellness Check-In Module, and Sleep Routine module endpoints
 
-const resourceModuleModel = require('../models/resourceModuleModel');
+const resourceModuleModel = require('../models/resourceModel');
 const wellnessModel = require('../models/wellnessModel');
 
 /**

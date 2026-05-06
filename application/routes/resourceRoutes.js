@@ -3,7 +3,7 @@
 // These routes are mounted in server.js under /api/resources
 
 const express = require('express');
-const resourceModuleController = require('../controllers/resourceModuleController');
+const resourceModuleController = require('../controllers/resourceController');
 const { authenticateJWT } = require('../middleware/authenticate');
 
 const router = express.Router();
