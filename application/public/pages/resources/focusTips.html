@@ -5,9 +5,9 @@
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-BKXMLJEGGQ"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-BKXMLJEGGQ');
+    function gtag(){dataLayer.push(arguments)}
+    gtag('js', new Date())
+    gtag('config', 'G-BKXMLJEGGQ')
   </script>
   
   <meta charset="utf-8" />
@@ -40,10 +40,14 @@
           <a class="dashboard-nav-link" href="../dashboard.html">Home</a>
           <a class="dashboard-nav-link" href="../studying.html">Academic</a>
           <a class="dashboard-nav-link" href="../jobpreparation.html">Career</a>
-          <a class="dashboard-nav-link" href="../goals.html">Productivity</a>
-          <a class="dashboard-nav-link active" href="../wellness.html">Wellness</a>
+          <a class="dashboard-nav-link" id="productivityNavLink" href="../goals.html">Productivity</a>
+          <a class="dashboard-nav-link" id="wellnessNavLink" href="../wellness.html">Wellness</a>
           <a class="dashboard-nav-link" href="../campus-map.html">Campus Map</a>
         </nav>
+
+        <div class="dashboard-sidebar-footer">
+          <button id="logoutBtn" class="dashboard-logout-btn" type="button">Logout</button>
+        </div>
       </aside>
 
       <main class="dashboard-main">
@@ -152,11 +156,8 @@
         </div>
 
         <div class="controls-bar" style="margin-top:1.5rem;">
-          <button class="btn" id="save-btn" type="button">Save Resource</button>
-          <a class="btn secondary" href="../dashboard.html">Back to Dashboard</a>
+          <a class="btn secondary" id="backCategoryBtn" href="../goals.html">Back to Productivity</a>
         </div>
-
-        <p id="save-msg" style="display:none; margin-top:0.75rem; font-size:0.875rem; color:var(--green,#22c55e);"></p>
 
         <div class="footer">Team 1 &middot; Spring 2026</div>
 
@@ -166,45 +167,68 @@
 
   <script src="../../js/staticResources.js"></script>
   <script>
-    'use strict';
+    'use strict'
 
-    const checkboxes = document.querySelectorAll('.checklist-checkbox');
-    const statDone = document.getElementById('stat-done');
-    const statRemaining = document.getElementById('stat-remaining');
-    const total = checkboxes.length;
+    const checkboxes = document.querySelectorAll('.checklist-checkbox')
+    const statDone = document.getElementById('stat-done')
+    const statRemaining = document.getElementById('stat-remaining')
+    const total = checkboxes.length
 
     function updateCounts() {
-      const done = Array.from(checkboxes).filter(cb => cb.checked).length;
-      statDone.textContent = done;
-      statRemaining.textContent = total - done;
+      const done = Array.from(checkboxes).filter(cb => cb.checked).length
+      statDone.textContent = done
+      statRemaining.textContent = total - done
     }
 
     function applyCardStyle(cb) {
-      const card = cb.closest('.checklist-card');
+      const card = cb.closest('.checklist-card')
       if (cb.checked) {
-        card.style.opacity = '0.6';
-        card.querySelector('.checklist-label').style.textDecoration = 'line-through';
+        card.style.opacity = '0.6'
+        card.querySelector('.checklist-label').style.textDecoration = 'line-through'
       } else {
-        card.style.opacity = '1';
-        card.querySelector('.checklist-label').style.textDecoration = 'none';
+        card.style.opacity = '1'
+        card.querySelector('.checklist-label').style.textDecoration = 'none'
       }
     }
 
     checkboxes.forEach(cb => {
       cb.addEventListener('change', () => {
-        applyCardStyle(cb);
-        updateCounts();
-      });
-    });
-
-    document.getElementById('save-btn').addEventListener('click', () => {
-      const done = Array.from(checkboxes).filter(cb => cb.checked).length;
-      const msg = document.getElementById('save-msg');
-      msg.textContent = `Saved — ${done} of ${total} tips tried.`;
-      msg.style.display = 'block';
-      setTimeout(() => { msg.style.display = 'none'; }, 3000);
-    });
+        applyCardStyle(cb)
+        updateCounts()
+      })
+    })
   </script>
   <script src="../../js/headerProfile.js"></script>
+  <script>
+    const pageParams = new URLSearchParams(window.location.search)
+    const fromPage = pageParams.get("from") || "productivity"
+
+    const productivityNavLink = document.getElementById("productivityNavLink")
+    const wellnessNavLink = document.getElementById("wellnessNavLink")
+    const backCategoryBtn = document.getElementById("backCategoryBtn")
+
+    if (fromPage === "wellness") {
+      wellnessNavLink.classList.add("active")
+      productivityNavLink.classList.remove("active")
+      backCategoryBtn.href = "../wellness.html"
+      backCategoryBtn.textContent = "Back to Wellness"
+    } else {
+      productivityNavLink.classList.add("active")
+      wellnessNavLink.classList.remove("active")
+      backCategoryBtn.href = "../goals.html"
+      backCategoryBtn.textContent = "Back to Productivity"
+    }
+
+    const logoutBtn = document.getElementById("logoutBtn")
+
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("accessToken")
+        localStorage.removeItem("refreshToken")
+        localStorage.removeItem("user")
+        window.location.href = "../auth.html"
+      })
+    }
+  </script>
 </body>
 </html>
