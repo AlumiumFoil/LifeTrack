@@ -38,6 +38,18 @@ const isValidTaskStatus = (status) => {
     return !status || validStatuses.includes(status.toLowerCase());
 };
 
+/**
+ * Helper: Validate that course name exists in user's courses
+ * @param {number} accountId - User's account ID
+ * @param {string} courseName - Course name to validate
+ * @returns {Promise<boolean>} True if course exists
+ */
+const validateCourseName = async (accountId, courseName) => {
+    if (!courseName) return true; // Allow null/empty course name
+    
+    const courses = await academicModel.getUserCourses(accountId);
+    return courses.some(course => course.courseTitle === courseName);
+};
 
 /**
  * Get all assignments for authenticated user
@@ -51,7 +63,7 @@ const getAssignments = async (req, res) => {
         const accountId = req.user.account_id;
         const assignments = await academicModel.getAssignments(accountId);
         const stats = await academicModel.getAcademicStats(accountId);
-        const courses = await academicModel.getCourses(accountId);
+        const courses = await academicModel.getUserCourses(accountId);
         
         // Apply status filter if provided
         const filterStatus = req.query.status;
@@ -153,6 +165,16 @@ const createAssignment = async (req, res) => {
                 error: 'Invalid status. Allowed: not started, in progress, completed, graded'
             });
         }
+
+        if (courseName) {
+            const courseExists = await validateCourseName(accountId, courseName);
+            if (!courseExists) {
+                return res.status(400).json({
+                    success: false,
+                    error: `Course "${courseName}" not found. Please create the course first or select from existing courses.`
+                });
+            }
+        }
         
         const assignmentId = await academicModel.createAssignment(accountId, {
             title: title.trim(),
@@ -209,6 +231,16 @@ const updateAssignment = async (req, res) => {
                 success: false,
                 error: 'Invalid status. Allowed: not started, in progress, completed, graded'
             });
+        }
+
+        if (courseName) {
+            const courseExists = await validateCourseName(accountId, courseName);
+            if (!courseExists) {
+                return res.status(400).json({
+                    success: false,
+                    error: `Course "${courseName}" not found. Please create the course first or select from existing courses.`
+                });
+            }
         }
         
         await academicModel.updateAssignment(assignmentId, accountId, {
@@ -526,30 +558,6 @@ const createStudySession = async (req, res) => {
         res.status(500).json({
             success: false,
             error: 'An error occurred while logging the study session'
-        });
-    }
-};
-
-/**
- * Get all courses for authenticated user (from assignments)
- * GET /api/academic/courses
- * Requires authentication
- * Output: { success, courses }
- */
-const getCourses = async (req, res) => {
-    try {
-        const accountId = req.user.account_id;
-        const courses = await academicModel.getCourses(accountId);
-        
-        res.json({
-            success: true,
-            courses
-        });
-    } catch (error) {
-        console.error('Get courses error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'An error occurred while fetching courses'
         });
     }
 };
@@ -968,6 +976,274 @@ const completePlannerItem = async (req, res) => {
     }
 };
 
+/**
+ * Get all courses for authenticated user
+ * Requires authentication
+ * GET /api/academic/courses
+ * Output: { success, courses }
+ */
+const getUserCourses = async (req, res) => {
+    try {
+        const accountId = req.user.account_id;
+        const courses = await academicModel.getUserCourses(accountId);
+        
+        res.json({
+            success: true,
+            courses
+        });
+    } catch (error) {
+        console.error('Get user courses error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'An error occurred while fetching courses'
+        });
+    }
+};
+
+/**
+ * Get a single course by ID
+ * GET /api/academic/courses/:id
+ * Requires authentication
+ * Output: { success, course }
+ */
+const getCourseById = async (req, res) => {
+    try {
+        const accountId = req.user.account_id;
+        const courseId = req.params.id;
+        
+        const course = await academicModel.getCourseById(courseId, accountId);
+        
+        if (!course) {
+            return res.status(404).json({
+                success: false,
+                error: 'Course not found'
+            });
+        }
+        
+        res.json({
+            success: true,
+            course
+        });
+    } catch (error) {
+        console.error('Get course by ID error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'An error occurred while fetching the course'
+        });
+    }
+};
+
+/**
+ * Create a new course
+ * Requires authentication
+ * POST /api/academic/courses
+ * Input: { courseCode, courseTitle, instructor, term, currentGrade }
+ * Output: { success, message, courseId }
+ */
+const createCourse = async (req, res) => {
+    try {
+        const accountId = req.user.account_id;
+        const { courseCode, courseTitle, instructor, term, currentGrade } = req.body;
+        
+        // Validate required fields
+        if (!courseCode || courseCode.trim() === '') {
+            return res.status(400).json({
+                success: false,
+                error: 'Course code is required'
+            });
+        }
+        
+        if (courseCode.length > 50) {
+            return res.status(400).json({
+                success: false,
+                error: 'Course code must not exceed 50 characters'
+            });
+        }
+        
+        if (!courseTitle || courseTitle.trim() === '') {
+            return res.status(400).json({
+                success: false,
+                error: 'Course title is required'
+            });
+        }
+        
+        if (courseTitle.length > 150) {
+            return res.status(400).json({
+                success: false,
+                error: 'Course title must not exceed 150 characters'
+            });
+        }
+        
+        // Validate instructor name length if provided
+        if (instructor && instructor.length > 100) {
+            return res.status(400).json({
+                success: false,
+                error: 'Instructor name must not exceed 100 characters'
+            });
+        }
+        
+        // Validate term length if provided
+        if (term && term.length > 50) {
+            return res.status(400).json({
+                success: false,
+                error: 'Term must not exceed 50 characters'
+            });
+        }
+        
+        // Validate grade if provided (allow letter grades like A-, B+, or numbers)
+        if (currentGrade && currentGrade.length > 10) {
+            return res.status(400).json({
+                success: false,
+                error: 'Grade must not exceed 10 characters'
+            });
+        }
+
+        // Check for duplicate course code
+        const isDuplicate = await academicModel.isCourseCodeDuplicate(accountId, courseCode);
+        if (isDuplicate) {
+            return res.status(409).json({
+                success: false,
+                error: `Course with code "${courseCode}" already exists. Please use a different course code.`
+            });
+        }
+        
+        const courseId = await academicModel.createCourse(accountId, {
+            courseCode: courseCode.trim().toUpperCase(),
+            courseTitle: courseTitle.trim(),
+            instructor: instructor || null,
+            term: term || null,
+            currentGrade: currentGrade || null
+        });
+        
+        res.status(201).json({
+            success: true,
+            message: 'Course created successfully',
+            courseId: courseId
+        });
+    } catch (error) {
+        console.error('Create course error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'An error occurred while creating the course'
+        });
+    }
+};
+
+/**
+ * Update an existing course
+ * Requires authentication
+ * PUT /api/academic/courses/:id
+ * Input: { courseCode, courseTitle, instructor, term, currentGrade } (all optional)
+ * Output: { success, message }
+ */
+const updateCourse = async (req, res) => {
+    try {
+        const accountId = req.user.account_id;
+        const courseId = req.params.id;
+        const { courseCode, courseTitle, instructor, term, currentGrade } = req.body;
+        
+        const existingCourse = await academicModel.getCourseById(courseId, accountId);
+        if (!existingCourse) {
+            return res.status(404).json({
+                success: false,
+                error: 'Course not found'
+            });
+        }
+        
+        // Validate course code length if provided
+        if (courseCode !== undefined && courseCode.length > 50) {
+            return res.status(400).json({
+                success: false,
+                error: 'Course code must not exceed 50 characters'
+            });
+        }
+        
+        // Validate course title length if provided
+        if (courseTitle !== undefined && courseTitle.length > 150) {
+            return res.status(400).json({
+                success: false,
+                error: 'Course title must not exceed 150 characters'
+            });
+        }
+        
+        // Validate instructor name length if provided
+        if (instructor !== undefined && instructor.length > 100) {
+            return res.status(400).json({
+                success: false,
+                error: 'Instructor name must not exceed 100 characters'
+            });
+        }
+        
+        // Validate term length if provided
+        if (term !== undefined && term.length > 50) {
+            return res.status(400).json({
+                success: false,
+                error: 'Term must not exceed 50 characters'
+            });
+        }
+        
+        // Validate grade length if provided
+        if (currentGrade !== undefined && currentGrade.length > 10) {
+            return res.status(400).json({
+                success: false,
+                error: 'Grade must not exceed 10 characters'
+            });
+        }
+        
+        await academicModel.updateCourse(courseId, accountId, {
+            courseCode: courseCode !== undefined ? courseCode.trim().toUpperCase() : undefined,
+            courseTitle: courseTitle !== undefined ? courseTitle.trim() : undefined,
+            instructor: instructor !== undefined ? instructor : undefined,
+            term: term !== undefined ? term : undefined,
+            currentGrade: currentGrade !== undefined ? currentGrade : undefined
+        });
+        
+        res.json({
+            success: true,
+            message: 'Course updated successfully'
+        });
+    } catch (error) {
+        console.error('Update course error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'An error occurred while updating the course'
+        });
+    }
+};
+
+/**
+ * Delete a course
+ * Requires authentication
+ * DELETE /api/academic/courses/:id
+ * Output: { success, message }
+ */
+const deleteCourse = async (req, res) => {
+    try {
+        const accountId = req.user.account_id;
+        const courseId = req.params.id;
+        
+        const deleted = await academicModel.deleteCourse(courseId, accountId);
+        
+        if (!deleted) {
+            return res.status(404).json({
+                success: false,
+                error: 'Course not found'
+            });
+        }
+        
+        res.json({
+            success: true,
+            message: 'Course deleted successfully'
+        });
+    } catch (error) {
+        console.error('Delete course error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'An error occurred while deleting the course'
+        });
+    }
+};
+
 module.exports = {
     // Assignments
     getAssignments,
@@ -987,9 +1263,6 @@ module.exports = {
     getStudySessions,
     createStudySession,
     
-    // Courses
-    getCourses,
-    
     // Stats
     getAcademicStats,
 
@@ -1001,6 +1274,13 @@ module.exports = {
     updatePlannerItem,
     deletePlannerItem,
     completePlannerItem,
+
+    // Course management
+    getUserCourses,
+    getCourseById,
+    createCourse,
+    updateCourse,
+    deleteCourse,
 
     // Valid values for Weekly Planner
     VALID_CATEGORIES,
