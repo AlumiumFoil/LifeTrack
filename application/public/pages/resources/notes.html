@@ -196,6 +196,10 @@
           <a class="dashboard-nav-link" href="../wellness.html">Wellness</a>
           <a class="dashboard-nav-link" href="../campus-map.html">Campus Map</a>
         </nav>
+
+        <div class="dashboard-sidebar-footer">
+          <button id="logoutBtn" class="dashboard-logout-btn" type="button">Logout</button>
+        </div>
       </aside>
 
       <main class="dashboard-main">
@@ -225,7 +229,6 @@
         <div class="controls-bar">
           <button class="btn" id="save-btn" type="button">Save Draft</button>
           <button class="btn secondary" id="download-btn" type="button">Download .txt</button>
-          <a class="btn secondary" href="../dashboard.html">Back to Dashboard</a>
         </div>
 
         <!-- two column builder -->
@@ -288,6 +291,10 @@
             <div class="notes-preview-paper" id="notes-preview" aria-live="polite"></div>
           </div>
 
+        </div>
+
+        <div class="controls-bar" style="margin-top:1.5rem;">
+          <a class="btn secondary" href="../studying.html">Back to Academic</a>
         </div>
 
         <p id="save-msg" style="display:none; margin-top:0.75rem; font-size:0.875rem; color:var(--green,#22c55e);"></p>
@@ -491,5 +498,17 @@
     loadNotes();
   </script>
   <script src="../../js/headerProfile.js"></script>
+  <script>
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        window.location.href = "../auth.html";
+      });
+    }
+  </script>
 </body>
 </html>

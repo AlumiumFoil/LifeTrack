@@ -45,6 +45,10 @@
           <a class="dashboard-nav-link" href="./wellness.html">Wellness</a>
           <a class="dashboard-nav-link" href="./campus-map.html">Campus Map</a>
         </nav>
+
+        <div class="dashboard-sidebar-footer">
+          <button id="logoutBtn" class="dashboard-logout-btn" type="button">Logout</button>
+        </div>
       </aside>
 
       <main class="dashboard-main">
@@ -118,7 +122,7 @@
             <article class="resource-card">
               <h3>Focus Tips</h3>
               <p>Tips to reduce distractions while working or studying.</p>
-              <a class="btn secondary sm" href="./resources/focusTips.html">Learn More</a>
+              <a class="btn secondary sm" href="./resources/focusTips.html?from=productivity">Learn More</a>
             </article>
           </div>
         </section>
@@ -181,5 +185,17 @@
 
   <script src="../js/goals.js"></script>
   <script src="../js/headerProfile.js"></script>
+  <script>
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        window.location.href = "./auth.html";
+      });
+    }
+  </script>
 </body>
 </html>

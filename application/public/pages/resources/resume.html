@@ -12,7 +12,7 @@
   
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Resume Builder – LifeTrack</title>
+  <title>Resume Builder - LifeTrack</title>
   <link rel="stylesheet" href="../../css/styles.css" />
   <style>
     /* ── textarea inherits the same look as text inputs ─────────────────── */
@@ -173,6 +173,10 @@
           <a class="dashboard-nav-link" href="../wellness.html">Wellness</a>
           <a class="dashboard-nav-link" href="../campus-map.html">Campus Map</a>
         </nav>
+
+        <div class="dashboard-sidebar-footer">
+          <button id="logoutBtn" class="dashboard-logout-btn" type="button">Logout</button>
+        </div>
       </aside>
 
       <main class="dashboard-main">
@@ -188,7 +192,6 @@
           <button class="btn" id="btn-pdf" type="button">Download PDF</button>
           <button class="btn secondary" id="btn-doc" type="button">Download .doc</button>
           <button class="btn secondary" id="btn-reset" type="button">Reset Form</button>
-          <a class="btn secondary" href="../jobpreparation.html">← Back to Career</a>
         </div>
 
         <!-- Two-column builder -->
@@ -241,7 +244,7 @@
             <div class="vp-form">
               <div class="form-group">
                 <label for="f-education">Education Details</label>
-                <textarea id="f-education" rows="4" placeholder="San Francisco State University — B.S. Computer Science&#10;Expected: May 2026 | GPA: 3.4 / 4.0&#10;Relevant Coursework: Data Structures, Software Engineering, Databases"></textarea>
+                <textarea id="f-education" rows="4" placeholder="San Francisco State University - B.S. Computer Science&#10;Expected: May 2026 | GPA: 3.4 / 4.0&#10;Relevant Coursework: Data Structures, Software Engineering, Databases"></textarea>
               </div>
             </div>
 
@@ -249,7 +252,7 @@
             <div class="vp-form">
               <div class="form-group">
                 <label for="f-experience">Work Experience</label>
-                <textarea id="f-experience" rows="6" placeholder="Software Engineering Intern – Example Co. | Jun – Aug 2025&#10;• Built and maintained REST API endpoints using Node.js and Express&#10;• Reduced page load time 18% through query optimization&#10;• Collaborated in two-week Agile sprint cycles"></textarea>
+                <textarea id="f-experience" rows="6" placeholder="Software Engineering Intern - Example Co. | Jun - Aug 2025&#10;• Built and maintained REST API endpoints using Node.js and Express&#10;• Reduced page load time 18% through query optimization&#10;• Collaborated in two-week Agile sprint cycles"></textarea>
               </div>
             </div>
 
@@ -257,7 +260,7 @@
             <div class="vp-form">
               <div class="form-group">
                 <label for="f-projects">Projects</label>
-                <textarea id="f-projects" rows="5" placeholder="LifeTrack – Student life management platform | React · Node.js · MySQL&#10;• Built Goals and Wellness modules with habit tracking and progress views&#10;• github.com/janesmith/lifetrack"></textarea>
+                <textarea id="f-projects" rows="5" placeholder="LifeTrack - Student life management platform | React · Node.js · MySQL&#10;• Built Goals and Wellness modules with habit tracking and progress views&#10;• github.com/janesmith/lifetrack"></textarea>
               </div>
             </div>
 
@@ -280,6 +283,10 @@
           </div>
 
         </div><!-- /resume-builder -->
+
+        <div class="controls-bar" style="margin-top:1.5rem;">
+          <a class="btn secondary" href="../jobpreparation.html">Back to Career</a>
+        </div>
 
         <div class="footer">Team 1 &middot; Spring 2026</div>
 
@@ -433,5 +440,17 @@
     });
   </script>
   <script src="../../js/headerProfile.js"></script>
+  <script>
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        window.location.href = "../auth.html";
+      });
+    }
+  </script>
 </body>
 </html>

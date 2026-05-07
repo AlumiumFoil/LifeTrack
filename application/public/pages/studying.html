@@ -45,6 +45,10 @@
           <a class="dashboard-nav-link" href="./wellness.html">Wellness</a>
           <a class="dashboard-nav-link" href="./campus-map.html">Campus Map</a>
         </nav>
+
+        <div class="dashboard-sidebar-footer">
+          <button id="logoutBtn" class="dashboard-logout-btn" type="button">Logout</button>
+        </div>
       </aside>
 
       <main class="dashboard-main">
@@ -124,5 +128,17 @@
 
   <script src="../js/studying.js"></script>
   <script src="../js/headerProfile.js"></script>
+  <script>
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        window.location.href = "./auth.html";
+      });
+    }
+  </script>
 </body>
 </html>

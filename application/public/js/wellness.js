@@ -27,7 +27,7 @@ const RESOURCES = [
   {
     title: 'Focus Tips',
     desc:  'Quick tips to help you reset, stay focused, and manage stress.',
-    link:  './resources/focusTips.html',
+    link:  './resources/focusTips.html?from=wellness',
   },
   {
     title: 'Sleep Routine',
