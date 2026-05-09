@@ -9,14 +9,82 @@
   <!-- shared/global stylesheet -->
   <link rel="stylesheet" href="../css/styles.css" />
   <link rel="stylesheet" href="../css/profile.css" />
+
+  <style>
+    .accessibility-toggle-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .mode-toggle-btn {
+      border: 2px solid var(--border);
+      opacity: 0.55;
+      position: relative;
+      min-width: 90px;
+      transition: opacity 0.15s, border-color 0.15s, box-shadow 0.15s, background 0.15s, transform 0.15s;
+    }
+
+    .mode-toggle-btn:hover {
+      opacity: 0.85;
+      transform: translateY(-1px);
+    }
+
+    .mode-toggle-btn.active-mode {
+      opacity: 1;
+      border: 3px solid var(--accent);
+      box-shadow: 0 0 0 4px rgba(77, 163, 255, 0.25);
+      transform: translateY(-2px);
+    }
+
+    .mode-toggle-btn.active-mode::before {
+      content: "✓ ";
+      font-weight: 800;
+    }
+
+    .mode-toggle-btn.active-mode::after {
+      content: "Active";
+      position: absolute;
+      top: -11px;
+      right: -8px;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #ffffff;
+      border: 1px solid var(--accent);
+    }
+
+    #defaultModeBtn {
+      background: #111a2e;
+      color: #e8eefc;
+      border-color: rgba(255, 255, 255, 0.22);
+    }
+
+    #defaultModeBtn.active-mode {
+      background: #111a2e;
+      color: #e8eefc;
+      border-color: var(--accent);
+    }
+
+    #accessibilityModeBtn {
+      background: #ffffff;
+      color: #0f172a;
+      border-color: rgba(15, 23, 42, 0.35);
+    }
+
+    #accessibilityModeBtn.active-mode {
+      background: #ffffff;
+      color: #0f172a;
+      border-color: var(--accent);
+    }
+  </style>
 </head>
 <body>
   <div class="dashboard-frame">
     <!-- top header kept consistent with dashboard -->
     <header class="dashboard-header">
       <a class="dashboard-header-brand" href="./dashboard.html">LifeTrack</a>
-
-      
 
       <div class="dashboard-header-actions">
         <a class="dashboard-header-profile" href="./search.html">Search</a>
@@ -159,12 +227,12 @@
               <div class="profile-settings-item">
                 <div>
                   <strong>Accessibility Mode</strong>
-                  <p class="small">Switch between the standard interface and a more accessible high-contrast, larger-text view.</p>
+                  <p class="small">Choose between the dark standard view and the light high-contrast accessibility view.</p>
                 </div>
 
                 <div class="accessibility-toggle-group" role="group" aria-label="Accessibility mode">
-                  <button id="defaultModeBtn" class="btn secondary" type="button">Default</button>
-                  <button id="accessibilityModeBtn" class="btn secondary" type="button">Accessibility</button>
+                  <button id="defaultModeBtn" class="btn secondary mode-toggle-btn" type="button">Dark</button>
+                  <button id="accessibilityModeBtn" class="btn secondary mode-toggle-btn" type="button">Light</button>
                 </div>
               </div>
             </div>

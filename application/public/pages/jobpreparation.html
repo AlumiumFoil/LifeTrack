@@ -57,38 +57,6 @@
           <p>Find resources, track your career goals, and stay prepared for what's next.</p>
         </section>
 
-        <!-- Career Resources — populated by jobpreparation.js -->
-        <div class="section-heading">Career Resources</div>
-        <div class="grid" id="careerResources">
-          <p style="color:var(--muted)">Loading career resources…</p>
-        </div>
-
-        <!-- Starter Resources — always rendered, static links -->
-        <div class="section-heading">Starter Resources</div>
-        <div class="grid">
-          <div class="card">
-            <h2 class="card-title">Resume Starter Template</h2>
-            <p class="card-desc">A simple template to help you build your resume from scratch.</p>
-            <a class="btn secondary sm" href="./resources/resume.html">Open Resource</a>
-          </div>
-          <div class="card">
-            <h2 class="card-title">Portfolio Checklist</h2>
-            <p class="card-desc">A quick checklist to make sure your portfolio is complete.</p>
-            <a class="btn secondary sm" href="./resources/portfolio.html">Open Resource</a>
-          </div>
-          <div class="card">
-            <h2 class="card-title">Interview Prep Workflow</h2>
-            <p class="card-desc">A step-by-step guide to prepare for interviews.</p>
-            <a class="btn secondary sm" href="./resources/interviewPrep.html">Open Resource</a>
-          </div>
-        </div>
-
-        <!-- Career Goals — header row with create button -->
-        <div style="display:flex; align-items:center; justify-content:space-between; margin:36px 0 16px; flex-wrap:wrap; gap:12px;">
-          <div class="section-heading" style="margin:0; flex:1">My Career Goals</div>
-          <button class="btn sm" id="new-goal-btn" type="button">+ New Career Goal</button>
-        </div>
-
         <!-- Summary cards — updated after every load/create/delete -->
         <div class="summary-row" id="goals-summary" style="display:none">
           <div class="summary-card">
@@ -109,6 +77,15 @@
           </div>
         </div>
 
+        <!-- Hidden container kept so jobpreparation.js does not break -->
+        <div id="careerResources" style="display:none;"></div>
+
+        <!-- Career Goals — header row with create button -->
+        <div style="display:flex; align-items:center; justify-content:space-between; margin:36px 0 16px; flex-wrap:wrap; gap:12px;">
+          <div class="section-heading" style="margin:0; flex:1">My Career Goals</div>
+          <button class="btn sm" id="new-goal-btn" type="button">+ New Career Goal</button>
+        </div>
+
         <!-- Filter tabs -->
         <div class="tab-bar" id="goals-tab-bar" style="display:none">
           <button class="tab-btn active" data-tab="all">All</button>
@@ -123,6 +100,26 @@
         <!-- Goals grid — populated by jobpreparation.js -->
         <div class="grid" id="careerGoals">
           <p style="color:var(--muted)">Loading career goals…</p>
+        </div>
+
+        <!-- Career Resources -->
+        <div class="section-heading">Career Resources</div>
+        <div class="grid">
+          <div class="card">
+            <h2 class="card-title">Resume Starter Template</h2>
+            <p class="card-desc">A simple template to help you build your resume from scratch.</p>
+            <a class="btn secondary sm" href="./resources/resume.html">Learn More</a>
+          </div>
+          <div class="card">
+            <h2 class="card-title">Portfolio Checklist</h2>
+            <p class="card-desc">A quick checklist to make sure your portfolio is complete.</p>
+            <a class="btn secondary sm" href="./resources/portfolio.html">Learn More</a>
+          </div>
+          <div class="card">
+            <h2 class="card-title">Interview Prep Workflow</h2>
+            <p class="card-desc">A step-by-step guide to prepare for interviews.</p>
+            <a class="btn secondary sm" href="./resources/interviewPrep.html">Learn More</a>
+          </div>
         </div>
 
         <div class="footer">Team 1 • Spring 2026</div>
