@@ -93,6 +93,13 @@
       border-color: rgba(77,163,255,0.8);
       box-shadow: 0 0 0 3px rgba(77,163,255,0.15);
     }
+
+    body[data-accessibility-mode="accessibility"] .form-group textarea,
+    body[data-accessibility-mode="accessibility"] .form-group select {
+      background: #ffffff;
+      color: var(--text);
+      border-color: rgba(15, 23, 42, 0.22);
+    }
   </style>
 </head>
 <body>
@@ -137,8 +144,8 @@
           <p>A simple sleep routine workflow for busy weeks.</p>
         </section>
 
-        <!-- Module info — populated from GET /api/resources/modules/sleep-routine -->
-        <div id="module-info"></div>
+        <!-- Module info is hidden to avoid repeating the page title -->
+        <div id="module-info" style="display:none;"></div>
 
         <!-- My Sleep Habits — populated by JS -->
         <div class="section-heading">My Sleep Habits</div>
@@ -308,7 +315,7 @@
       const habitsGrid = document.getElementById('habits-grid');
 
       if (!token) {
-        moduleInfo.innerHTML = '<p style="color:var(--muted);margin-bottom:8px">Log in to track your sleep habits and see personalised content.</p>';
+        moduleInfo.innerHTML = '';
         habitsGrid.innerHTML  = '<p style="color:var(--muted)">Log in to see your sleep habits.</p>';
         return;
       }
@@ -321,7 +328,7 @@
         });
 
         if (res.status === 401) {
-          moduleInfo.innerHTML = '<p style="color:var(--muted);margin-bottom:8px">Your session has expired. Please log in again.</p>';
+          moduleInfo.innerHTML = '';
           habitsGrid.innerHTML  = '<p style="color:var(--muted)">Please log in to see your sleep habits.</p>';
           return;
         }
@@ -333,7 +340,7 @@
 
         const data = await res.json();
 
-        // Render resource metadata if present
+        // Resource metadata is intentionally not rendered to avoid repeating the page title.
         if (data.resource) {
           renderModuleInfo(data.resource);
         }
@@ -347,21 +354,11 @@
       }
     }
 
-    // Render resource title, description, and any category/contentType pills
+    // This page already has a main hero header, so the module info card is not displayed.
     function renderModuleInfo(resource) {
       const el = document.getElementById('module-info');
-      const pill1 = resource.contentType || '';
-      const pill2 = resource.useCase     || '';
-      const pill3 = resource.category    || '';
-      const pills = [pill1, pill2, pill3].filter(Boolean);
-
-      el.innerHTML = `
-        <div class="card" style="margin-bottom:4px">
-          ${pills.length ? `<div class="goal-card-meta" style="margin-bottom:10px">${pills.map(p => `<span class="badge">${esc(p)}</span>`).join(' ')}</div>` : ''}
-          <h2 class="card-title" style="margin-top:0">${esc(resource.title || 'Sleep Routine')}</h2>
-          ${resource.description ? `<p class="card-desc" style="margin-bottom:0">${esc(resource.description)}</p>` : ''}
-        </div>
-      `;
+      if (!el) return;
+      el.innerHTML = '';
     }
 
     // Render the habits grid; handles empty state
