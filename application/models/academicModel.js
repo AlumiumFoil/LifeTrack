@@ -3,9 +3,8 @@
 
 const pool = require('../config/db');
 
-// Helper Function
 /**
- * Format a date object to YYYY-MM-DD string
+ * Helper: Format a date object to YYYY-MM-DD string
  * @param {Date|null} date - Date object or null
  * @returns {string|null} Formatted date string or null
  */
@@ -13,6 +12,21 @@ const formatDate = (date) => {
     if (!date) return null;
     const d = new Date(date);
     return d.toISOString().split('T')[0]; // Returns YYYY-MM-DD
+};
+
+/**
+ * Helper: Check if a course code already exists for a user
+ * @param {number} accountId - User's account ID
+ * @param {string} courseCode - Course code to check
+ * @returns {Promise<boolean>} True if exists
+ */
+const isCourseCodeDuplicate = async (accountId, courseCode) => {
+    const [result] = await pool.query(
+        `SELECT course_id FROM courses 
+         WHERE account_id = ? AND course_code = ?`,
+        [accountId, courseCode]
+    );
+    return result.length > 0;
 };
 
 // Frontend status value reference. Values are stored in backend
@@ -349,26 +363,6 @@ const createStudySession = async (accountId, data) => {
 };
 
 /**
- * Get all unique courses for a user (from assignments)
- * @param {number} accountId - User's account ID
- * @returns {Promise<Array>} Array of course objects
- */
-const getCourses = async (accountId) => {
-    const [courses] = await pool.query(
-        `SELECT DISTINCT 
-            course_name AS name,
-            COUNT(assignment_id) AS assignmentCount,
-            SUM(CASE WHEN status = 'completed' OR status = 'graded' THEN 1 ELSE 0 END) AS completedCount
-         FROM assignments
-         WHERE account_id = ? AND course_name IS NOT NULL
-         GROUP BY course_name
-         ORDER BY course_name ASC`,
-        [accountId]
-    );
-    return courses;
-};
-
-/**
  * Get academic statistics
  * @param {number} accountId - User's account ID
  * @returns {Promise<object>} Statistics object
@@ -654,7 +648,135 @@ const getWeeklyPlanner = async (accountId, startDate, endDate) => {
     return allItems;
 };
 
+/**
+ * Get all courses for a user
+ * @param {number} accountId - User's account ID
+ * @returns {Promise<Array>} Array of course objects
+ */
+const getUserCourses = async (accountId) => {
+    const [courses] = await pool.query(
+        `SELECT 
+            course_id AS id,
+            account_id AS accountId,
+            course_code AS courseCode,
+            course_title AS courseTitle,
+            instructor_name AS instructor,
+            term,
+            current_grade AS currentGrade,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+         FROM courses
+         WHERE account_id = ?
+         ORDER BY course_code ASC`,
+        [accountId]
+    );
+    return courses;
+};
+
+/**
+ * Get a single course by ID
+ * @param {number} courseId - Course ID
+ * @param {number} accountId - User's account ID
+ * @returns {Promise<object|null>} Course object or null
+ */
+const getCourseById = async (courseId, accountId) => {
+    const [courses] = await pool.query(
+        `SELECT 
+            course_id AS id,
+            account_id AS accountId,
+            course_code AS courseCode,
+            course_title AS courseTitle,
+            instructor_name AS instructor,
+            term,
+            current_grade AS currentGrade,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+         FROM courses
+         WHERE course_id = ? AND account_id = ?`,
+        [courseId, accountId]
+    );
+    return courses.length > 0 ? courses[0] : null;
+};
+
+/**
+ * Create a new course
+ * @param {number} accountId - User's account ID
+ * @param {object} data - Course data
+ * @returns {Promise<number>} Inserted course ID
+ */
+const createCourse = async (accountId, data) => {
+    const { courseCode, courseTitle, instructor, term, currentGrade } = data;
+    
+    const [result] = await pool.query(
+        `INSERT INTO courses (account_id, course_code, course_title, instructor_name, term, current_grade, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+        [accountId, courseCode, courseTitle, instructor || null, term || null, currentGrade || null]
+    );
+    return result.insertId;
+};
+
+/**
+ * Update an existing course
+ * @param {number} courseId - Course ID
+ * @param {number} accountId - User's account ID
+ * @param {object} data - Updated course data
+ * @returns {Promise<boolean>} True if updated
+ */
+const updateCourse = async (courseId, accountId, data) => {
+    const { courseCode, courseTitle, instructor, term, currentGrade } = data;
+    
+    const updates = [];
+    const values = [];
+    
+    if (courseCode !== undefined) {
+        updates.push('course_code = ?');
+        values.push(courseCode);
+    }
+    if (courseTitle !== undefined) {
+        updates.push('course_title = ?');
+        values.push(courseTitle);
+    }
+    if (instructor !== undefined) {
+        updates.push('instructor_name = ?');
+        values.push(instructor);
+    }
+    if (term !== undefined) {
+        updates.push('term = ?');
+        values.push(term);
+    }
+    if (currentGrade !== undefined) {
+        updates.push('current_grade = ?');
+        values.push(currentGrade);
+    }
+    
+    updates.push('updated_at = NOW()');
+    values.push(courseId, accountId);
+    
+    const [result] = await pool.query(
+        `UPDATE courses SET ${updates.join(', ')} WHERE course_id = ? AND account_id = ?`,
+        values
+    );
+    return result.affectedRows > 0;
+};
+
+/**
+ * Delete a course
+ * @param {number} courseId - Course ID
+ * @param {number} accountId - User's account ID
+ * @returns {Promise<boolean>} True if deleted
+ */
+const deleteCourse = async (courseId, accountId) => {
+    const [result] = await pool.query(
+        `DELETE FROM courses WHERE course_id = ? AND account_id = ?`,
+        [courseId, accountId]
+    );
+    return result.affectedRows > 0;
+};
+
 module.exports = {
+    // Helper functions
+    isCourseCodeDuplicate,
+    
     // Assignment functions
     getAssignments,
     getAssignmentById,
@@ -673,9 +795,6 @@ module.exports = {
     getStudySessions,
     createStudySession,
     
-    // Course functions
-    getCourses,
-    
     // Stats
     getAcademicStats,
     
@@ -689,5 +808,12 @@ module.exports = {
     updatePlannerItem,
     deletePlannerItem,
     getAssignmentsForPlanner,
-    getWeeklyPlanner
+    getWeeklyPlanner,
+
+    // Course functions
+    getUserCourses,
+    getCourseById,
+    createCourse,
+    updateCourse,
+    deleteCourse,
 };

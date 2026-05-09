@@ -113,14 +113,6 @@ router.get('/study-sessions', academicController.getStudySessions);
 router.post('/study-sessions', academicController.createStudySession);
 
 /**
- * GET /api/academic/courses
- * Get all courses for authenticated user (derived from assignments)
- * Requires authentication
- * Output: { success, courses }
- */
-router.get('/courses', academicController.getCourses);
-
-/**
  * GET /api/academic/stats
  * Get academic statistics (assignment counts, task counts, total study minutes)
  * Requires authentication
@@ -187,5 +179,47 @@ router.delete('/planner-items/:id', academicController.deletePlannerItem);
  * Output: { success, message }
  */
 router.patch('/planner-items/:id/complete', academicController.completePlannerItem);
+
+/**
+ * GET /api/academic/courses
+ * Get all courses for authenticated user
+ * Requires authentication
+ * Output: { success, courses }
+ */
+router.get('/courses', academicController.getUserCourses);
+
+/**
+ * GET /api/academic/courses/:id
+ * Get a single course by ID
+ * Requires authentication
+ * Output: { success, course }
+ */
+router.get('/courses/:id', academicController.getCourseById);
+
+/**
+ * POST /api/academic/courses
+ * Create a new course
+ * Requires authentication
+ * Input: { courseCode, courseTitle, instructor, term, currentGrade }
+ * Output: { success, message, courseId }
+ */
+router.post('/courses', academicController.createCourse);
+
+/**
+ * PUT /api/academic/courses/:id
+ * Update an existing course
+ * Requires authentication
+ * Input: { courseCode, courseTitle, instructor, term, currentGrade } (all optional)
+ * Output: { success, message }
+ */
+router.put('/courses/:id', academicController.updateCourse);
+
+/**
+ * DELETE /api/academic/courses/:id
+ * Delete a course
+ * Requires authentication
+ * Output: { success, message }
+ */
+router.delete('/courses/:id', academicController.deleteCourse);
 
 module.exports = router;
