@@ -27,6 +27,21 @@
   color: var(--muted);
 }
 
+/* Make date picker calendar icons visible on dark UI */
+.weekly-jump-group input[type="date"]::-webkit-calendar-picker-indicator,
+#plannerDueDate::-webkit-calendar-picker-indicator,
+#plannerRecurringEndDate::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(1.6);
+  opacity: 0.85;
+  cursor: pointer;
+}
+
+.weekly-jump-group input[type="date"]::-webkit-calendar-picker-indicator:hover,
+#plannerDueDate::-webkit-calendar-picker-indicator:hover,
+#plannerRecurringEndDate::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
 .weekly-plan-header {
   display: flex;
   justify-content: space-between;
@@ -53,8 +68,8 @@
 
 .weekly-grid {
   display: grid;
-  grid-template-columns: repeat(7, minmax(180px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
   align-items: stretch;
 }
 
@@ -300,6 +315,11 @@
   margin-right: auto;
 }
 
+/* Force hidden modal buttons to stay hidden even with global .btn display styling */
+.weekly-modal-actions button[hidden] {
+  display: none !important;
+}
+
 /* Accessibility mode support for Weekly Planner-specific cards */
 body[data-accessibility-mode="accessibility"] .weekly-day-card,
 body[data-accessibility-mode="accessibility"] .weekly-item-card,
@@ -335,7 +355,7 @@ body[data-accessibility-mode="accessibility"] .weekly-modal-close {
 }
 
 /* Responsive behavior */
-@media (max-width: 1500px) {
+@media (max-width: 1100px) {
   .weekly-grid {
     grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   }
