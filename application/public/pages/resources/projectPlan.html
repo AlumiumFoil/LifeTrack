@@ -1,4 +1,7 @@
-<!-- google analytics tag -->
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- google analytics tag -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-BKXMLJEGGQ"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -7,5 +10,270 @@
     gtag('config', 'G-BKXMLJEGGQ');
   </script>
 
-  <!-- FOR WHOEVER WORKS ON THIS PAGE. MAKE SURE TO INCLUDE THIS GOOGLE ANAYLTICS TAG ABOVE.
-        PUT IN THE HEAD PORTION RIGHT ABOVE THE META TAGS. LOOK AT OTHER PAGES FOR REFERENCE - MOHIT-->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Project Planning – LifeTrack</title>
+  <link rel="stylesheet" href="../../css/styles.css" />
+  <link rel="stylesheet" href="../../css/projectPlan.css" />
+</head>
+<body>
+  <div class="dashboard-frame">
+
+    <header class="dashboard-header">
+      <a class="dashboard-header-brand" href="../dashboard.html">LifeTrack</a>
+      <div class="dashboard-header-actions">
+        <a class="dashboard-header-profile" href="../search.html">Search</a>
+        <a class="dashboard-header-profile" href="../profile.html">
+          <img
+            id="profilePreview"
+            class="dashboard-header-avatar"
+            src="https://placehold.co/120x120?text=User"
+            alt="Profile preview"
+          />
+          <span id="profileUsernameTop">Profile</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="dashboard-body">
+      <aside class="dashboard-sidebar">
+        <nav class="dashboard-nav">
+          <a class="dashboard-nav-link" href="../dashboard.html">Home</a>
+          <a class="dashboard-nav-link" href="../studying.html">Academic</a>
+          <a class="dashboard-nav-link" href="../jobpreparation.html">Career</a>
+          <a class="dashboard-nav-link active" href="../goals.html">Productivity</a>
+          <a class="dashboard-nav-link" href="../wellness.html">Wellness</a>
+          <a class="dashboard-nav-link" href="../campus-map.html">Campus Map</a>
+        </nav>
+
+        <div class="dashboard-sidebar-footer">
+          <button id="logoutBtn" class="dashboard-logout-btn" type="button">Logout</button>
+        </div>
+      </aside>
+
+      <main class="dashboard-main">
+
+        <section class="hero">
+          <h1>Project Planning</h1>
+          <p>Create projects, organize milestones, track due dates, and monitor progress across your academic or personal work.</p>
+        </section>
+
+        <div class="summary-row" aria-label="Project planning summary">
+          <div class="summary-card">
+            <div class="s-value" id="stat-total-projects">0</div>
+            <div class="s-label">Total Projects</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value accent" id="stat-active-projects">0</div>
+            <div class="s-label">Active Projects</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value green" id="stat-completed-milestones">0</div>
+            <div class="s-label">Completed Milestones</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value amber" id="stat-overdue-milestones">0</div>
+            <div class="s-label">Overdue Milestones</div>
+          </div>
+        </div>
+
+        <div id="project-plan-message" class="status-message project-plan-message" hidden></div>
+
+        <section class="project-plan-layout" aria-label="Project planner workspace">
+
+          <div class="project-panel">
+            <div class="project-section-header">
+              <div>
+                <h2 class="section-heading project-section-title">Projects</h2>
+                <p class="project-section-note">Select a project to view and manage its milestones.</p>
+              </div>
+              <button id="new-project-btn" class="btn sm" type="button">+ New Project</button>
+            </div>
+
+            <div id="project-list" class="project-list" aria-live="polite">
+              <div class="card project-empty-card">
+                <h2>No projects yet</h2>
+                <p>Create your first project to begin organizing milestones.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="milestone-panel">
+            <div class="project-section-header">
+              <div>
+                <h2 class="section-heading project-section-title">Milestones</h2>
+                <p id="selected-project-note" class="project-section-note">Choose a project to view its milestones.</p>
+              </div>
+              <button id="new-milestone-btn" class="btn sm" type="button" disabled>+ New Milestone</button>
+            </div>
+
+            <div id="selected-project-details" class="card selected-project-card" hidden></div>
+
+            <div id="milestone-list" class="milestone-list" aria-live="polite">
+              <div class="card project-empty-card">
+                <h2>No project selected</h2>
+                <p>Select a project from the list to load its milestones.</p>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <div class="controls-bar project-bottom-actions">
+          <a class="btn secondary" href="../goals.html">Back to Productivity</a>
+        </div>
+
+        <div class="footer">Team 1 &middot; Spring 2026</div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Project Modal -->
+  <div id="project-modal" class="modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="project-modal-title">
+      <div class="project-modal-header">
+        <h2 id="project-modal-title">New Project</h2>
+        <button id="close-project-modal-btn" class="project-icon-btn" type="button" aria-label="Close project modal">×</button>
+      </div>
+
+      <form id="project-form" class="vp-form">
+        <input type="hidden" id="project-id" />
+
+        <div class="form-group">
+          <label for="project-title">Project Title</label>
+          <input
+            id="project-title"
+            type="text"
+            maxlength="255"
+            placeholder="Example: Senior Capstone Project"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="project-description">Description</label>
+          <textarea
+            id="project-description"
+            class="project-textarea"
+            rows="4"
+            placeholder="Briefly describe the project goal, scope, or deliverable."
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="project-git-url">GitHub / Project URL</label>
+          <input
+            id="project-git-url"
+            type="url"
+            placeholder="https://github.com/team/project"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="project-members">Group Members and Roles</label>
+          <textarea
+            id="project-members"
+            class="project-textarea"
+            rows="5"
+            placeholder="One per line. Example:&#10;Will Brust - Frontend Lead&#10;Jane Smith - Backend Lead&#10;Bob Wilson"
+          ></textarea>
+          <p class="small project-field-help">Use “Name - Role” when a role is known. Names without roles are okay.</p>
+        </div>
+
+        <div class="form-group" id="project-status-group">
+          <label for="project-status">Project Status</label>
+          <select id="project-status">
+            <option value="active">Active</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+
+        <div class="modal-actions">
+          <button id="delete-project-btn" class="btn danger" type="button" hidden>Delete Project</button>
+          <button id="cancel-project-btn" class="btn secondary" type="button">Cancel</button>
+          <button class="btn" type="submit">Save Project</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Milestone Modal -->
+  <div id="milestone-modal" class="modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="milestone-modal-title">
+      <div class="project-modal-header">
+        <h2 id="milestone-modal-title">New Milestone</h2>
+        <button id="close-milestone-modal-btn" class="project-icon-btn" type="button" aria-label="Close milestone modal">×</button>
+      </div>
+
+      <form id="milestone-form" class="vp-form">
+        <input type="hidden" id="milestone-id" />
+
+        <div class="form-group">
+          <label for="milestone-title">Milestone Title</label>
+          <input
+            id="milestone-title"
+            type="text"
+            maxlength="255"
+            placeholder="Example: Complete database schema"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="milestone-description">Description</label>
+          <textarea
+            id="milestone-description"
+            class="project-textarea"
+            rows="4"
+            placeholder="Describe the task, requirement, or checkpoint."
+          ></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="milestone-due-date">Due Date</label>
+            <input id="milestone-due-date" type="date" />
+          </div>
+
+          <div class="form-group">
+            <label for="milestone-sort-order">Sort Order</label>
+            <input id="milestone-sort-order" type="number" min="0" step="1" value="0" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="milestone-status">Milestone Status</label>
+          <select id="milestone-status">
+            <option value="not started">Not Started</option>
+            <option value="in progress">In Progress</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+
+        <div class="modal-actions">
+          <button id="delete-milestone-btn" class="btn danger" type="button" hidden>Delete Milestone</button>
+          <button id="cancel-milestone-btn" class="btn secondary" type="button">Cancel</button>
+          <button class="btn" type="submit">Save Milestone</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../../js/staticResources.js"></script>
+  <script src="../../js/projectPlan.js"></script>
+  <script src="../../js/headerProfile.js"></script>
+  <script>
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        window.location.href = "../auth.html";
+      });
+    }
+  </script>
+</body>
+</html>
