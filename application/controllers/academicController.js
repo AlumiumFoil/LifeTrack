@@ -592,13 +592,12 @@ const getAcademicStats = async (req, res) => {
  * @returns {object} { startDate, endDate }
  */
 const getWeekRange = (date) => {
-    const refDate = new Date(date);
+    const refDate = new Date(`${date}T00:00:00`);
     const dayOfWeek = refDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
     
     // Calculate start of the week (Sunday)
     const startDate = new Date(refDate);
-    let offset = dayOfWeek === 6 ? 0 : -(dayOfWeek + 1);
-    startDate.setDate(refDate.getDate() + offset);
+    startDate.setDate(refDate.getDate() - dayOfWeek);
     
     // Calculate end of the week (Saturday)
     const endDate = new Date(startDate);
