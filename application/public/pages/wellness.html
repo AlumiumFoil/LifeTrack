@@ -15,6 +15,35 @@
   <title>Wellness Hub – LifeTrack</title>
   <link rel="stylesheet" href="../css/styles.css" />
   <link rel="stylesheet" href="../css/wellness.css" />
+
+  <style>
+    body[data-accessibility-mode="accessibility"] .habit-item {
+      background: #ffffff;
+      color: var(--text);
+      border-color: rgba(15, 23, 42, 0.2);
+    }
+
+    body[data-accessibility-mode="accessibility"] .habit-item:hover {
+      background: rgba(77, 163, 255, 0.08);
+      border-color: rgba(77, 163, 255, 0.35);
+    }
+
+    body[data-accessibility-mode="accessibility"] .habit-item.checked {
+      background: rgba(74, 222, 128, 0.12);
+      border-color: rgba(74, 222, 128, 0.35);
+    }
+
+    body[data-accessibility-mode="accessibility"] .habit-label,
+    body[data-accessibility-mode="accessibility"] .habit-description,
+    body[data-accessibility-mode="accessibility"] .habit-streak {
+      color: var(--text);
+    }
+
+    body[data-accessibility-mode="accessibility"] .habit-item.checked .habit-label,
+    body[data-accessibility-mode="accessibility"] .habit-item.checked .habit-description {
+      color: var(--muted);
+    }
+  </style>
 </head>
 <body>
   <div class="dashboard-frame">
@@ -81,7 +110,7 @@
             <textarea id="checkin-notes" rows="3"
               placeholder="How are you feeling today?"
               style="width:100%; padding:10px 12px; border-radius:12px; border:1px solid var(--border);
-                     background:rgba(11,18,32,0.9); color:var(--text); font:inherit;
+                     background:var(--card); color:var(--text); font:inherit;
                      resize:vertical; line-height:1.5;"></textarea>
           </div>
 
