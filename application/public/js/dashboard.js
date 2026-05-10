@@ -227,9 +227,69 @@ function populateDashboard(dashboard) {
   */
 
   //render each dashboard section
+  loadAcademicAssignmentsSnapshot();
   renderAcademicProgress(academicProgress);
   renderProjects(projects);
   renderWellness(wellnessEntries);
+}
+
+//loads upcoming academic assignments for the dashboard academic snapshot
+async function loadAcademicAssignmentsSnapshot() {
+  const token = getAccessToken();
+  const container = document.getElementById("academicAssignmentsList");
+
+  if (!container) return;
+
+  if (!token) {
+    container.innerHTML = `<p class="small">Sign in to view upcoming assignments.</p>`;
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/academic/assignments?status=Upcoming", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || "Could not load upcoming assignments.");
+    }
+
+    renderAcademicAssignmentsSnapshot(data.assignments || []);
+  } catch (error) {
+    console.error("Academic dashboard snapshot error:", error.message || error);
+    container.innerHTML = `<p class="small">Could not load upcoming assignments.</p>`;
+  }
+}
+
+//renders the upcoming assignment snapshot inside the academic dashboard card
+function renderAcademicAssignmentsSnapshot(assignments) {
+  const container = document.getElementById("academicAssignmentsList");
+  if (!container) return;
+
+  if (!assignments.length) {
+    container.innerHTML = `<p class="small">No upcoming assignments. Schedule is wide open.</p>`;
+    return;
+  }
+
+  container.innerHTML = assignments.slice(0, 3).map((assignment) => {
+    const dueDateText = formatDashboardDate(assignment.dueDate);
+
+    return `
+      <div class="dashboard-list-item">
+        <strong>${escapeHtml(assignment.title || "Untitled Assignment")}</strong>
+        <span class="small">
+          ${escapeHtml(assignment.courseName || "No course")}
+          ${dueDateText ? ` • Due: ${escapeHtml(dueDateText)}` : ""}
+          • ${escapeHtml(assignment.status || "Upcoming")}
+        </span>
+      </div>
+    `;
+  }).join("");
 }
 
 //this will fill out the academic progress card (schedule).
@@ -302,6 +362,23 @@ function logoutUser() {
   localStorage.removeItem("refreshToken");
   localStorage.removeItem("user");
   window.location.href = "./auth.html";
+}
+
+//formats dates for dashboard cards
+function formatDashboardDate(value) {
+  if (!value) return "";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  });
 }
 
 //prevents html injection by replacing special chars w/ safe html versions 
