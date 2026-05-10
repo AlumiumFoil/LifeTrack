@@ -64,14 +64,18 @@
         <!--The main dashboard cards laid out in a grid-->
         <section class="dashboard-grid storyboard-grid">
           <article class="card dashboard-panel dashboard-panel-large">
-            <h2>Academic</h2>
+            <h2>Upcoming Assignments</h2>
 
             <!--This is updated by JS after the dash data loads-->
-            <p id="dashboardWelcome" class="small">Current Course: CSC 648</p>
+            <p id="dashboardWelcome" class="small">Welcome!</p>
 
-            <!--button for study-plan related nav-->
+            <div id="academicAssignmentsList" class="dashboard-list">
+              <p class="small">No upcoming assignments. Schedule is wide open.</p>
+            </div>
+
+            <!--button for academic related nav-->
             <div class="dashboard-button-stack">
-              <a class="btn secondary" href="./studying.html">Create Study Plan</a>
+              <a class="btn secondary" href="./studying.html">View Academic Tab</a>
             </div>
           </article>
 
