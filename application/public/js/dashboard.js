@@ -487,8 +487,7 @@ function renderProjectMilestonesSnapshot(projects, milestones) {
   }).join("");
 }
 
-//this will fill out the wellness progress card.
-//currently it uses the default untill post HP when linked with wellness data
+//this will fill out the wellness snapshot card
 function renderWellness(items) {
   const container = document.getElementById("wellnessList");
   if (!container) return;
@@ -498,12 +497,31 @@ function renderWellness(items) {
     return;
   }
 
-  container.innerHTML = items.slice(0, 5).map((entry) => `
-    <div class="dashboard-list-item">
-      <strong>Mood: ${escapeHtml(entry.moodValue ?? "N/A")}</strong>
-      <span class="small">${escapeHtml(entry.note || "No note added.")}</span>
-    </div>
-  `).join("");
+  container.innerHTML = items.slice(0, 3).map((entry) => {
+    const mood = getDashboardMoodDisplay(entry.moodValue);
+
+    return `
+      <div class="dashboard-list-item">
+        <strong>${escapeHtml(mood.emoji)} ${escapeHtml(mood.label)}</strong>
+        <span class="small">${escapeHtml(entry.note || "No note added.")}</span>
+      </div>
+    `;
+  }).join("");
+}
+
+//converts numeric mood values into the same style used by the wellness page
+function getDashboardMoodDisplay(value) {
+  const moodValue = Number(value);
+
+  const moods = {
+    1: { emoji: "😰", label: "Struggling" },
+    2: { emoji: "😔", label: "Low" },
+    3: { emoji: "🙂", label: "Okay" },
+    4: { emoji: "😊", label: "Good" },
+    5: { emoji: "😄", label: "Great" }
+  };
+
+  return moods[moodValue] || { emoji: "🙂", label: "Mood Check-In" };
 }
 
 //user logout
