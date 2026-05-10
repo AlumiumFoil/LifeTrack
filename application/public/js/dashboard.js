@@ -229,7 +229,7 @@ function populateDashboard(dashboard) {
   //render each dashboard section
   loadAcademicAssignmentsSnapshot();
   renderAcademicProgress(academicProgress);
-  renderProjects(projects);
+  loadProjectMilestonesSnapshot();
   renderWellness(wellnessEntries);
 }
 
@@ -314,24 +314,109 @@ function renderAcademicProgress(items) {
 }
 
 //this will fill out the project progress card (milestones).
-//currently it uses the default untill post HP when linked with our projects data
-function renderProjects(items) {
+//loads upcoming project milestones for the dashboard snapshot
+async function loadProjectMilestonesSnapshot() {
+  const token = getAccessToken();
   const container = document.getElementById("projectList");
+
   if (!container) return;
 
-  if (!items.length) {
-    container.innerHTML = `<p class="small">No projects found yet.</p>`;
+  if (!token) {
+    container.innerHTML = `<p class="small">Sign in to view upcoming milestones.</p>`;
     return;
   }
 
-  container.innerHTML = items.slice(0, 4).map((project) => {
-    const milestones = Array.isArray(project.milestones) ? project.milestones : [];
+  try {
+    const [projectsResponse, milestonesResponse] = await Promise.all([
+      fetch("/api/goals/projects", {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      }),
+      fetch("/api/goals/milestones", {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      })
+    ]);
+
+    const projectsData = await projectsResponse.json();
+    const milestonesData = await milestonesResponse.json();
+
+    if (!projectsResponse.ok || !projectsData.success) {
+      throw new Error(projectsData.error || "Could not load projects.");
+    }
+
+    if (!milestonesResponse.ok || !milestonesData.success) {
+      throw new Error(milestonesData.error || "Could not load milestones.");
+    }
+
+    const visibleProjects = Array.isArray(projectsData.projects)
+      ? projectsData.projects
+      : [];
+
+    const allMilestones = Array.isArray(milestonesData.milestones)
+      ? milestonesData.milestones
+      : [];
+
+    renderProjectMilestonesSnapshot(visibleProjects, allMilestones);
+  } catch (error) {
+    console.error("Project milestones dashboard snapshot error:", error.message || error);
+    container.innerHTML = `<p class="small">Could not load upcoming milestones.</p>`;
+  }
+}
+
+//renders upcoming milestones attached only to visible/non-archived projects
+function renderProjectMilestonesSnapshot(projects, milestones) {
+  const container = document.getElementById("projectList");
+  if (!container) return;
+
+  const visibleProjectIds = new Set(
+    projects.map(project => Number(project.id))
+  );
+
+  const projectTitleById = new Map(
+    projects.map(project => [Number(project.id), project.title || "Untitled Project"])
+  );
+
+  const visibleMilestones = milestones
+    .filter(milestone => visibleProjectIds.has(Number(milestone.projectId)))
+    .filter(milestone => milestone.status !== "completed");
+
+  const sortedMilestones = visibleMilestones.sort((a, b) => {
+    const aOverdue = isDashboardOverdue(a.dueDate) ? 0 : 1;
+    const bOverdue = isDashboardOverdue(b.dueDate) ? 0 : 1;
+
+    if (aOverdue !== bOverdue) {
+      return aOverdue - bOverdue;
+    }
+
+    const aTime = getDashboardDateTime(a.dueDate);
+    const bTime = getDashboardDateTime(b.dueDate);
+
+    return aTime - bTime;
+  });
+
+  if (!sortedMilestones.length) {
+    container.innerHTML = `<p class="small">No upcoming milestones. Project schedule is clear.</p>`;
+    return;
+  }
+
+  container.innerHTML = sortedMilestones.slice(0, 3).map((milestone) => {
+    const projectTitle = projectTitleById.get(Number(milestone.projectId)) || "Untitled Project";
+    const dueDateText = formatDashboardDate(milestone.dueDate);
+    const dueLabel = isDashboardOverdue(milestone.dueDate) ? "Overdue" : "Due";
 
     return `
       <div class="dashboard-list-item">
-        <strong>${escapeHtml(project.title || "Untitled Project")}</strong>
-        <span class="small">Status: ${escapeHtml(project.status || "unknown")}</span>
-        <span class="small">Milestones: ${milestones.length}</span>
+        <strong>${escapeHtml(milestone.title || "Untitled Milestone")}</strong>
+        <span class="small">${escapeHtml(projectTitle)}</span>
+        <span class="small">
+          ${dueDateText ? `${dueLabel}: ${escapeHtml(dueDateText)} • ` : ""}
+          ${escapeHtml(formatDashboardStatus(milestone.status || "not started"))}
+        </span>
       </div>
     `;
   }).join("");
@@ -364,11 +449,50 @@ function logoutUser() {
   window.location.href = "./auth.html";
 }
 
+//returns a comparable timestamp for dashboard sorting
+function getDashboardDateTime(value) {
+  if (!value) return Number.MAX_SAFE_INTEGER;
+
+  const date = new Date(`${value}T00:00:00`);
+
+  if (Number.isNaN(date.getTime())) {
+    return Number.MAX_SAFE_INTEGER;
+  }
+
+  return date.getTime();
+}
+
+//checks whether a dashboard date is overdue
+function isDashboardOverdue(value) {
+  if (!value) return false;
+
+  const today = new Date();
+  const dueDate = new Date(`${value}T00:00:00`);
+
+  if (Number.isNaN(dueDate.getTime())) {
+    return false;
+  }
+
+  today.setHours(0, 0, 0, 0);
+
+  return dueDate < today;
+}
+
+//formats status text like "in progress" into "In Progress"
+function formatDashboardStatus(status) {
+  if (!status) return "";
+
+  return String(status)
+    .split(" ")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 //formats dates for dashboard cards
 function formatDashboardDate(value) {
   if (!value) return "";
 
-  const date = new Date(value);
+  const date = new Date(`${value}T00:00:00`);
 
   if (Number.isNaN(date.getTime())) {
     return "";
