@@ -129,10 +129,8 @@ async function initializeProjectPlanner() {
     return;
   }
 
-  await Promise.all([
-    loadProjectStats(),
-    loadProjects()
-  ]);
+  await loadProjects();
+  await loadVisibleProjectStats();
 }
 
 /* Auth / fetch helpers */
@@ -195,6 +193,60 @@ async function loadProjectStats() {
     renderStats(data.stats);
   } catch (error) {
     console.error('Project stats load error:', error.message);
+  }
+}
+
+async function loadVisibleProjectStats() {
+  try {
+    const data = await apiRequest('/milestones', {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+
+    const allMilestones = Array.isArray(data.milestones) ? data.milestones : [];
+    const visibleProjectIds = new Set(projects.map(project => Number(project.id)));
+
+    const visibleMilestones = allMilestones.filter(milestone =>
+      visibleProjectIds.has(Number(milestone.projectId))
+    );
+
+    const completedMilestones = visibleMilestones.filter(milestone =>
+      milestone.status === 'completed'
+    ).length;
+
+    const overdueMilestones = visibleMilestones.filter(milestone =>
+      milestone.status !== 'completed' && isOverdue(milestone.dueDate)
+    ).length;
+
+    renderStats({
+      projects: {
+        total: projects.length,
+        active: projects.filter(project => project.status === 'active').length,
+        completed: projects.filter(project => project.status === 'completed').length
+      },
+      milestones: {
+        total: visibleMilestones.length,
+        completed: completedMilestones,
+        overdue: overdueMilestones
+      }
+    });
+  } catch (error) {
+    console.error('Visible project stats load error:', error.message);
+
+    renderStats({
+      projects: {
+        total: projects.length,
+        active: projects.filter(project => project.status === 'active').length,
+        completed: projects.filter(project => project.status === 'completed').length
+      },
+      milestones: {
+        total: milestones.length,
+        completed: milestones.filter(milestone => milestone.status === 'completed').length,
+        overdue: milestones.filter(milestone =>
+          milestone.status !== 'completed' && isOverdue(milestone.dueDate)
+        ).length
+      }
+    });
   }
 }
 
@@ -611,10 +663,9 @@ async function handleProjectSubmit(event) {
 
     closeProjectModal();
 
-    await Promise.all([
-      loadProjectStats(),
-      loadProjects()
-    ]);
+    await loadProjects();
+    await loadVisibleProjectStats();
+
   } catch (error) {
     console.error('Project save error:', error.message);
     showMessage(error.message || 'Could not save project.', 'error');
@@ -641,10 +692,9 @@ async function handleProjectDelete() {
     closeProjectModal();
     showMessage('Project deleted successfully.', 'success');
 
-    await Promise.all([
-      loadProjectStats(),
-      loadProjects()
-    ]);
+    await loadProjects();
+    await loadVisibleProjectStats();
+
   } catch (error) {
     console.error('Project delete error:', error.message);
     showMessage(error.message || 'Could not delete project.', 'error');
@@ -754,10 +804,9 @@ async function handleMilestoneSubmit(event) {
 
     closeMilestoneModal();
 
-    await Promise.all([
-      loadProjectStats(),
-      loadMilestones(selectedProjectId)
-    ]);
+    await loadMilestones(selectedProjectId);
+    await loadVisibleProjectStats();
+
   } catch (error) {
     console.error('Milestone save error:', error.message);
     showMessage(error.message || 'Could not save milestone.', 'error');
@@ -774,10 +823,8 @@ async function updateMilestoneStatus(milestoneId, status) {
       body: JSON.stringify({ status })
     });
 
-    await Promise.all([
-      loadProjectStats(),
-      loadMilestones(selectedProjectId)
-    ]);
+    await loadMilestones(selectedProjectId);
+    await loadVisibleProjectStats();
 
     showMessage('Milestone status updated.', 'success');
   } catch (error) {
@@ -803,10 +850,9 @@ async function handleMilestoneDelete() {
     closeMilestoneModal();
     showMessage('Milestone deleted successfully.', 'success');
 
-    await Promise.all([
-      loadProjectStats(),
-      loadMilestones(selectedProjectId)
-    ]);
+    await loadMilestones(selectedProjectId);
+    await loadVisibleProjectStats();
+    
   } catch (error) {
     console.error('Milestone delete error:', error.message);
     showMessage(error.message || 'Could not delete milestone.', 'error');
