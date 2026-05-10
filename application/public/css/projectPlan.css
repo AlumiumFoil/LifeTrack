@@ -222,13 +222,13 @@
 }
 
 /* Firefox/general fallback */
-#milestone-due-date {
+/*#milestone-due-date {
   color-scheme: dark;
 }
 
 body[data-accessibility-mode="accessibility"] #milestone-due-date {
   color-scheme: light;
-}
+}*/
 
 .project-icon-btn {
   width: 34px;
