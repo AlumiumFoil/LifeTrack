@@ -187,7 +187,7 @@ function populateDashboard(dashboard) {
   const profile = dashboard.profile || {};
   //const summary = dashboard.summary || {};
   const projects = Array.isArray(dashboard.projects) ? dashboard.projects : [];
-  const academicProgress = Array.isArray(dashboard.academicProgress) ? dashboard.academicProgress : [];
+  //const academicProgress = Array.isArray(dashboard.academicProgress) ? dashboard.academicProgress : [];
   const wellnessEntries = Array.isArray(dashboard.wellnessMoodEntries) ? dashboard.wellnessMoodEntries : [];
 
   const dashboardWelcome = document.getElementById("dashboardWelcome");
@@ -228,7 +228,7 @@ function populateDashboard(dashboard) {
 
   //render each dashboard section
   loadAcademicAssignmentsSnapshot();
-  renderAcademicProgress(academicProgress);
+  loadTodaysScheduleSnapshot();
   loadProjectMilestonesSnapshot();
   renderWellness(wellnessEntries);
 }
@@ -292,28 +292,93 @@ function renderAcademicAssignmentsSnapshot(assignments) {
   }).join("");
 }
 
-//this will fill out the academic progress card (schedule).
-//currently it uses the default untill post HP when linked with different tasks
-function renderAcademicProgress(items) {
+//loads today's schedule from the weekly planner combined assignment/planner endpoint
+async function loadTodaysScheduleSnapshot() {
+  const token = getAccessToken();
   const container = document.getElementById("academicProgressList");
+
   if (!container) return;
 
-  //default message when no data exists
-  if (!items.length) {
-    container.innerHTML = `<p class="small">No academic progress records yet.</p>`;
+  if (!token) {
+    container.innerHTML = `<p class="small">Sign in to view today's schedule.</p>`;
     return;
   }
 
-  //will only show a few items on the dash to keep the card compact
-  container.innerHTML = items.slice(0, 5).map((item) => `
-    <div class="dashboard-list-item">
-      <strong>${escapeHtml(item.courseName || "Unnamed Course")}</strong>
-      <span class="small">${Number(item.progressPercent ?? 0)}% complete</span>
-    </div>
-  `).join("");
+  try {
+    const today = getDashboardLocalDate();
+    const weekStart = getDashboardStartOfWeek(today);
+
+    const response = await fetch(`/api/academic/weekly-planner?weekStart=${weekStart}`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || "Could not load today's schedule.");
+    }
+
+    const weeklyItems = Array.isArray(data.items) ? data.items : [];
+    const todayItems = weeklyItems.filter(item => item.dueDate === today);
+
+    renderTodaysScheduleSnapshot(todayItems);
+  } catch (error) {
+    console.error("Today's schedule dashboard snapshot error:", error.message || error);
+    container.innerHTML = `<p class="small">Could not load today's schedule.</p>`;
+  }
 }
 
-//this will fill out the project progress card (milestones).
+//renders assignments and planner items due today
+function renderTodaysScheduleSnapshot(items) {
+  const container = document.getElementById("academicProgressList");
+  if (!container) return;
+
+  if (!items.length) {
+    container.innerHTML = `<p class="small">Nothing scheduled for today.</p>`;
+    return;
+  }
+
+  const sortedItems = items.sort((a, b) => {
+    const aDone = isDashboardCompletedStatus(a.status);
+    const bDone = isDashboardCompletedStatus(b.status);
+
+    if (aDone !== bDone) {
+      return aDone ? 1 : -1;
+    }
+
+    const aSourceOrder = a.source === "assignment" ? 0 : 1;
+    const bSourceOrder = b.source === "assignment" ? 0 : 1;
+
+    if (aSourceOrder !== bSourceOrder) {
+      return aSourceOrder - bSourceOrder;
+    }
+
+    return String(a.title || "").localeCompare(String(b.title || ""));
+  });
+
+  container.innerHTML = sortedItems.slice(0, 5).map((item) => {
+    const sourceLabel = item.source === "assignment" ? "Assignment" : "Planner";
+    const contextLabel = item.source === "assignment"
+      ? item.courseName || item.category || "Academic"
+      : item.category || "Planner Item";
+
+    return `
+      <div class="dashboard-list-item">
+        <strong>${escapeHtml(item.title || "Untitled Item")}</strong>
+        <span class="small">
+          ${escapeHtml(sourceLabel)}
+          ${contextLabel ? ` • ${escapeHtml(contextLabel)}` : ""}
+          • ${escapeHtml(formatDashboardStatus(item.status || "pending"))}
+        </span>
+      </div>
+    `;
+  }).join("");
+}
+
+//this fills out the project progress card (milestones).
 //loads upcoming project milestones for the dashboard snapshot
 async function loadProjectMilestonesSnapshot() {
   const token = getAccessToken();
@@ -503,6 +568,37 @@ function formatDashboardDate(value) {
     day: "numeric",
     year: "numeric"
   });
+}
+
+//returns today's local date as YYYY-MM-DD
+function getDashboardLocalDate() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+//returns the Sunday week start for a YYYY-MM-DD date string
+function getDashboardStartOfWeek(dateString) {
+  const date = new Date(`${dateString}T00:00:00`);
+  date.setHours(0, 0, 0, 0);
+
+  const dayOfWeek = date.getDay();
+  const start = new Date(date);
+  start.setDate(date.getDate() - dayOfWeek);
+
+  const year = start.getFullYear();
+  const month = String(start.getMonth() + 1).padStart(2, "0");
+  const day = String(start.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+//dashboard version of completed/finished status check
+function isDashboardCompletedStatus(status) {
+  return status === "completed" || status === "graded";
 }
 
 //prevents html injection by replacing special chars w/ safe html versions 
