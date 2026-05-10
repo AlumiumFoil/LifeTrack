@@ -183,3 +183,40 @@
 .assignment-clickable .assign-meta {
   color: var(--muted);
 }
+
+.course-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.course-clickable {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.course-clickable:hover {
+  border-color: var(--accent);
+}
+
+.course-clickable .course-code,
+.course-clickable .course-name {
+  color: var(--text);
+}
+
+.course-clickable .course-meta {
+  color: var(--muted);
+}
+
+.course-clickable .course-grade {
+  font-weight: 800;
+  font-size: 1.4rem;
+}
+
+@media (max-width: 850px) {
+  .course-grid {
+    grid-template-columns: 1fr;
+  }
+}

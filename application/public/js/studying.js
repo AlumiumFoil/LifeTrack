@@ -17,6 +17,7 @@
 */
 
 let assignments = [];
+let courses = [];
 let currentAssignFilter = 'all';
 
 const SESSION_SECS = 25 * 60;
@@ -244,6 +245,121 @@ async function deleteAssignment() {
   }
 }
 
+async function loadCourses() {
+  const token = getAccessToken();
+
+  if (!token) {
+    renderCourseError('No saved login found. Please log in again.');
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/academic/courses', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Could not load courses.');
+    }
+
+    courses = data.courses || [];
+    renderCourses();
+    populateAssignmentCourseOptions();
+  } catch (error) {
+    console.error('Course load error:', error.message || error);
+    renderCourseError('Please refresh the page or log in again.');
+  }
+}
+
+async function saveCourse(event) {
+  event.preventDefault();
+
+  const token = getAccessToken();
+  const courseId = document.getElementById('courseId').value;
+
+  const payload = {
+    courseCode: document.getElementById('courseCode').value.trim(),
+    courseTitle: document.getElementById('courseTitle').value.trim(),
+    instructor: document.getElementById('courseInstructor').value.trim(),
+    term: document.getElementById('courseTerm').value,
+    currentGrade: document.getElementById('courseGrade').value
+  };
+
+  if (!payload.courseCode) {
+    showCourseModalMessage('Course code is required.', 'error');
+    return;
+  }
+
+  if (!payload.courseTitle) {
+    showCourseModalMessage('Course title is required.', 'error');
+    return;
+  }
+
+  const isEditing = Boolean(courseId);
+  const endpoint = isEditing
+    ? `/api/academic/courses/${courseId}`
+    : '/api/academic/courses';
+
+  try {
+    const response = await fetch(endpoint, {
+      method: isEditing ? 'PUT' : 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Could not save course.');
+    }
+
+    closeCourseModal();
+    await loadCourses();
+    await loadAssignments(currentAssignFilter);
+  } catch (error) {
+    showCourseModalMessage(error.message || 'Could not save course.', 'error');
+  }
+}
+
+async function deleteCourse() {
+  const token = getAccessToken();
+  const courseId = document.getElementById('courseId').value;
+
+  if (!courseId) return;
+
+  const confirmed = confirm('Delete this course? This cannot be undone.');
+  if (!confirmed) return;
+
+  try {
+    const response = await fetch(`/api/academic/courses/${courseId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Could not delete course.');
+    }
+
+    closeCourseModal();
+    await loadCourses();
+    await loadAssignments(currentAssignFilter);
+  } catch (error) {
+    showCourseModalMessage(error.message || 'Could not delete course.', 'error');
+  }
+}
+
 // ── Formatting Helpers ────────────────────────────────────────────────────────
 
 function formatDate(dateString) {
@@ -419,17 +535,72 @@ function injectFocusTimer() {
   updateTimerUI();
 }
 
-// ── Course Cards Placeholder ─────────────────────────────────────────────────
+// ── Course Cards ─────────────────────────────────────────────────
 
-function renderCoursesPlaceholder() {
+function gradeColor(grade) {
+  const normalized = (grade || '').toUpperCase();
+
+  if (normalized.startsWith('A')) return '#4ade80';
+  if (normalized.startsWith('B')) return '#4da3ff';
+  if (normalized.startsWith('C')) return '#fbbf24';
+  if (normalized.startsWith('D')) return '#fb923c';
+
+  return '#f87171';
+}
+
+function renderCourses() {
+  const courseGrid = document.getElementById('course-grid');
+  if (!courseGrid) return;
+
+  if (!courses.length) {
+    courseGrid.innerHTML = `
+      <div class="card">
+        <p class="small">No courses found yet. Use the Add Course button to create one.</p>
+      </div>
+    `;
+    return;
+  }
+
+  courseGrid.innerHTML = courses.map(course => `
+    <button class="course-card course-clickable" type="button" data-course-id="${course.id}">
+      <div class="course-card-header">
+        <div>
+          <div class="course-code">${escapeHtml(course.courseCode || 'No Code')}</div>
+          <div class="course-name">${escapeHtml(course.courseTitle || 'Untitled Course')}</div>
+        </div>
+
+        <div class="course-grade" style="color:${gradeColor(course.currentGrade)}">
+          ${escapeHtml(course.currentGrade || 'N/A')}
+        </div>
+      </div>
+
+      <div class="course-meta">
+        ${escapeHtml(course.instructor || 'No instructor')}
+        &nbsp;•&nbsp;
+        ${escapeHtml(course.term || 'No term')}
+      </div>
+
+      <div class="course-footer">
+        <span class="badge badge-in-progress">Course</span>
+      </div>
+    </button>
+  `).join('');
+
+  document.querySelectorAll('.course-clickable').forEach(card => {
+    card.addEventListener('click', () => {
+      const course = courses.find(c => String(c.id) === String(card.dataset.courseId));
+      openCourseModal(course);
+    });
+  });
+}
+
+function renderCourseError(message) {
   const courseGrid = document.getElementById('course-grid');
   if (!courseGrid) return;
 
   courseGrid.innerHTML = `
     <div class="card">
-      <p class="small">
-        Course cards will be connected later if/when backend support is expanded.
-      </p>
+      <p class="small">${escapeHtml(message || 'Could not load courses.')}</p>
     </div>
   `;
 }
@@ -538,8 +709,10 @@ function injectAssignmentModal() {
         </label>
 
         <label>
-          Course Name
-          <input id="assignmentCourse" type="text" maxlength="150" placeholder="Example: CSC 648" />
+          Course
+          <select id="assignmentCourse">
+            <option value="">No course selected</option>
+          </select>
         </label>
 
         <label>
@@ -588,6 +761,37 @@ function injectAssignmentModal() {
   });
 }
 
+function populateAssignmentCourseOptions(selectedValue = '') {
+  const select = document.getElementById('assignmentCourse');
+  if (!select) return;
+
+  const currentValue = selectedValue || select.value || '';
+
+  const options = [
+    '<option value="">No course selected</option>',
+    ...courses.map(course => `
+      <option value="${escapeHtml(course.courseTitle)}">
+        ${escapeHtml(course.courseCode)} — ${escapeHtml(course.courseTitle)}
+      </option>
+    `)
+  ];
+
+  const hasCurrentValue =
+    currentValue &&
+    courses.some(course => course.courseTitle === currentValue);
+
+  if (currentValue && !hasCurrentValue) {
+    options.push(`
+      <option value="${escapeHtml(currentValue)}">
+        ${escapeHtml(currentValue)}
+      </option>
+    `);
+  }
+
+  select.innerHTML = options.join('');
+  select.value = currentValue;
+}
+
 function openAssignmentModal(assignment = null) {
   const modal = document.getElementById('assignmentModal');
   const title = document.getElementById('assignmentModalTitle');
@@ -597,7 +801,7 @@ function openAssignmentModal(assignment = null) {
 
   document.getElementById('assignmentId').value = assignment?.id || '';
   document.getElementById('assignmentTitle').value = assignment?.title || '';
-  document.getElementById('assignmentCourse').value = assignment?.courseName || '';
+  populateAssignmentCourseOptions(assignment?.courseName || '');
   document.getElementById('assignmentDueDate').value = assignment?.dueDate || '';
   document.getElementById('assignmentStatus').value = assignment?.status || 'not started';
   document.getElementById('assignmentDescription').value = assignment?.description || '';
@@ -629,6 +833,138 @@ function clearModalMessage() {
   modalMessage.className = 'assignment-modal-message';
 }
 
+function injectCourseModal() {
+  if (document.getElementById('courseModal')) return;
+
+  const modal = document.createElement('div');
+  modal.id = 'courseModal';
+  modal.className = 'assignment-modal-overlay';
+  modal.innerHTML = `
+    <div class="assignment-modal">
+      <div class="assignment-modal-header">
+        <h2 id="courseModalTitle">Add Course</h2>
+        <button id="closeCourseModalBtn" class="assignment-modal-close" type="button">×</button>
+      </div>
+
+      <form id="courseForm" class="assignment-form">
+        <input id="courseId" type="hidden" />
+
+        <label>
+          Course Code
+          <input id="courseCode" type="text" maxlength="50" placeholder="Example: CSC 648" required />
+        </label>
+
+        <label>
+          Course Title
+          <input id="courseTitle" type="text" maxlength="150" placeholder="Example: Software Engineering" required />
+        </label>
+
+        <label>
+          Instructor
+          <input id="courseInstructor" type="text" maxlength="100" placeholder="Example: Dr. Smith" />
+        </label>
+
+        <label>
+          Term
+          <select id="courseTerm">
+            <option value="">No term selected</option>
+            <option value="Spring">Spring</option>
+            <option value="Summer">Summer</option>
+            <option value="Fall">Fall</option>
+            <option value="Winter">Winter</option>
+          </select>
+        </label>
+
+        <label>
+          Current Grade
+          <select id="courseGrade">
+            <option value="">No grade selected</option>
+            <option value="A+">A+</option>
+            <option value="A">A</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B">B</option>
+            <option value="B-">B-</option>
+            <option value="C+">C+</option>
+            <option value="C">C</option>
+            <option value="C-">C-</option>
+            <option value="D+">D+</option>
+            <option value="D">D</option>
+            <option value="D-">D-</option>
+            <option value="F">F</option>
+            <option value="P">P</option>
+            <option value="NP">NP</option>
+            <option value="IP">IP</option>
+          </select>
+        </label>
+
+        <p id="courseModalMessage" class="assignment-modal-message"></p>
+
+        <div class="assignment-modal-actions">
+          <button id="deleteCourseBtn" class="btn secondary sm danger-btn" type="button">Delete</button>
+
+          <div class="assignment-modal-actions-right">
+            <button class="btn secondary sm" type="button" id="cancelCourseBtn">Cancel</button>
+            <button class="btn sm" type="submit">Save Course</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  document.getElementById('courseForm').addEventListener('submit', saveCourse);
+  document.getElementById('closeCourseModalBtn').addEventListener('click', closeCourseModal);
+  document.getElementById('cancelCourseBtn').addEventListener('click', closeCourseModal);
+  document.getElementById('deleteCourseBtn').addEventListener('click', deleteCourse);
+
+  modal.addEventListener('click', event => {
+    if (event.target === modal) closeCourseModal();
+  });
+}
+
+function openCourseModal(course = null) {
+  const modal = document.getElementById('courseModal');
+  const title = document.getElementById('courseModalTitle');
+  const deleteBtn = document.getElementById('deleteCourseBtn');
+
+  clearCourseModalMessage();
+
+  document.getElementById('courseId').value = course?.id || '';
+  document.getElementById('courseCode').value = course?.courseCode || '';
+  document.getElementById('courseTitle').value = course?.courseTitle || '';
+  document.getElementById('courseInstructor').value = course?.instructor || '';
+  document.getElementById('courseTerm').value = course?.term || '';
+  document.getElementById('courseGrade').value = course?.currentGrade || '';
+
+  if (title) title.textContent = course ? 'Edit Course' : 'Add Course';
+  if (deleteBtn) deleteBtn.style.display = course ? 'inline-flex' : 'none';
+
+  modal.classList.add('open');
+}
+
+function closeCourseModal() {
+  const modal = document.getElementById('courseModal');
+  if (modal) modal.classList.remove('open');
+}
+
+function showCourseModalMessage(message, type = 'error') {
+  const modalMessage = document.getElementById('courseModalMessage');
+  if (!modalMessage) return;
+
+  modalMessage.textContent = message;
+  modalMessage.className = `assignment-modal-message ${type}`;
+}
+
+function clearCourseModalMessage() {
+  const modalMessage = document.getElementById('courseModalMessage');
+  if (!modalMessage) return;
+
+  modalMessage.textContent = '';
+  modalMessage.className = 'assignment-modal-message';
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -639,12 +975,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   injectFocusTimer();
   injectAssignmentModal();
-  renderCoursesPlaceholder();
+  injectCourseModal();
 
   const addAssignmentBtn = document.getElementById('addAssignmentBtn');
   if (addAssignmentBtn) {
     addAssignmentBtn.addEventListener('click', () => openAssignmentModal());
   }
 
+  const addCourseBtn = document.getElementById('addCourseBtn');
+  if (addCourseBtn) {
+    addCourseBtn.addEventListener('click', () => openCourseModal());
+  }
+  await loadCourses();
   await loadAssignments(currentAssignFilter);
 });
