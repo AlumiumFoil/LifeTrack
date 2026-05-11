@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head> 
-    <!-- google analytics tag -->
+<head>
+  <!-- google analytics tag -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-BKXMLJEGGQ"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -10,160 +10,106 @@
     gtag('config', 'G-BKXMLJEGGQ');
   </script>
   
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mohit Kumar</title>
-    <style>
-        body {
-            background-image: url('../img/forest.jpg');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
-            height: 100vh;
-            background-attachment: fixed;
-            margin: 0;
-            color: white; /* to make the text readable */
-        }
-
-        nav {
-            padding-top: 8px; /* to make navigation position consistent */
-            padding-left: 8px;
-
-        }
-
-        nav a {
-            font-size: 26px;
-            color: white;
-        }
-
-        nav a:hover {
-            color: orange;
-        }
-
-        header {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: rgba(0, 0, 0, 0.7); /* for a semi-transparent background */
-            padding: 10px 20px;
-            border-radius: 10px;
-            width: fit-content;
-            margin: 20px auto;
-        }
-
-        h1 {
-            font-size: 32px;
-            font-weight: bold;
-        }
-
-        main {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            padding: 20px;
-        }
-
-        section {
-            text-align: center;
-            margin: 20px;
-            background-color: rgba(0, 0, 0, 0.5);
-            padding: 15px;
-            border-radius: 10px;
-            display: inline-block;
-        }
-
-        img {
-            width: 400px;
-            height: auto;
-            border-radius: 10px;
-        }
-
-        h2 {
-            margin-top: 10px;
-        }
-
-        .text-box {
-            max-width: 400px;
-            word-wrap: break-word;
-            text-align: center;
-            margin: 10px auto;
-        }
-
-        p {
-            font-size: 18px;
-            font-weight: bold;
-            line-height: 1.6;
-        }
-
-        footer {
-            padding-left: 10px;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mohit Kumar - Team 1</title>
+  <link rel="stylesheet" href="../css/styles.css" />
 </head>
 <body>
-    <font face="Courier New">
-        <!-- Navigation Bar -->
-        <nav> 
-            <a href="../index.html">Home</a>
-            <a href="../about.html">About</a> 
-        </nav>
+  <div class="container">
+    <div class="nav">
+      <div class="brand">CSC 648/848 • Team 1</div>
+      <div style="display:flex; gap:10px;">
+        <a href="../index.html">Home</a>
+        <a href="../about.html">About</a>
+      </div>
+    </div>
 
-        <!-- Header (Title/Banner) -->
-        <header>
-            <h1>About me</h1>
-        </header>
+    <section class="hero">
+      <h1>Mohit Kumar</h1>
+      <p>Role: Database Engineer</p>
+    </section>
 
-        <!-- Main Content (3 Albums) -->
-        <main>
-            <!-- Nostalgia, Ultra -->
-            <section>
-                <img src="../img/mohit .jpeg" alt="Mohit Kumar">
-                <h2><i>Mohit Kumar - DB Engineer</i></h2>
-                <div class="text-box">
-                    <p>
-                        Hello, I am Mohit Kumar! I am the team's Database Engineer. 
-                        I am currently a senior at San Francisco State University, 
-                        majoring in Computer Science and minoring in Data Science.
-                        I love to watch movies, anime, and play video games! I also enjoy
-                        listen to music and playing a lot of different intsruments. In this 
-                        photo I am with my girlfriend. 
-                        
-                    </p>
-                </div>    
-            </section>
+    <section class="grid">
+      <div class="card">
+        <h2>About Me</h2>
 
-            <!-- Channel Orange -->
-            <section>
-                <img src="../img/doggie.jpeg" alt="Mohit's Dog">
-                <h2><i>Oreo!</i></h2>
-                <div class="text-box">
-                    <p>
-                        This is my dog Oreo! He is a 6 month old Chihuahua/Frenchie mix.
-                        I've always loved animals and I want to have more dogs and get
-                        bunnies in the future. Oreo is my first dog ever and I love him so much! 
-                        He is very playful and loves to cuddle. And an unique thing about him is that
-                        he has heterochromia, which means his eyes are two different colors! One eye is 
-                        blue and the other is brown.
-                    </p>
-                </div>
-            </section>
+        <img
+          src="../img/mohit .jpeg"
+          alt="Photo of Mohit Kumar"
+          style="
+            width: 100%;
+            max-width: 360px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.12);
+            display: block;
+          "
+        />
 
-            <!-- Blonde -->
-            <section>
-                <img src="../img/car.jpeg" alt="Mohit's Car">
-                <h2><i>Cars, cars, cars!</i></h2>
-                <div class="text-box">
-                    <p>
-                        Another thing about me is that I love cars! My friends and I always go
-                        for togues(mountain races) and car meets. One of the reasons I went into
-                        CS is so that I can afford to a bunch of nice/project cars in the future.
-                        My car is in black and my friend is the white one! We are both working on 
-                        them and have done a ton of mods to them!
-                    </p>
-                </div>
-            </section>
-        </main>
-    </font>
+        <p style="margin-top:14px;">
+          Hello, I am Mohit Kumar! I am the team's Database Engineer. 
+          I am currently a senior at San Francisco State University, 
+          majoring in Computer Science and minoring in Data Science.
+          I love to watch movies, anime, and play video games. I also enjoy
+          listening to music and playing different instruments. In this 
+          photo I am with my girlfriend.
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>Oreo!</h2>
+
+        <img
+          src="../img/doggie.jpeg"
+          alt="Photo of Mohit's dog Oreo"
+          style="
+            width: 100%;
+            max-width: 360px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.12);
+            display: block;
+          "
+        />
+
+        <p style="margin-top:14px;">
+          This is my dog Oreo! He is a 6 month old Chihuahua and Frenchie mix.
+          I've always loved animals, and I want to have more dogs and bunnies
+          in the future. Oreo is my first dog ever, and I love him so much.
+          He is very playful and loves to cuddle. A unique thing about him is
+          that he has heterochromia, which means his eyes are two different
+          colors. One eye is blue and the other is brown.
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>Cars, Cars, Cars!</h2>
+
+        <img
+          src="../img/car.jpeg"
+          alt="Photo of Mohit's car"
+          style="
+            width: 100%;
+            max-width: 360px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.12);
+            display: block;
+          "
+        />
+
+        <p style="margin-top:14px;">
+          Another thing about me is that I love cars! My friends and I like
+          going on mountain drives and going to car meets. One of the reasons
+          I went into CS is so that I can afford a bunch of nice cars and
+          project cars in the future. My car is the black one and my friend's
+          car is the white one. We are both working on them and have done a
+          ton of mods to them.
+        </p>
+      </div>
+    </section>
+
+    <div class="footer">
+      Team 1 • Member Page
+    </div>
+  </div>
 </body>
 </html>
