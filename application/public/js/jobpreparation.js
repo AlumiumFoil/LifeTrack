@@ -109,11 +109,14 @@ function esc(str) {
     .replace(/"/g, '&quot;');
 }
 
-// Format an ISO date string for display
+// Format a date string for display.
+// Parses YYYY-MM-DD as local midnight (not UTC) to avoid timezone off-by-one issues.
 function fmtDate(iso) {
   if (!iso) return '';
-  const d = new Date(iso);
-  return isNaN(d) ? iso : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const s = String(iso).slice(0, 10); // normalise to "YYYY-MM-DD"
+  const [y, m, d] = s.split('-').map(Number);
+  if (!y || !m || !d) return String(iso);
+  return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 const GOAL_BADGE = {

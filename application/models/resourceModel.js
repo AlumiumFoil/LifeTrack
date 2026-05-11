@@ -117,10 +117,7 @@ const getSleepRoutineHabitsByAccountId = async (accountId) => {
          FROM habits
          WHERE account_id = ?
            AND status = 'active'
-           AND (
-                LOWER(title) LIKE '%sleep%'
-                OR LOWER(COALESCE(description, '')) LIKE '%sleep%'
-           )
+           AND category = 'sleep-routine'
          ORDER BY created_at DESC, habit_id DESC`,
         [accountId]
     );
@@ -150,7 +147,7 @@ const createSleepRoutineHabit = async (accountId, habitData) => {
             last_completed_date,
             streak_count
          )
-         VALUES (?, ?, ?, 'wellness', ?, 'active', NOW(), NOW(), NULL, 0)`,
+         VALUES (?, ?, ?, 'sleep-routine', ?, 'active', NOW(), NOW(), NULL, 0)`,
         [accountId, title, description || null, frequency || 'daily']
     );
 

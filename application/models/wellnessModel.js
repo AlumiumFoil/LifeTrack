@@ -122,7 +122,9 @@ const getUserHabits = async (accountId) => {
             created_at AS createdAt,
             updated_at AS updatedAt
          FROM habits
-         WHERE account_id = ? AND status = 'active'
+         WHERE account_id = ?
+           AND status = 'active'
+           AND (category IS NULL OR category <> 'sleep-routine')
          ORDER BY created_at ASC`,
         [accountId]
     );
@@ -297,7 +299,9 @@ const getHabitStats = async (accountId) => {
             COUNT(*) AS total,
             SUM(CASE WHEN last_completed_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) THEN 1 ELSE 0 END) AS completedThisWeek
          FROM habits
-         WHERE account_id = ? AND status = 'active'`,
+         WHERE account_id = ?
+           AND status = 'active'
+           AND (category IS NULL OR category <> 'sleep-routine')`,
         [accountId]
     );
     
