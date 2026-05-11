@@ -269,7 +269,7 @@ const completeHabit = async (habitId, accountId) => {
     let newStreak = 1;
     if (habit.lastCompletedDate) {
         const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setUTCDate(yesterday.getUTCDate() - 1);
         const yesterdayStr = yesterday.toISOString().slice(0, 10);
         
         if (lastCompleted === yesterdayStr) {
