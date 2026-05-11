@@ -279,11 +279,14 @@
       return localStorage.getItem('accessToken');
     }
 
-    // Format an ISO date string into a readable short date
+    // Format a date string for display.
+    // Parses YYYY-MM-DD as local midnight (not UTC) to avoid timezone off-by-one issues.
     function fmtDate(iso) {
       if (!iso) return '';
-      const d = new Date(iso);
-      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const s = String(iso).slice(0, 10); // normalise to "YYYY-MM-DD"
+      const [y, m, d] = s.split('-').map(Number);
+      if (!y || !m || !d) return String(iso);
+      return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
 
     // Map habit status to a badge CSS class

@@ -159,16 +159,11 @@ const getSleepRoutineModule = async (req, res) => {
             resourceModuleModel.getSleepRoutineHabitsByAccountId(accountId)
         ]);
 
-        if (!resource) {
-            return res.status(404).json({
-                success: false,
-                error: 'Sleep routine resource not found'
-            });
-        }
-
+        // Return habits even when the resource metadata row is absent from the DB.
+        // The frontend already handles resource === null gracefully.
         return res.json({
             success: true,
-            resource: formatResource(resource),
+            resource: resource ? formatResource(resource) : null,
             habits: habits.map(formatSleepHabit)
         });
     } catch (error) {
