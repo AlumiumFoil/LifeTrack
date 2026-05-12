@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- google analytics tag -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BKXMLJEGGQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BKXMLJEGGQ');
+  </script>
+  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Career – LifeTrack</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body>
+  <div class="dashboard-frame">
+
+    <header class="dashboard-header">
+      <a class="dashboard-header-brand" href="./dashboard.html">LifeTrack</a>
+      <div class="dashboard-header-actions">
+        <a class="dashboard-header-profile" href="./search.html">Search</a>
+        <a class="dashboard-header-profile" href="./profile.html">
+          <img
+            id="profilePreview"
+            class="dashboard-header-avatar"
+            src="https://placehold.co/120x120?text=User"
+            alt="Profile preview"
+          />
+          <span id="profileUsernameTop">Profile</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="dashboard-body">
+      <aside class="dashboard-sidebar">
+        <nav class="dashboard-nav">
+          <a class="dashboard-nav-link" href="./dashboard.html">Home</a>
+          <a class="dashboard-nav-link" href="./studying.html">Academic</a>
+          <a class="dashboard-nav-link active" href="./jobpreparation.html">Career</a>
+          <a class="dashboard-nav-link" href="./goals.html">Productivity</a>
+          <a class="dashboard-nav-link" href="./wellness.html">Wellness</a>
+          <a class="dashboard-nav-link" href="./campus-map.html">Campus Map</a>
+        </nav>
+
+        <div class="dashboard-sidebar-footer">
+          <button id="logoutBtn" class="dashboard-logout-btn" type="button">Logout</button>
+        </div>
+      </aside>
+
+      <main class="dashboard-main">
+
+        <section class="hero">
+          <h1>Career</h1>
+          <p>Find resources, track your career goals, and stay prepared for what's next.</p>
+        </section>
+
+        <!-- Summary cards — updated after every load/create/delete -->
+        <div class="summary-row" id="goals-summary" style="display:none">
+          <div class="summary-card">
+            <div class="s-value" id="cg-total">0</div>
+            <div class="s-label">Total Goals</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value" id="cg-not-started">0</div>
+            <div class="s-label">Not Started</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value accent" id="cg-in-progress">0</div>
+            <div class="s-label">In Progress</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value green" id="cg-completed">0</div>
+            <div class="s-label">Completed</div>
+          </div>
+        </div>
+
+        <!-- Hidden container kept so jobpreparation.js does not break -->
+        <div id="careerResources" style="display:none;"></div>
+
+        <!-- Career Goals — header row with create button -->
+        <div style="display:flex; align-items:center; justify-content:space-between; margin:36px 0 16px; flex-wrap:wrap; gap:12px;">
+          <div class="section-heading" style="margin:0; flex:1">My Career Goals</div>
+          <button class="btn sm" id="new-goal-btn" type="button">+ New Career Goal</button>
+        </div>
+
+        <!-- Filter tabs -->
+        <div class="tab-bar" id="goals-tab-bar" style="display:none">
+          <button class="tab-btn active" data-tab="all">All</button>
+          <button class="tab-btn" data-tab="Not Started">Not Started</button>
+          <button class="tab-btn" data-tab="In Progress">In Progress</button>
+          <button class="tab-btn" data-tab="Completed">Completed</button>
+        </div>
+
+        <!-- Inline feedback (success / error after create, edit, delete) -->
+        <div id="goals-feedback" style="display:none; margin-bottom:14px;"></div>
+
+        <!-- Goals grid — populated by jobpreparation.js -->
+        <div class="grid" id="careerGoals">
+          <p style="color:var(--muted)">Loading career goals…</p>
+        </div>
+
+        <!-- Career Resources -->
+        <div class="section-heading">Career Resources</div>
+        <div class="grid">
+          <div class="card">
+            <h2 class="card-title">Resume Starter Template</h2>
+            <p class="card-desc">A simple template to help you build your resume from scratch.</p>
+            <a class="btn secondary sm" href="./resources/resume.html">Learn More</a>
+          </div>
+          <div class="card">
+            <h2 class="card-title">Portfolio Checklist</h2>
+            <p class="card-desc">A quick checklist to make sure your portfolio is complete.</p>
+            <a class="btn secondary sm" href="./resources/portfolio.html">Learn More</a>
+          </div>
+          <div class="card">
+            <h2 class="card-title">Interview Prep Workflow</h2>
+            <p class="card-desc">A step-by-step guide to prepare for interviews.</p>
+            <a class="btn secondary sm" href="./resources/interviewPrep.html">Learn More</a>
+          </div>
+        </div>
+
+        <div class="footer">Team 1 • Spring 2026</div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Create / Edit Career Goal Modal -->
+  <div class="modal-overlay" id="career-goal-modal">
+    <div class="modal" style="max-width:520px; width:90%">
+      <h2 id="cg-modal-title">New Career Goal</h2>
+
+      <div id="cg-modal-msg" class="status-message" style="display:none; margin-bottom:14px;"></div>
+
+      <div class="vp-form">
+        <div class="form-group">
+          <label for="cg-title">Title <span style="color:var(--muted); font-weight:400">(required)</span></label>
+          <input type="text" id="cg-title" maxlength="255" placeholder="e.g. Land a software engineering internship" />
+        </div>
+        <div class="form-group">
+          <label for="cg-role">Target Role</label>
+          <input type="text" id="cg-role" maxlength="150" placeholder="e.g. Software Engineer, Product Manager" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="cg-status">Status</label>
+            <select id="cg-status">
+              <option value="Not Started">Not Started</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="cg-date">Target Date</label>
+            <input type="date" id="cg-date" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="cg-desc">Description</label>
+          <input type="text" id="cg-desc" placeholder="What does reaching this goal look like?" />
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn danger" id="cg-delete-btn" type="button" style="display:none">Delete</button>
+        <button class="btn secondary" id="cg-cancel-btn" type="button">Cancel</button>
+        <button class="btn" id="cg-save-btn" type="button">Save Goal</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/jobpreparation.js"></script>
+  <script src="../js/headerProfile.js"></script>
+  <script>
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        window.location.href = "./auth.html";
+      });
+    }
+  </script>
+</body>
+</html>

@@ -5,6 +5,15 @@ query to results.html using GET params-->
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- google analytics tag -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BKXMLJEGGQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BKXMLJEGGQ');
+  </script>
+  
   <meta charset="utf-8" />
    <!-- Helps page scale correctly on tablets/phones -->
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -16,14 +25,17 @@ query to results.html using GET params-->
   <div class="container">
 
      <!--top nav for moving between main/key pages -->
-    <div class="nav">
-      <div class="brand">LifeTrack</div>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <a href="./dashboard.html">Dashboard</a>
-        <a href="../index.html">Home</a>
-        <a href="../about.html">About</a>
-      </div>
-    </div>
+  <div class="nav">
+    <div class="brand">
+      <a href="./dashboard.html" style="all: unset; cursor: pointer;">
+        LifeTrack
+      </a>
+  </div>
+
+  <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <a href="./dashboard.html">Dashboard</a>
+  </div>
+</div>
 
     <section class="hero">
       <h1>Search</h1>
@@ -75,5 +87,7 @@ query to results.html using GET params-->
       Team 1 • Search Page
     </div>
   </div>
+  <!--added this script file for the accessibility settings-->
+  <script src="../js/search.js"></script>
 </body>
 </html>

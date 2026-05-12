@@ -60,5 +60,29 @@ router.post('/logout-all', authenticateJWT, authController.logoutAll);
  */
 router.get('/me', authenticateJWT, authController.getCurrentUser);
 
+/**
+ * POST /api/auth/password-reset/initiate
+ * Initiate password reset for unauthenticated users
+ * Input: { identifier } (email or username)
+ * Output: { success, accountId, securityQuestions }
+ */
+router.post('/password-reset/initiate', authController.initiatePasswordReset);
+
+/**
+ * POST /api/auth/password-reset/verify
+ * Verify security answers and get reset token
+ * Input: { accountId, answers }
+ * Output: { success, resetToken, expiresInMinutes }
+ */
+router.post('/password-reset/verify', authController.verifyPasswordResetAnswers);
+
+/**
+ * POST /api/auth/password-reset/complete
+ * Reset password using reset token
+ * Input: { resetToken, newPassword }
+ * Output: { success, message }
+ */
+router.post('/password-reset/complete', authController.completePasswordReset);
+
 // Exports
 module.exports = router;

@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- google analytics tag -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BKXMLJEGGQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BKXMLJEGGQ');
+  </script>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sleep Routine – LifeTrack</title>
+  <link rel="stylesheet" href="../../css/styles.css" />
+  <style>
+    /* ── Checklist card sub-styles (mirrors breathing.html pattern) ─────── */
+    .checklist-card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .checklist-label {
+      font-weight: 600;
+      font-size: 15px;
+    }
+    .checklist-hint {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* ── Habit card extras ───────────────────────────────────────────────── */
+    .habit-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+      align-items: center;
+    }
+    .habit-streak {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .habit-last {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* ── Frequency pill ──────────────────────────────────────────────────── */
+    .freq-pill {
+      display: inline-block;
+      font-size: 11px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      color: var(--muted);
+      text-transform: capitalize;
+    }
+
+    /* ── Form textarea inherits input look ───────────────────────────────── */
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(11,18,32,0.9);
+      color: var(--text);
+      font: inherit;
+      resize: vertical;
+      min-height: 80px;
+      line-height: 1.5;
+    }
+    .form-group textarea::placeholder { color: var(--muted); }
+    .form-group textarea:focus {
+      outline: none;
+      border-color: rgba(77,163,255,0.8);
+      box-shadow: 0 0 0 3px rgba(77,163,255,0.15);
+    }
+    .form-group select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(11,18,32,0.9);
+      color: var(--text);
+      font: inherit;
+    }
+    .form-group select:focus {
+      outline: none;
+      border-color: rgba(77,163,255,0.8);
+      box-shadow: 0 0 0 3px rgba(77,163,255,0.15);
+    }
+
+    body[data-accessibility-mode="accessibility"] .form-group textarea,
+    body[data-accessibility-mode="accessibility"] .form-group select {
+      background: #ffffff;
+      color: var(--text);
+      border-color: rgba(15, 23, 42, 0.22);
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-frame">
+
+    <header class="dashboard-header">
+      <a class="dashboard-header-brand" href="../dashboard.html">LifeTrack</a>
+      <div class="dashboard-header-actions">
+        <a class="dashboard-header-profile" href="../search.html">Search</a>
+        <a class="dashboard-header-profile" href="../profile.html">
+          <img
+            id="profilePreview"
+            class="dashboard-header-avatar"
+            src="https://placehold.co/120x120?text=User"
+            alt="Profile preview"
+          />
+          <span id="profileUsernameTop">Profile</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="dashboard-body">
+      <aside class="dashboard-sidebar">
+        <nav class="dashboard-nav">
+          <a class="dashboard-nav-link" href="../dashboard.html">Home</a>
+          <a class="dashboard-nav-link" href="../studying.html">Academic</a>
+          <a class="dashboard-nav-link" href="../jobpreparation.html">Career</a>
+          <a class="dashboard-nav-link" href="../goals.html">Productivity</a>
+          <a class="dashboard-nav-link active" href="../wellness.html">Wellness</a>
+          <a class="dashboard-nav-link" href="../campus-map.html">Campus Map</a>
+        </nav>
+
+        <div class="dashboard-sidebar-footer">
+          <button id="logoutBtn" class="dashboard-logout-btn" type="button">Logout</button>
+        </div>
+      </aside>
+
+      <main class="dashboard-main">
+
+        <section class="hero">
+          <h1>Sleep Routine Workflow</h1>
+          <p>A simple sleep routine workflow for busy weeks.</p>
+        </section>
+
+        <!-- Module info is hidden to avoid repeating the page title -->
+        <div id="module-info" style="display:none;"></div>
+
+        <!-- My Sleep Habits — populated by JS -->
+        <div class="section-heading">My Sleep Habits</div>
+        <div class="grid" id="habits-grid">
+          <p style="color:var(--muted)">Loading habits…</p>
+        </div>
+
+        <!-- Add a Sleep Habit form -->
+        <div class="section-heading">Add a Sleep Habit</div>
+        <div class="card" style="max-width:560px">
+          <form id="add-habit-form" novalidate>
+            <div class="vp-form">
+              <div class="form-group">
+                <label for="habit-title">Title <span style="color:var(--muted);font-weight:400">(required)</span></label>
+                <input id="habit-title" type="text" maxlength="255" placeholder="e.g. Wind-down reading" required />
+              </div>
+              <div class="form-group">
+                <label for="habit-desc">Description</label>
+                <textarea id="habit-desc" placeholder="What does this habit involve?"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="habit-freq">Frequency</label>
+                <select id="habit-freq">
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="custom">Custom</option>
+                </select>
+              </div>
+            </div>
+            <div id="add-habit-msg" style="display:none; margin-top:12px"></div>
+            <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn" type="submit">Add Habit</button>
+              <button class="btn secondary" type="reset">Clear</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Suggested Sleep Routine — always rendered, static -->
+        <div class="section-heading">Suggested Sleep Routine</div>
+        <div class="grid">
+
+          <div class="card checklist-card" data-id="bedtime">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-bedtime" style="margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;" />
+              <label class="checklist-label" for="cb-bedtime">Pick a consistent bedtime</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li>Choose a time you can realistically hit every night</li>
+              <li>Aim for 7–9 hours depending on when you wake up</li>
+              <li>Weekends within 1 hour of your weekday bedtime helps too</li>
+            </ul>
+          </div>
+
+          <div class="card checklist-card" data-id="screens">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-screens" style="margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;" />
+              <label class="checklist-label" for="cb-screens">Stop screens 30 minutes before sleep</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li>Blue light delays your body's melatonin production</li>
+              <li>Put your phone on Do Not Disturb and leave it across the room</li>
+              <li>Replace scrolling with reading, journaling, or stretching</li>
+            </ul>
+          </div>
+
+          <div class="card checklist-card" data-id="prep">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-prep" style="margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;" />
+              <label class="checklist-label" for="cb-prep">Prepare clothes or school items for tomorrow</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li>Lay out what you need the night before</li>
+              <li>Reduces morning stress and decision fatigue</li>
+              <li>Takes 2–3 minutes and makes mornings much smoother</li>
+            </ul>
+          </div>
+
+          <div class="card checklist-card" data-id="room">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-room" style="margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;" />
+              <label class="checklist-label" for="cb-room">Keep the room cool and dark</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li>Ideal sleep temperature is around 65–68 °F (18–20 °C)</li>
+              <li>Use blackout curtains or a sleep mask if needed</li>
+              <li>White noise or earplugs help block disruptive sounds</li>
+            </ul>
+          </div>
+
+          <div class="card checklist-card" data-id="tomorrow">
+            <div class="checklist-card-top">
+              <input type="checkbox" class="checklist-checkbox" id="cb-tomorrow" style="margin-top:3px;accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;" />
+              <label class="checklist-label" for="cb-tomorrow">Write down one thing to handle tomorrow</label>
+            </div>
+            <ul class="checklist-hint" style="margin:0.5rem 0 0;padding-left:1.2rem;line-height:1.8;">
+              <li>Brain-dump the one task that keeps nagging at you</li>
+              <li>Writing it down lets your mind let go of it</li>
+              <li>Keeps your sleep from being disrupted by mental to-do lists</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <div class="controls-bar" style="margin-top:1.5rem;">
+          <a class="btn secondary" href="../wellness.html">Back to Wellness</a>
+        </div>
+
+        <div class="footer">Team 1 &middot; Spring 2026</div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="../../js/staticResources.js"></script>
+  <script>
+    'use strict';
+
+    // ── Helpers ────────────────────────────────────────────────────────────
+
+    // Escape a string so it's safe to insert as HTML text content
+    function esc(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function getToken() {
+      return localStorage.getItem('accessToken');
+    }
+
+    // Format a date string for display.
+    // Parses YYYY-MM-DD as local midnight (not UTC) to avoid timezone off-by-one issues.
+    function fmtDate(iso) {
+      if (!iso) return '';
+      const s = String(iso).slice(0, 10); // normalise to "YYYY-MM-DD"
+      const [y, m, d] = s.split('-').map(Number);
+      if (!y || !m || !d) return String(iso);
+      return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    // Map habit status to a badge CSS class
+    const STATUS_CLASS = {
+      active:    'badge-in-progress',
+      inactive:  'badge-not-started',
+      completed: 'badge-completed',
+      paused:    'badge-paused',
+    };
+    function statusBadge(status) {
+      return STATUS_CLASS[(status || '').toLowerCase()] || 'badge-not-started';
+    }
+
+    // Show an inline feedback message inside a target element
+    function showMsg(elementId, text, type) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      el.innerHTML = `<div class="status-message ${esc(type)}">${esc(text)}</div>`;
+      el.style.display = 'block';
+      clearTimeout(el._t);
+      el._t = setTimeout(() => { el.style.display = 'none'; }, 5000);
+    }
+
+    // ── Load module info + habits from backend ─────────────────────────────
+
+    async function loadModule() {
+      const token = getToken();
+      const moduleInfo = document.getElementById('module-info');
+      const habitsGrid = document.getElementById('habits-grid');
+
+      if (!token) {
+        moduleInfo.innerHTML = '';
+        habitsGrid.innerHTML  = '<p style="color:var(--muted)">Log in to see your sleep habits.</p>';
+        return;
+      }
+
+      habitsGrid.innerHTML = '<p style="color:var(--muted)">Loading habits…</p>';
+
+      try {
+        const res = await fetch('/api/resources/modules/sleep-routine', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.status === 401) {
+          moduleInfo.innerHTML = '';
+          habitsGrid.innerHTML  = '<p style="color:var(--muted)">Please log in to see your sleep habits.</p>';
+          return;
+        }
+
+        if (!res.ok) {
+          habitsGrid.innerHTML = '<p style="color:var(--muted)">Unable to load sleep routine data. Please try again.</p>';
+          return;
+        }
+
+        const data = await res.json();
+
+        // Resource metadata is intentionally not rendered to avoid repeating the page title.
+        if (data.resource) {
+          renderModuleInfo(data.resource);
+        }
+
+        // Render habits list
+        renderHabits(data.habits || []);
+
+      } catch (err) {
+        console.error('Sleep routine load error:', err);
+        habitsGrid.innerHTML = '<p style="color:var(--muted)">Unable to reach the server. Please try again.</p>';
+      }
+    }
+
+    // This page already has a main hero header, so the module info card is not displayed.
+    function renderModuleInfo(resource) {
+      const el = document.getElementById('module-info');
+      if (!el) return;
+      el.innerHTML = '';
+    }
+
+    // Render the habits grid; handles empty state
+    function renderHabits(habits) {
+      const grid = document.getElementById('habits-grid');
+
+      if (!habits.length) {
+        grid.innerHTML = '<p style="color:var(--muted)">No sleep habits yet. Add one below to get started.</p>';
+        return;
+      }
+
+      grid.innerHTML = habits.map(h => {
+        const habitId   = h.habitId || h.id;
+        const status    = h.status  || 'active';
+        const streak    = h.streakCount != null ? h.streakCount : (h.streak || 0);
+        const lastDate  = fmtDate(h.lastCompletedDate || h.lastCompleted);
+
+        return `
+          <div class="card">
+            <div class="habit-meta">
+              <span class="badge ${statusBadge(status)}">${esc(status)}</span>
+              <span class="freq-pill">${esc(h.frequency || 'daily')}</span>
+            </div>
+            <h2 class="card-title">${esc(h.title || 'Habit')}</h2>
+            ${h.description ? `<p class="card-desc">${esc(h.description)}</p>` : ''}
+            <div class="habit-streak">🔥 ${esc(String(streak))}-day streak</div>
+            ${lastDate ? `<div class="habit-last">Last completed: ${esc(lastDate)}</div>` : ''}
+            <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; align-items:center">
+              <button class="btn sm" onclick="markComplete(${habitId})">Mark Complete</button>
+              <span id="complete-msg-${habitId}" style="display:none; font-size:13px"></span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ── Mark a habit complete ──────────────────────────────────────────────
+
+    async function markComplete(habitId) {
+      const token = getToken();
+      if (!token) {
+        alert('Please log in to mark habits complete.');
+        return;
+      }
+
+      const msgEl = document.getElementById(`complete-msg-${habitId}`);
+
+      try {
+        const res = await fetch(`/api/resources/modules/sleep-routine/habits/${habitId}/complete`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.status === 409) {
+          if (msgEl) {
+            msgEl.textContent  = 'Already completed today!';
+            msgEl.style.color  = 'var(--muted)';
+            msgEl.style.display = 'inline';
+          }
+          return;
+        }
+
+        if (!res.ok) {
+          if (msgEl) {
+            msgEl.textContent  = 'Could not mark complete.';
+            msgEl.style.color  = 'var(--muted)';
+            msgEl.style.display = 'inline';
+          }
+          return;
+        }
+
+        // Reload to reflect updated streak / status
+        await loadModule();
+
+      } catch (err) {
+        console.error('Mark complete error:', err);
+        if (msgEl) {
+          msgEl.textContent  = 'Server error. Try again.';
+          msgEl.style.color  = 'var(--muted)';
+          msgEl.style.display = 'inline';
+        }
+      }
+    }
+
+    // ── Add a new sleep habit ──────────────────────────────────────────────
+
+    async function addHabit(e) {
+      e.preventDefault();
+
+      const token = getToken();
+      if (!token) {
+        showMsg('add-habit-msg', 'Please log in to add habits.', 'error');
+        return;
+      }
+
+      const title       = document.getElementById('habit-title').value.trim();
+      const description = document.getElementById('habit-desc').value.trim();
+      const frequency   = document.getElementById('habit-freq').value;
+
+      // Client-side validation
+      if (!title) {
+        showMsg('add-habit-msg', 'Habit title is required.', 'error');
+        return;
+      }
+      if (title.length > 255) {
+        showMsg('add-habit-msg', 'Title must be 255 characters or fewer.', 'error');
+        return;
+      }
+      if (!['daily', 'weekly', 'custom'].includes(frequency)) {
+        showMsg('add-habit-msg', 'Please select a valid frequency.', 'error');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/resources/modules/sleep-routine/habits', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ title, description, frequency }),
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          showMsg('add-habit-msg', data.error || 'Unable to add habit. Please try again.', 'error');
+          return;
+        }
+
+        // Clear form and refresh habits list
+        document.getElementById('add-habit-form').reset();
+        showMsg('add-habit-msg', 'Habit added!', 'success');
+        await loadModule();
+
+      } catch (err) {
+        console.error('Add habit error:', err);
+        showMsg('add-habit-msg', 'Unable to reach the server. Please try again.', 'error');
+      }
+    }
+
+    // ── Suggested routine static checklist ────────────────────────────────
+
+    function initChecklist() {
+      const checkboxes = document.querySelectorAll('.checklist-checkbox');
+      checkboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+          const card = cb.closest('.checklist-card');
+          if (!card) return;
+          const label = card.querySelector('.checklist-label');
+          if (cb.checked) {
+            card.style.opacity = '0.6';
+            if (label) label.style.textDecoration = 'line-through';
+          } else {
+            card.style.opacity = '1';
+            if (label) label.style.textDecoration = 'none';
+          }
+        });
+      });
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadModule();
+      document.getElementById('add-habit-form').addEventListener('submit', addHabit);
+      initChecklist();
+    });
+  </script>
+  <script src="../../js/headerProfile.js"></script>
+  <script>
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        window.location.href = "../auth.html";
+      });
+    }
+  </script>
+</body>
+</html>

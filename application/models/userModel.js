@@ -167,6 +167,222 @@ const createDefaultDashboard = async (accountId, connection) => {
     );
 };
 
+/**
+ * Get complete user profile by account ID
+ * Returns all profile information
+ * @param {number} accountId - User's account ID
+ * @returns {Promise<object|null>} User profile object or null if not found
+ */
+const getUserProfile = async (accountId) => {
+    const [users] = await pool.query(
+        `SELECT
+             account_id,
+             email,
+             username,
+             full_name AS name,
+             major,
+             academic_year AS academicYear,
+             university,
+             account_status,
+             created_at,
+             profile_image_url,
+             profile_thumbnail_url
+         FROM user_accounts
+         WHERE account_id = ?`,
+        [accountId]
+    );
+
+    if (users.length === 0) {
+        return null;
+    }
+
+    return users[0];
+};
+
+/**
+ * Update user profile information
+ * @param {number} accountId - User's account ID
+ * @param {object} profileData - Object containing full_name, major, academic_year, university
+ * @returns {Promise<object>} Result of the update operation
+ */
+const updateUserProfile = async (accountId, profileData) => {
+    const fields = [];
+    const values = [];
+
+    // Build query based on provided fields
+    if (profileData.name !== undefined) {
+        fields.push('full_name = ?');
+        values.push(profileData.name);
+    }
+    if (profileData.major !== undefined) {
+        fields.push('major = ?');
+        values.push(profileData.major);
+    }
+    if (profileData.academicYear !== undefined) {
+        fields.push('academic_year = ?');
+        values.push(profileData.academicYear);
+    }
+    if (profileData.university !== undefined) {
+        fields.push('university = ?');
+        values.push(profileData.university);
+    }
+
+    // Add accountId & update user data with the array
+    values.push(accountId);
+
+    const [result] = await pool.query(
+        `UPDATE user_accounts SET ${fields.join(', ')} WHERE account_id = ?`,
+        values
+    );
+
+    return result;
+};
+
+/**
+ * Get current accessibility settings for user
+ * @param {number} accountId - user's account ID
+ * @returns {Promise<object | null>} Accessibility settings or null if missing
+ */
+const getAccessibilitySettingsByAccountId = async (accountId) => {
+    const [rows] = await pool.query(`
+        SELECT
+             account_id AS accountId,
+             theme_mode AS themeMode,
+             text_size AS textSize,
+             high_contrast_enabled AS highContrastEnabled
+        FROM user_accessibility_settings
+        WHERE account_id = ?`,
+        [accountId]
+        );
+        return rows[0] || null;  
+};
+
+/**
+ * Create default accessibility settings if the row does not exist yet
+ * @param {number} accountId - user's account ID
+ * @returns {Promise<void>}
+ */
+const ensureAccessibilitySettingsExist = async (accountId) => {
+    await pool.query(
+        `INSERT INTO user_accessibility_settings (
+             account_id,
+             theme_mode,
+             text_size,
+             high_contrast_enabled,
+             font_choice,
+             color_blind_mode
+         )
+         VALUES (?, 'system', 'normal', 0, NULL, NULL)
+         ON DUPLICATE KEY UPDATE account_id = account_id`,
+        [accountId]
+    );
+};
+
+/**
+ * Update accessibility settings for a user
+ * @param {number} accountId - user's account ID
+ * @param {object} settings - accessibility settings to save
+ * @param {string} settings.themeMode - theme mode value
+ * @param {string} settings.textSize - text size value
+ * @param {number} settings.highContrastEnabled - high contrast flag
+ * @returns {Promise<void>}
+ */
+const updateAccessibilitySettings = async (accountId, settings) => {
+    await pool.query(
+        `UPDATE user_accessibility_settings
+         SET theme_mode = ?,
+             text_size = ?,
+             high_contrast_enabled = ?
+         WHERE account_id = ?`,
+        [
+            settings.themeMode,
+            settings.textSize,
+            settings.highContrastEnabled,
+            accountId
+        ]
+    );
+};
+
+/**
+ * Update security question answers for a user
+ * @param {number} accountId - user's account ID
+ * @param {Array} securityQuestions - array of { questionId, answerHash }
+ * @returns {Promise<void>}
+ */
+const updateUserSecurityQuestionAnswers = async (accountId, securityQuestions) => {
+    const connection = await pool.getConnection();
+
+    try {
+        await connection.beginTransaction();
+
+        for (const question of securityQuestions) {
+            await connection.query(
+                `UPDATE user_security_questions
+                 SET answer_hash = ?
+                 WHERE account_id = ? AND question_id = ?`,
+                [question.answerHash, accountId, question.questionId]
+            );
+        }
+
+        await connection.commit();
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
+    }
+};
+
+/**
+ * Update user's password
+ * @param {number} accountId - User's account ID
+ * @param {string} newPasswordHash - New hashed password
+ * @returns {Promise<object>} Result of the update operation
+ */
+const updateUserPassword = async (accountId, newPasswordHash) => {
+    const [result] = await pool.query(
+        `UPDATE user_accounts SET password_hash = ? WHERE account_id = ?`,
+        [newPasswordHash, accountId]
+    );
+
+    return result;
+};
+
+/**
+ * Get user's password hash by account ID
+ * @param {number} accountId - User's account ID
+ * @returns {Promise<string|null>} Password hash or null if not found
+ */
+const getUserPasswordHash = async (accountId) => {
+    const [users] = await pool.query(
+        `SELECT password_hash FROM user_accounts WHERE account_id = ?`,
+        [accountId]
+    );
+
+    if (users.length === 0) {
+        return null;
+    }
+
+    return users[0].password_hash;
+}
+
+/**
+ * Get current user's security questions
+ * @param {number} accountId - User's account ID
+ * @returns {Promise<Array>} Array of security question objects
+ */
+const getUserSecurityQuestions = async (accountId) => {
+    const [questions] = await pool.query(
+        `SELECT question_id, question_text, created_at
+         FROM user_security_questions
+         WHERE account_id = ?
+         ORDER BY question_id ASC`,
+         [accountId]
+    );
+
+    return questions;
+};
+
 // Exports
 module.exports = {
     // User account functions
@@ -175,6 +391,15 @@ module.exports = {
     emailExists,
     usernameExists,
     createUser,
+    getUserProfile,
+    updateUserProfile,
+    updateUserPassword,
+    getUserPasswordHash,
+    getUserSecurityQuestions,
+    getAccessibilitySettingsByAccountId,
+    ensureAccessibilitySettingsExist,
+    updateAccessibilitySettings,
+    updateUserSecurityQuestionAnswers,
     
     // User role functions
     getRoleIdByName,

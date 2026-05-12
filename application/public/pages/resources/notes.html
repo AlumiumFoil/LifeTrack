@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- google analytics tag -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BKXMLJEGGQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BKXMLJEGGQ');
+  </script>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Note Taking Template - LifeTrack</title>
+  <link rel="stylesheet" href="../../css/styles.css" />
+
+  <style>
+    /* note builder layout */
+    .notes-builder {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      align-items: start;
+      margin-top: 8px;
+    }
+
+    /* form side */
+    .notes-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .notes-layout {
+      display: grid;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .notes-label {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 600;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .notes-input,
+    .notes-textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(11, 18, 32, 0.9);
+      color: var(--text);
+      font: inherit;
+    }
+
+    .notes-textarea {
+      min-height: 180px;
+      resize: vertical;
+      line-height: 1.55;
+    }
+
+    .notes-input:focus,
+    .notes-textarea:focus {
+      outline: none;
+      border-color: rgba(77, 163, 255, 0.8);
+      box-shadow: 0 0 0 3px rgba(77, 163, 255, 0.15);
+    }
+
+    .notes-grid-two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* preview side */
+    .notes-preview-wrap {
+      position: sticky;
+      top: 24px;
+    }
+
+    .notes-preview-paper {
+      background: #ffffff;
+      color: #111111;
+      border-radius: 10px;
+      padding: 36px 38px;
+      min-height: 560px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.45);
+      overflow-wrap: break-word;
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    .notes-preview-title {
+      margin: 0 0 6px;
+      font-size: 24px;
+      font-weight: 700;
+      color: #111111;
+    }
+
+    .notes-preview-meta {
+      margin: 0 0 2px;
+      font-size: 12.5px;
+      color: #444444;
+      line-height: 1.5;
+    }
+
+    .notes-preview-divider {
+      border: none;
+      border-top: 1.5px solid #222222;
+      margin: 12px 0 12px;
+    }
+
+    .notes-preview-section {
+      margin-top: 14px;
+    }
+
+    .notes-preview-section h2 {
+      margin: 0 0 4px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #111111;
+      border-bottom: 1px solid #cccccc;
+      padding-bottom: 2px;
+    }
+
+    .notes-preview-section p {
+      margin: 4px 0 0;
+      font-size: 12.5px;
+      color: #222222;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .notes-preview-placeholder {
+      color: #999999;
+      font-size: 12px;
+      font-style: italic;
+      font-family: system-ui, sans-serif;
+    }
+
+    body[data-accessibility-mode="accessibility"] .notes-input,
+    body[data-accessibility-mode="accessibility"] .notes-textarea {
+      background: #ffffff;
+      color: var(--text);
+      border-color: rgba(15, 23, 42, 0.22);
+    }
+
+    @media (max-width: 860px) {
+      .notes-builder {
+        grid-template-columns: 1fr;
+      }
+
+      .notes-preview-wrap {
+        position: static;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .notes-grid-two {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-frame">
+
+    <header class="dashboard-header">
+      <a class="dashboard-header-brand" href="../dashboard.html">LifeTrack</a>
+      <div class="dashboard-header-actions">
+        <a class="dashboard-header-profile" href="../search.html">Search</a>
+        <a class="dashboard-header-profile" href="../profile.html">
+          <img
+            id="profilePreview"
+            class="dashboard-header-avatar"
+            src="https://placehold.co/120x120?text=User"
+            alt="Profile preview"
+          />
+          <span id="profileUsernameTop">Profile</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="dashboard-body">
+      <aside class="dashboard-sidebar">
+        <nav class="dashboard-nav">
+          <a class="dashboard-nav-link" href="../dashboard.html">Home</a>
+          <a class="dashboard-nav-link active" href="../studying.html">Academic</a>
+          <a class="dashboard-nav-link" href="../jobpreparation.html">Career</a>
+          <a class="dashboard-nav-link" href="../goals.html">Productivity</a>
+          <a class="dashboard-nav-link" href="../wellness.html">Wellness</a>
+          <a class="dashboard-nav-link" href="../campus-map.html">Campus Map</a>
+        </nav>
+
+        <div class="dashboard-sidebar-footer">
+          <button id="logoutBtn" class="dashboard-logout-btn" type="button">Logout</button>
+        </div>
+      </aside>
+
+      <main class="dashboard-main">
+
+        <section class="hero">
+          <h1>Note Taking Template</h1>
+          <p>Use this simple note page for lectures and readings. Fill it out, preview it live, save your draft in this browser, and download it as a text file to your device.</p>
+        </section>
+
+        <!-- summary stats -->
+        <div class="summary-row">
+          <div class="summary-card">
+            <div class="s-value" id="stat-fields">7</div>
+            <div class="s-label">Main Sections</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value green" id="stat-complete">0</div>
+            <div class="s-label">Filled Sections</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value accent" id="stat-left">7</div>
+            <div class="s-label">Sections Left</div>
+          </div>
+        </div>
+
+        <!-- page actions -->
+        <div class="controls-bar">
+          <button class="btn" id="save-btn" type="button">Save Draft</button>
+          <button class="btn secondary" id="download-btn" type="button">Download .txt</button>
+        </div>
+
+        <!-- two column builder -->
+        <div class="notes-builder">
+
+          <!-- left side form -->
+          <div class="notes-form">
+            <div class="section-heading">Write Notes</div>
+
+            <div class="notes-layout">
+
+              <div class="card">
+                <label class="notes-label" for="notes-title">Topic or title</label>
+                <input class="notes-input notes-track" id="notes-title" type="text" placeholder="example: chapter 5 lecture notes" />
+              </div>
+
+              <div class="notes-grid-two">
+                <div class="card">
+                  <label class="notes-label" for="notes-course">Course or class</label>
+                  <input class="notes-input notes-track" id="notes-course" type="text" placeholder="example: csc 648" />
+                </div>
+
+                <div class="card">
+                  <label class="notes-label" for="notes-date">Date</label>
+                  <input class="notes-input notes-track" id="notes-date" type="text" placeholder="example: 05/01/2026" />
+                </div>
+              </div>
+
+              <div class="card">
+                <label class="notes-label" for="notes-main">Main ideas</label>
+                <textarea class="notes-textarea notes-track" id="notes-main" placeholder="write the main points here"></textarea>
+              </div>
+
+              <div class="card">
+                <label class="notes-label" for="notes-details">Important details or examples</label>
+                <textarea class="notes-textarea notes-track" id="notes-details" placeholder="write supporting details, examples, or explanations here"></textarea>
+              </div>
+
+              <div class="card">
+                <label class="notes-label" for="notes-terms">Key terms</label>
+                <textarea class="notes-textarea notes-track" id="notes-terms" placeholder="list important terms and short definitions here"></textarea>
+              </div>
+
+              <div class="card">
+                <label class="notes-label" for="notes-summary">Short summary</label>
+                <textarea class="notes-textarea notes-track" id="notes-summary" placeholder="write a short summary in your own words"></textarea>
+              </div>
+
+              <div class="card">
+                <label class="notes-label" for="notes-questions">Questions to review later</label>
+                <textarea class="notes-textarea notes-track" id="notes-questions" placeholder="write any confusing parts or review questions here"></textarea>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- right side live preview -->
+          <div class="notes-preview-wrap">
+            <div class="section-heading">Live Preview</div>
+            <div class="notes-preview-paper" id="notes-preview" aria-live="polite"></div>
+          </div>
+
+        </div>
+
+        <div class="controls-bar" style="margin-top:1.5rem;">
+          <a class="btn secondary" href="../studying.html">Back to Academic</a>
+        </div>
+
+        <p id="save-msg" style="display:none; margin-top:0.75rem; font-size:0.875rem; color:var(--green,#22c55e);"></p>
+
+        <div class="footer">Team 1 &middot; Spring 2026</div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="../../js/staticResources.js"></script>
+  <script>
+    'use strict';
+
+    const notesFields = document.querySelectorAll('.notes-track');
+    const notesPreview = document.getElementById('notes-preview');
+    const saveBtn = document.getElementById('save-btn');
+    const downloadBtn = document.getElementById('download-btn');
+    const saveMsg = document.getElementById('save-msg');
+
+    const statFields = document.getElementById('stat-fields');
+    const statComplete = document.getElementById('stat-complete');
+    const statLeft = document.getElementById('stat-left');
+
+    const storageKey = 'lifetrack_note_template';
+
+    // updatestats updates the summary cards for completed note sections
+    function updateStats() {
+      const total = notesFields.length;
+      const complete = Array.from(notesFields).filter(field => field.value.trim() !== '').length;
+
+      statFields.textContent = total;
+      statComplete.textContent = complete;
+      statLeft.textContent = total - complete;
+    }
+
+    // getnotedata reads the current note form into one plain object
+    function getNoteData() {
+      return {
+        title: document.getElementById('notes-title').value.trim(),
+        course: document.getElementById('notes-course').value.trim(),
+        date: document.getElementById('notes-date').value.trim(),
+        main: document.getElementById('notes-main').value.trim(),
+        details: document.getElementById('notes-details').value.trim(),
+        terms: document.getElementById('notes-terms').value.trim(),
+        summary: document.getElementById('notes-summary').value.trim(),
+        questions: document.getElementById('notes-questions').value.trim()
+      };
+    }
+
+    // buildpreviewhtml creates the right side live note preview
+    function buildPreviewHtml() {
+      const data = getNoteData();
+      const hasAnyContent = Object.values(data).some(value => value !== '');
+
+      if (!hasAnyContent) {
+        return '<p class="notes-preview-placeholder">Start typing on the left to preview your notes here.</p>';
+      }
+
+      const meta = [data.course, data.date].filter(Boolean).join(' | ');
+
+      return `
+        <h2 class="notes-preview-title">${escapeHtml(data.title || 'Untitled Notes')}</h2>
+        <p class="notes-preview-meta">${escapeHtml(meta || 'No course or date yet')}</p>
+        <hr class="notes-preview-divider" />
+
+        ${buildPreviewSection('Main Ideas', data.main)}
+        ${buildPreviewSection('Important Details or Examples', data.details)}
+        ${buildPreviewSection('Key Terms', data.terms)}
+        ${buildPreviewSection('Short Summary', data.summary)}
+        ${buildPreviewSection('Questions to Review Later', data.questions)}
+      `;
+    }
+
+    // buildpreviewsection creates one formatted preview section
+    function buildPreviewSection(title, value) {
+      if (!value) {
+        return '';
+      }
+
+      return `
+        <div class="notes-preview-section">
+          <h2>${escapeHtml(title)}</h2>
+          <p>${escapeHtml(value)}</p>
+        </div>
+      `;
+    }
+
+    // updatepreview redraws the live preview based on current inputs
+    function updatePreview() {
+      notesPreview.innerHTML = buildPreviewHtml();
+    }
+
+    // savenotes stores the note form in local storage
+    function saveNotes() {
+      const data = getNoteData();
+      localStorage.setItem(storageKey, JSON.stringify(data));
+
+      saveMsg.textContent = 'Saved note draft.';
+      saveMsg.style.display = 'block';
+
+      setTimeout(() => {
+        saveMsg.style.display = 'none';
+      }, 3000);
+    }
+
+    // loadnotes loads the saved note form back into the page
+    function loadNotes() {
+      const saved = localStorage.getItem(storageKey);
+
+      if (!saved) {
+        updateStats();
+        updatePreview();
+        return;
+      }
+
+      try {
+        const data = JSON.parse(saved);
+
+        document.getElementById('notes-title').value = data.title || '';
+        document.getElementById('notes-course').value = data.course || '';
+        document.getElementById('notes-date').value = data.date || '';
+        document.getElementById('notes-main').value = data.main || '';
+        document.getElementById('notes-details').value = data.details || '';
+        document.getElementById('notes-terms').value = data.terms || '';
+        document.getElementById('notes-summary').value = data.summary || '';
+        document.getElementById('notes-questions').value = data.questions || '';
+
+        updateStats();
+        updatePreview();
+      } catch (error) {
+        updateStats();
+        updatePreview();
+      }
+    }
+
+    // downloadnotes builds a txt file and downloads it to the device
+    function downloadNotes() {
+      const data = getNoteData();
+
+      const content = [
+        `topic or title: ${data.title}`,
+        `course or class: ${data.course}`,
+        `date: ${data.date}`,
+        '',
+        'main ideas',
+        data.main,
+        '',
+        'important details or examples',
+        data.details,
+        '',
+        'key terms',
+        data.terms,
+        '',
+        'short summary',
+        data.summary,
+        '',
+        'questions to review later',
+        data.questions
+      ].join('\n');
+
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const fileUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+
+      link.href = fileUrl;
+      link.download = 'notes.txt';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(fileUrl);
+
+      saveMsg.textContent = 'Downloaded notes.txt';
+      saveMsg.style.display = 'block';
+
+      setTimeout(() => {
+        saveMsg.style.display = 'none';
+      }, 3000);
+    }
+
+    // escapehtml protects typed text before placing it into html
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    notesFields.forEach(field => {
+      field.addEventListener('input', () => {
+        updateStats();
+        updatePreview();
+      });
+    });
+
+    saveBtn.addEventListener('click', saveNotes);
+    downloadBtn.addEventListener('click', downloadNotes);
+
+    loadNotes();
+  </script>
+  <script src="../../js/headerProfile.js"></script>
+  <script>
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        window.location.href = "../auth.html";
+      });
+    }
+  </script>
+</body>
+</html>

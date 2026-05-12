@@ -1,16 +1,26 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- google analytics tag -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BKXMLJEGGQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BKXMLJEGGQ');
+  </script>
+  
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Study Workspace – LifeTrack</title>
   <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/studying.css" />
 </head>
 <body>
   <div class="dashboard-frame">
 
     <header class="dashboard-header">
-      <a class="dashboard-header-brand" href="../index.html">LifeTrack</a>
+      <a class="dashboard-header-brand" href="./dashboard.html">LifeTrack</a>
       <div class="dashboard-header-actions">
         <a class="dashboard-header-profile" href="./search.html">Search</a>
         <a class="dashboard-header-profile" href="./profile.html">
@@ -33,7 +43,12 @@
           <a class="dashboard-nav-link" href="./jobpreparation.html">Career</a>
           <a class="dashboard-nav-link" href="./goals.html">Productivity</a>
           <a class="dashboard-nav-link" href="./wellness.html">Wellness</a>
+          <a class="dashboard-nav-link" href="./campus-map.html">Campus Map</a>
         </nav>
+
+        <div class="dashboard-sidebar-footer">
+          <button id="logoutBtn" class="dashboard-logout-btn" type="button">Logout</button>
+        </div>
       </aside>
 
       <main class="dashboard-main">
@@ -46,29 +61,35 @@
         <!-- Summary cards -->
         <div class="summary-row">
           <div class="summary-card">
-            <div class="s-value accent">3.6</div>
-            <div class="s-label">Current GPA</div>
+            <div class="s-value accent">0</div>
+            <div class="s-label">Total Assignments</div>
           </div>
           <div class="summary-card">
-            <div class="s-value">15</div>
-            <div class="s-label">Credit Hours</div>
-          </div>
-          <div class="summary-card">
-            <div class="s-value accent2">5</div>
-            <div class="s-label">Enrolled Courses</div>
-          </div>
-          <div class="summary-card">
-            <div class="s-value amber">3</div>
+            <div class="s-value amber">0</div>
             <div class="s-label">Due This Week</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value accent2">0</div>
+            <div class="s-label">Submitted</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-value accent">0</div>
+            <div class="s-label">Graded</div>
           </div>
         </div>
 
         <!-- Course cards — rendered by studying.js -->
-        <div class="section-heading">My Courses — Spring 2026</div>
+        <div class="section-heading assignment-heading-row">
+          <span>My Courses</span>
+          <button id="addCourseBtn" class="btn sm" type="button">Add Course</button>
+        </div>
         <div class="course-grid" id="course-grid"></div>
 
         <!-- Assignment tracker — tab-filtered by status -->
-        <div class="section-heading">Assignment Tracker</div>
+        <div class="section-heading assignment-heading-row">
+          <span>Assignment Tracker</span>
+          <button id="addAssignmentBtn" class="btn sm" type="button">Add Assignment</button>
+        </div>
         <div class="tab-bar">
           <button class="tab-btn active" onclick="filterAssign(this,'all')">All</button>
           <button class="tab-btn" onclick="filterAssign(this,'Upcoming')">Upcoming</button>
@@ -77,6 +98,31 @@
         </div>
         <div class="assign-list" id="assign-list"></div>
 
+        <!-- Academic resources -->
+        <section class="academic-resources-section">
+          <h2 class="academic-resources-title">Academic Resources</h2>
+
+          <div class="academic-resource-grid">
+            <article class="academic-resource-card">
+              <h3>Study Guide</h3>
+              <p>A step by step workflow for building study guides before exams.</p>
+              <a class="btn sm" href="./resources/studyGuide.html">Learn More</a>
+            </article>
+
+            <article class="academic-resource-card">
+              <h3>Notes</h3>
+              <p>A clean note taking template for lectures and readings.</p>
+              <a class="btn sm" href="./resources/notes.html">Learn More</a>
+            </article>
+
+            <article class="academic-resource-card">
+              <h3>Flashcards</h3>
+              <p>A simple flashcard template for key terms and concepts.</p>
+              <a class="btn sm" href="./resources/flashcards.html">Learn More</a>
+            </article>
+          </div>
+        </section>
+
         <div class="footer">Team 1 • Spring 2026</div>
 
       </main>
@@ -84,5 +130,18 @@
   </div>
 
   <script src="../js/studying.js"></script>
+  <script src="../js/headerProfile.js"></script>
+  <script>
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        window.location.href = "./auth.html";
+      });
+    }
+  </script>
 </body>
 </html>

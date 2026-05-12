@@ -1,188 +1,523 @@
 'use strict';
-/* Goal Management – demo data only, no backend calls */
 
-// ── Data ──────────────────────────────────────────────────────────────────────
+/* Goal Management – backend-connected */
 
-let nextGoalId = 7;
+let GOALS = [];
+let STATS = {
+  total: 0,
+  inProgress: 0,
+  completed: 0
+};
 
-let GOALS = [
-  { id:1, title:'Complete Research Paper',  category:'Academic', status:'In Progress', date:'2026-04-15', progress:65,  desc:'Write and submit the 10-page research paper for ENGR 301.'         },
-  { id:2, title:'Run 5K Without Stopping',  category:'Health',   status:'In Progress', date:'2026-04-20', progress:45,  desc:'Train consistently to run a 5K in under 35 minutes.'               },
-  { id:3, title:'Apply to 3 Internships',   category:'Career',   status:'Completed',   date:'2026-03-31', progress:100, desc:'Tailor résumé and submit to three target companies.'               },
-  { id:4, title:'Finish Linear Algebra',    category:'Academic', status:'Completed',   date:'2026-03-25', progress:100, desc:'Complete all modules and pass the final exam with a B or higher.'  },
-  { id:5, title:'Read 2 Books This Month',  category:'Personal', status:'Not Started', date:'2026-04-30', progress:0,   desc:'Choose and complete two books from the reading list.'              },
-  { id:6, title:'Update Portfolio Website', category:'Career',   status:'Overdue',     date:'2026-04-01', progress:30,  desc:'Redesign portfolio and add latest projects from this semester.'    },
-];
+let activeTab = 'all';
+let editingId = null;
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Auth / headers ────────────────────────────────────────────────────────────
+
+function getAccessToken() {
+  return localStorage.getItem('accessToken');
+}
+
+function getAuthHeaders(includeJson = false) {
+  const token = getAccessToken();
+
+  const headers = {};
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  if (includeJson) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  return headers;
+}
+
+// ── Profile header ────────────────────────────────────────────────────────────
+
+function getStoredUser() {
+  try {
+    const rawUser = localStorage.getItem("user");
+    return rawUser ? JSON.parse(rawUser) : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function setProfileHeaderFromStoredUser() {
+  const storedUser = getStoredUser();
+  const profileUsernameTop = document.getElementById("profileUsernameTop");
+
+  if (!profileUsernameTop) return;
+
+  if (!storedUser) {
+    profileUsernameTop.textContent = "Profile";
+    return;
+  }
+
+  profileUsernameTop.textContent = storedUser.username || "Profile";
+}
+
+async function loadProfileHeader() {
+  setProfileHeaderFromStoredUser();
+
+  const token = getAccessToken();
+  if (!token) return;
+
+  try {
+    const response = await fetch("/api/users/me/dashboard", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || "Could not load dashboard profile.");
+    }
+
+    const dashboard = data.dashboard || {};
+    const profile = dashboard.profile || {};
+
+    const profileUsernameTop = document.getElementById("profileUsernameTop");
+    const profilePreview = document.getElementById("profilePreview");
+
+    if (profileUsernameTop) {
+      profileUsernameTop.textContent = profile.username || "Profile";
+    }
+
+    if (profilePreview && profile.profileThumbnailUrl) {
+      profilePreview.src = profile.profileThumbnailUrl;
+    }
+  } catch (error) {
+    console.error("Profile header load error:", error.message || error);
+  }
+}
+
+// ── Accessibility settings ────────────────────────────────────────────────────
+
+async function loadAccessibilitySettings() {
+  const token = getAccessToken();
+  if (!token) return;
+
+  try {
+    const response = await fetch('/api/users/me/accessibility', {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Could not load accessibility settings.');
+    }
+
+    applyAccessibilitySettings(data.accessibility);
+  } catch (error) {
+    console.error('Accessibility settings load error:', error.message || error);
+  }
+}
+
+function applyAccessibilitySettings(accessibility) {
+  if (!accessibility) return;
+
+  const themeMode = accessibility.themeMode || 'dark';
+  const textSize = accessibility.textSize || 'normal';
+  const highContrastEnabled =
+    accessibility.highContrastEnabled === true ||
+    accessibility.highContrastEnabled === 1 ||
+    accessibility.highContrastEnabled === '1';
+
+  const isAccessibilityMode =
+    themeMode === 'light' &&
+    textSize === 'large' &&
+    highContrastEnabled;
+
+  document.body.setAttribute(
+    'data-accessibility-mode',
+    isAccessibilityMode ? 'accessibility' : 'default'
+  );
+}
+
+// ── Display helpers ───────────────────────────────────────────────────────────
 
 const BADGE_CLASS = {
-  'In Progress': 'badge-in-progress',
-  'Completed':   'badge-completed',
-  'Not Started': 'badge-not-started',
-  'Overdue':     'badge-overdue',
-  'Paused':      'badge-paused',
+  'in progress': 'badge-in-progress',
+  completed: 'badge-completed',
+  'not started': 'badge-not-started'
 };
 
 function badgeClass(status) {
-  return BADGE_CLASS[status] || 'badge-not-started';
+  return BADGE_CLASS[normalizeStatus(status)] || 'badge-not-started';
+}
+
+function normalizeStatus(status) {
+  return String(status || 'not started').toLowerCase();
+}
+
+function displayStatus(status) {
+  const normalized = normalizeStatus(status);
+
+  if (normalized === 'in progress') return 'In Progress';
+  if (normalized === 'completed') return 'Completed';
+  return 'Not Started';
 }
 
 function formatDate(iso) {
-  const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  if (!iso) return 'No target date';
+
   const [y, m, d] = iso.split('-');
-  return `${M[+m - 1]} ${+d}, ${y}`;
+  if (!y || !m || !d) return iso;
+
+  const date = new Date(Number(y), Number(m) - 1, Number(d));
+
+  return date.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function showGoalMessage(message, type = 'error') {
+  const messageEl = document.getElementById('goal-message');
+  if (!messageEl) return;
+
+  messageEl.textContent = message;
+  messageEl.className = `status-message ${type}`;
+  messageEl.hidden = false;
+}
+
+function clearGoalMessage() {
+  const messageEl = document.getElementById('goal-message');
+  if (!messageEl) return;
+
+  messageEl.textContent = '';
+  messageEl.className = 'status-message';
+  messageEl.hidden = true;
+}
+
+// ── API ───────────────────────────────────────────────────────────────────────
+
+async function apiRequest(url, options = {}) {
+  const response = await fetch(url, options);
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok || data.success === false) {
+    throw new Error(data.error || data.message || 'Request failed.');
+  }
+
+  return data;
+}
+
+async function loadGoals() {
+  const token = getAccessToken();
+
+  if (!token) {
+    renderLoadError('Please log in to view and manage your goals.');
+    return;
+  }
+
+  try {
+    const data = await apiRequest('/api/goals', {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+
+    GOALS = Array.isArray(data.goals) ? data.goals : [];
+    STATS = data.stats || {
+      total: GOALS.length,
+      inProgress: GOALS.filter(g => normalizeStatus(g.status) === 'in progress').length,
+      completed: GOALS.filter(g => normalizeStatus(g.status) === 'completed').length
+    };
+
+    updateSummary();
+    renderGoals();
+  } catch (error) {
+    console.error('Goal load error:', error.message || error);
+    renderLoadError(error.message || 'Could not load goals.');
+  }
+}
+
+async function createGoal(payload) {
+  await apiRequest('/api/goals', {
+    method: 'POST',
+    headers: getAuthHeaders(true),
+    body: JSON.stringify(payload)
+  });
+}
+
+async function updateGoal(goalId, payload) {
+  await apiRequest(`/api/goals/${goalId}`, {
+    method: 'PUT',
+    headers: getAuthHeaders(true),
+    body: JSON.stringify(payload)
+  });
+}
+
+async function deleteGoal(goalId) {
+  await apiRequest(`/api/goals/${goalId}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders()
+  });
 }
 
 // ── Summary cards ─────────────────────────────────────────────────────────────
 
 function updateSummary() {
-  const now  = Date.now();
-  const week = 7 * 864e5; // 7 days in ms
-  document.getElementById('stat-total').textContent      = GOALS.length;
-  document.getElementById('stat-inprogress').textContent = GOALS.filter(g => g.status === 'In Progress').length;
-  document.getElementById('stat-completed').textContent  = GOALS.filter(g => g.status === 'Completed').length;
-  // Count goals whose target date falls within the next 7 days
-  document.getElementById('stat-week').textContent = GOALS.filter(g => {
-    const t = new Date(g.date).getTime();
-    return t >= now && t <= now + week;
-  }).length;
+  const notStarted = GOALS.filter(
+    g => normalizeStatus(g.status) === 'not started'
+  ).length;
+
+  document.getElementById('stat-total').textContent = STATS.total ?? GOALS.length;
+  document.getElementById('stat-inprogress').textContent = STATS.inProgress ?? 0;
+  document.getElementById('stat-completed').textContent = STATS.completed ?? 0;
+  document.getElementById('stat-not-started').textContent = notStarted;
 }
 
 // ── Goal grid ─────────────────────────────────────────────────────────────────
 
-let activeTab = 'all';
+function renderLoadError(message) {
+  const grid = document.getElementById('goals-grid');
+
+  if (!grid) return;
+
+  grid.innerHTML = `
+    <div class="card goals-empty-card">
+      <h2 class="card-title">Goals unavailable</h2>
+      <p class="card-desc">${escapeHtml(message)}</p>
+    </div>
+  `;
+
+  document.getElementById('stat-total').textContent = '0';
+  document.getElementById('stat-inprogress').textContent = '0';
+  document.getElementById('stat-completed').textContent = '0';
+  document.getElementById('stat-not-started').textContent = '0';
+}
 
 function renderGoals() {
-  const search  = document.getElementById('search-input').value.toLowerCase();
-  const statusF = document.getElementById('status-filter').value;
-  const catF    = document.getElementById('cat-filter').value;
+  const grid = document.getElementById('goals-grid');
+  if (!grid) return;
 
-  const visible = GOALS.filter(g => {
-    if (activeTab !== 'all' && g.status   !== activeTab) return false;
-    if (statusF  !== 'all' && g.status   !== statusF)    return false;
-    if (catF     !== 'all' && g.category !== catF)       return false;
-    if (search && !g.title.toLowerCase().includes(search) &&
-                  !g.desc.toLowerCase().includes(search)) return false;
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const statusFilter = document.getElementById('status-filter').value;
+
+  const visible = GOALS.filter(goal => {
+    const status = normalizeStatus(goal.status);
+    const title = String(goal.title || '').toLowerCase();
+    const description = String(goal.description || '').toLowerCase();
+    const notes = String(goal.notes || '').toLowerCase();
+
+    if (activeTab !== 'all' && status !== activeTab) return false;
+    if (statusFilter !== 'all' && status !== statusFilter) return false;
+
+    if (
+      search &&
+      !title.includes(search) &&
+      !description.includes(search) &&
+      !notes.includes(search)
+    ) {
+      return false;
+    }
+
     return true;
   });
 
-  const grid = document.getElementById('goals-grid');
-
   if (!visible.length) {
-    grid.innerHTML = '<p style="color:var(--muted);padding:12px 0">No goals match your filters.</p>';
+    grid.innerHTML = `
+      <div class="card goals-empty-card">
+        <h2 class="card-title">No goals found</h2>
+        <p class="card-desc">Try adjusting your filters or create a new goal.</p>
+      </div>
+    `;
     return;
   }
 
-  grid.innerHTML = visible.map(g => `
-    <div class="card">
+  grid.innerHTML = visible.map(goal => `
+    <article class="card goal-card">
       <div class="goal-card-meta">
-        <span class="badge ${badgeClass(g.status)}">${g.status}</span>
-        <span class="small">${g.category}</span>
+        <span class="badge ${badgeClass(goal.status)}">${displayStatus(goal.status)}</span>
+        <span class="small">Target: ${formatDate(goal.targetDate)}</span>
       </div>
-      <h2 class="card-title">${g.title}</h2>
-      <p class="card-desc">${g.desc}</p>
-      <div class="progress-wrap">
-        <div class="progress-track">
-          <div class="progress-fill" style="width:${g.progress}%"></div>
-        </div>
-        <div class="progress-label">
-          <span>Progress</span><span>${g.progress}%</span>
-        </div>
-      </div>
+
+      <h2 class="card-title">${escapeHtml(goal.title)}</h2>
+
+      <p class="card-desc">
+        ${escapeHtml(goal.description || 'No description added yet.')}
+      </p>
+
+      ${
+        goal.notes
+          ? `<p class="goal-notes"><strong>Notes:</strong> ${escapeHtml(goal.notes)}</p>`
+          : ''
+      }
+
       <div class="goal-card-footer">
-        <span class="small">Target: ${formatDate(g.date)}</span>
-        <button class="btn secondary sm" data-edit="${g.id}">Edit</button>
+        <span class="small">Updated: ${goal.updatedAt ? formatDate(String(goal.updatedAt).slice(0, 10)) : 'N/A'}</span>
+        <button class="btn secondary sm" data-edit="${goal.id}">Edit</button>
       </div>
-    </div>
+    </article>
   `).join('');
 }
 
-// ── Tab switching — called from HTML inline onclick ────────────────────────────
+// ── Tabs ──────────────────────────────────────────────────────────────────────
 
-function setTab(btn, tab) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+function setActiveTab(button, tab) {
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+
+  button.classList.add('active');
   activeTab = tab;
   renderGoals();
 }
 
 // ── Modal ─────────────────────────────────────────────────────────────────────
 
-let editingId = null; // null = creating a new goal, number = editing an existing one
-
-// Called with no args from the "+ New Goal" button; called with a goal object when editing
-function openModal(goal) {
+function openModal(goal = null) {
   editingId = goal ? goal.id : null;
+
+  clearGoalMessage();
+
   document.getElementById('modal-title').textContent = goal ? 'Edit Goal' : 'New Goal';
-  document.getElementById('goal-title').value        = goal ? goal.title    : '';
-  document.getElementById('goal-cat').value          = goal ? goal.category : 'Academic';
-  document.getElementById('goal-status').value       = goal ? goal.status   : 'Not Started';
-  document.getElementById('goal-date').value         = goal ? goal.date     : '';
-  document.getElementById('goal-progress').value     = goal ? goal.progress : '';
-  document.getElementById('goal-desc').value         = goal ? goal.desc     : '';
+  document.getElementById('goal-title').value = goal ? goal.title || '' : '';
+  document.getElementById('goal-status').value = goal ? normalizeStatus(goal.status) : 'not started';
+  document.getElementById('goal-date').value = goal ? goal.targetDate || '' : '';
+  document.getElementById('goal-desc').value = goal ? goal.description || '' : '';
+  document.getElementById('goal-notes').value = goal ? goal.notes || '' : '';
+
+  const deleteBtn = document.getElementById('delete-goal-btn');
+  if (deleteBtn) {
+    deleteBtn.hidden = !goal;
+  }
+
   document.getElementById('goal-modal').classList.add('open');
 }
 
 function closeModal() {
   document.getElementById('goal-modal').classList.remove('open');
   editingId = null;
+  clearGoalMessage();
 }
 
-function saveGoal() {
+function buildGoalPayload() {
   const title = document.getElementById('goal-title').value.trim();
-  if (!title) { alert('Please enter a goal name.'); return; }
+  const status = document.getElementById('goal-status').value;
+  const targetDate = document.getElementById('goal-date').value;
+  const description = document.getElementById('goal-desc').value.trim();
+  const notes = document.getElementById('goal-notes').value.trim();
 
-  const data = {
+  return {
     title,
-    category: document.getElementById('goal-cat').value,
-    status:   document.getElementById('goal-status').value,
-    // Default to today if no date was entered
-    date:     document.getElementById('goal-date').value || new Date().toISOString().slice(0, 10),
-    progress: Math.min(100, Math.max(0, +document.getElementById('goal-progress').value || 0)),
-    desc:     document.getElementById('goal-desc').value.trim(),
+    status,
+    targetDate: targetDate || null,
+    description: description || null,
+    notes: notes || null
   };
+}
 
-  if (editingId !== null) {
-    const idx = GOALS.findIndex(g => g.id === editingId);
-    if (idx !== -1) GOALS[idx] = { ...GOALS[idx], ...data };
-  } else {
-    GOALS.push({ id: nextGoalId++, ...data });
+async function saveGoal() {
+  const saveBtn = document.getElementById('save-goal-btn');
+  const payload = buildGoalPayload();
+
+  if (!payload.title) {
+    showGoalMessage('Please enter a goal name.');
+    return;
   }
 
-  closeModal();
-  updateSummary();
-  renderGoals();
+  try {
+    saveBtn.disabled = true;
+    saveBtn.textContent = editingId ? 'Saving...' : 'Creating...';
+
+    if (editingId !== null) {
+      await updateGoal(editingId, payload);
+    } else {
+      await createGoal(payload);
+    }
+
+    closeModal();
+    await loadGoals();
+  } catch (error) {
+    console.error('Save goal error:', error.message || error);
+    showGoalMessage(error.message || 'Could not save goal.');
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save Goal';
+  }
+}
+
+async function handleDeleteGoal() {
+  if (editingId === null) return;
+
+  const confirmed = confirm('Delete this goal? This cannot be undone.');
+  if (!confirmed) return;
+
+  const deleteBtn = document.getElementById('delete-goal-btn');
+
+  try {
+    deleteBtn.disabled = true;
+    deleteBtn.textContent = 'Deleting...';
+
+    await deleteGoal(editingId);
+
+    closeModal();
+    await loadGoals();
+  } catch (error) {
+    console.error('Delete goal error:', error.message || error);
+    showGoalMessage(error.message || 'Could not delete goal.');
+  } finally {
+    deleteBtn.disabled = false;
+    deleteBtn.textContent = 'Delete Goal';
+  }
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 
-document.addEventListener('DOMContentLoaded', () => {
-  // Live filter controls
+document.addEventListener('DOMContentLoaded', async () => {
+  await Promise.all([
+    loadAccessibilitySettings(),
+    loadProfileHeader()
+  ]);
+
+  document.getElementById('new-goal-btn').addEventListener('click', () => {
+    openModal();
+  });
+
   document.getElementById('search-input').addEventListener('input', renderGoals);
   document.getElementById('status-filter').addEventListener('change', renderGoals);
-  document.getElementById('cat-filter').addEventListener('change', renderGoals);
 
-  // Edit buttons — event delegation avoids attaching a handler per card
-  document.getElementById('goals-grid').addEventListener('click', e => {
-    const btn = e.target.closest('[data-edit]');
-    if (!btn) return;
-    const goal = GOALS.find(g => g.id === +btn.dataset.edit);
+  document.querySelectorAll('.tab-btn').forEach(button => {
+    button.addEventListener('click', () => {
+      setActiveTab(button, button.dataset.tab);
+    });
+  });
+
+  document.getElementById('goals-grid').addEventListener('click', event => {
+    const editBtn = event.target.closest('[data-edit]');
+    if (!editBtn) return;
+
+    const goal = GOALS.find(item => item.id === Number(editBtn.dataset.edit));
     if (goal) openModal(goal);
   });
 
-  // Close modal when clicking outside the modal box (on the dark backdrop)
-  document.getElementById('goal-modal').addEventListener('click', function (e) {
-    if (e.target === this) closeModal();
+  document.getElementById('goal-modal').addEventListener('click', function (event) {
+    if (event.target === this) closeModal();
   });
 
-  // The HTML wired this button to closeModal() only; replace with saveGoal
-  const saveBtn = document.querySelector('#goal-modal .modal-actions .btn:not(.secondary)');
-  if (saveBtn) {
-    saveBtn.removeAttribute('onclick');
-    saveBtn.addEventListener('click', saveGoal);
-  }
+  document.getElementById('cancel-goal-btn').addEventListener('click', closeModal);
+  document.getElementById('save-goal-btn').addEventListener('click', saveGoal);
+  document.getElementById('delete-goal-btn').addEventListener('click', handleDeleteGoal);
 
-  updateSummary();
-  renderGoals();
+  await loadGoals();
 });

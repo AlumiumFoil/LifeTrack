@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- google analytics tag -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BKXMLJEGGQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-BKXMLJEGGQ');
+  </script>
+  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Team 1 - Campus Map</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+  <style>
+    .map-filter-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .map-filter-btn {
+      padding: 8px 18px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font: inherit;
+      font-size: 14px;
+      transition: all 0.15s;
+    }
+
+    .map-filter-btn:hover {
+      border-color: rgba(255,255,255,0.25);
+      color: var(--text);
+    }
+
+    .map-filter-btn.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      border-color: transparent;
+    }
+
+    #campusMap {
+      width: 100%;
+      height: 500px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .location-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .location-card {
+      border: 1px solid var(--border);
+      background: rgba(17,26,46,0.6);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .location-card:hover {
+      border-color: rgba(77,163,255,0.4);
+      background: rgba(77,163,255,0.06);
+    }
+
+    .location-card.active {
+      border-color: var(--accent);
+      background: rgba(77,163,255,0.1);
+    }
+
+    .location-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+
+    .location-info {
+      flex: 1;
+    }
+
+    .location-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+
+    .location-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .location-actions {
+      margin-top: 6px;
+    }
+
+    .location-directions {
+      font-size: 11px;
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .location-directions:hover {
+      text-decoration: underline;
+    }
+
+    .map-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .map-summary-text {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .map-summary-text strong {
+      color: var(--accent);
+    }
+
+    body[data-accessibility-mode="accessibility"] .location-card {
+      background: #ffffff;
+      color: var(--text);
+      border-color: rgba(15, 23, 42, 0.2);
+    }
+
+    body[data-accessibility-mode="accessibility"] .location-card:hover {
+      background: rgba(77,163,255,0.08);
+      border-color: rgba(77,163,255,0.35);
+    }
+
+    body[data-accessibility-mode="accessibility"] .location-card.active {
+      background: rgba(77,163,255,0.12);
+      border-color: var(--accent);
+    }
+
+    body[data-accessibility-mode="accessibility"] .location-desc,
+    body[data-accessibility-mode="accessibility"] .map-summary-text {
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-frame">
+
+    <header class="dashboard-header">
+      <a class="dashboard-header-brand" href="./dashboard.html">LifeTrack</a>
+      <div class="dashboard-header-actions">
+        <a class="dashboard-header-profile" href="./search.html">Search</a>
+        <a class="dashboard-header-profile" href="./profile.html">
+          <img
+            id="profilePreview"
+            class="dashboard-header-avatar"
+            src="https://placehold.co/120x120?text=User"
+            alt="Profile"
+          />
+          <span id="profileUsernameTop">Profile</span>
+        </a>
+      </div>
+    </header>
+
+    <div class="dashboard-body">
+      <aside class="dashboard-sidebar">
+        <nav class="dashboard-nav">
+          <a class="dashboard-nav-link" href="./dashboard.html">Home</a>
+          <a class="dashboard-nav-link" href="./studying.html">Academic</a>
+          <a class="dashboard-nav-link" href="./jobpreparation.html">Career</a>
+          <a class="dashboard-nav-link" href="./goals.html">Productivity</a>
+          <a class="dashboard-nav-link" href="./wellness.html">Wellness</a>
+          <a class="dashboard-nav-link active" href="./campus-map.html">Campus Map</a>
+        </nav>
+
+        <div class="dashboard-sidebar-footer">
+          <button id="logoutBtn" class="dashboard-logout-btn" type="button">Logout</button>
+        </div>
+      </aside>
+
+      <main class="dashboard-main">
+        <section class="dashboard-page-title">
+          <h1>Campus Map</h1>
+          <p class="small" style="margin-top:4px;">Explore SFSU campus resources by category. Click a location card to zoom in on the map.</p>
+        </section>
+
+        <!-- Filter tabs -->
+        <div class="map-filter-bar">
+          <button class="map-filter-btn active" data-category="all">All</button>
+          <button class="map-filter-btn" data-category="wellness">Wellness</button>
+          <button class="map-filter-btn" data-category="academic">Academic</button>
+          <button class="map-filter-btn" data-category="career">Career</button>
+          <button class="map-filter-btn" data-category="productivity">Productivity</button>
+        </div>
+
+        <!-- Map summary -->
+        <div class="map-summary">
+          <p class="map-summary-text">Showing <strong id="locationCount">8</strong> locations on campus</p>
+        </div>
+
+        <!-- Map -->
+        <div id="campusMap"></div>
+
+        <!-- Location cards -->
+        <div class="location-list" id="locationList"></div>
+
+        <div class="footer" style="margin-top:32px;">
+          Team 1 • Campus Map
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // auth check - redirect to login if not authenticated
+    function getAccessToken() {
+      return localStorage.getItem("accessToken");
+    }
+
+    if (!getAccessToken()) {
+      window.location.href = "./auth.html";
+    }
+
+    // load profile preview
+    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+    if (storedUser.username) {
+      document.getElementById("profileUsernameTop").textContent = storedUser.username;
+    }
+
+    // logout
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
+      window.location.href = "./auth.html";
+    });
+
+    // load accessibility settings
+    async function loadAccessibilitySettings() {
+      const token = getAccessToken();
+      if (!token) return;
+
+      try {
+        const response = await fetch("/api/users/me/accessibility", {
+          method: "GET",
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        const data = await response.json();
+        if (!response.ok || !data.success) return;
+        applyAccessibilitySettings(data.accessibility);
+      } catch (error) {
+        console.error("Accessibility settings load error:", error.message || error);
+      }
+    }
+
+    function applyAccessibilitySettings(accessibility) {
+      if (!accessibility) return;
+
+      const themeMode = accessibility.themeMode || "dark";
+      const textSize = accessibility.textSize || "normal";
+      const highContrastEnabled =
+        accessibility.highContrastEnabled === true ||
+        accessibility.highContrastEnabled === 1 ||
+        accessibility.highContrastEnabled === "1";
+
+      const isAccessibilityMode =
+        themeMode === "light" &&
+        textSize === "large" &&
+        highContrastEnabled;
+
+      document.body.setAttribute(
+        "data-accessibility-mode",
+        isAccessibilityMode ? "accessibility" : "default"
+      );
+    }
+
+    loadAccessibilitySettings();
+
+    // load profile image from backend
+    async function loadProfileImage() {
+      const token = getAccessToken();
+      if (!token) return;
+
+      try {
+        const response = await fetch("/api/users/me/profile", {
+          method: "GET",
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        const data = await response.json();
+        if (!response.ok || !data.success) return;
+
+        const profilePreview = document.getElementById("profilePreview");
+        const profileUsernameTop = document.getElementById("profileUsernameTop");
+
+        if (profilePreview && data.profile.profileThumbnailUrl) {
+          profilePreview.src = data.profile.profileThumbnailUrl;
+        }
+
+        if (profileUsernameTop && data.profile.username) {
+          profileUsernameTop.textContent = data.profile.username;
+        }
+      } catch (error) {
+        console.error("Profile load error:", error.message || error);
+      }
+    }
+
+    loadProfileImage();
+
+    // all campus locations
+    const allLocations = [
+      {
+        name: "Counseling & Psychological Services (CAPS)",
+        desc: "Free individual and group therapy, crisis counseling, psychiatric services, and mental health workshops. Walk-in hours available. Offers Let's Talk drop-in consultations and online appointments.",
+        category: "wellness",
+        lat: 37.7250,
+        lng: -122.4775,
+        color: "#4ade80",
+        directions: "Counseling+%26+Psychological+Services+SFSU"
+      },
+      {
+        name: "Student Health Center",
+        desc: "Primary care visits, immunizations, lab tests, physical therapy, nutrition counseling, sexual health services, and pharmacy. Accepts student health insurance. Book appointments online via the MyHealth portal.",
+        category: "wellness",
+        lat: 37.7243,
+        lng: -122.4780,
+        color: "#4ade80",
+        directions: "Student+Health+Center+SFSU"
+      },
+      {
+        name: "Recreation Center",
+        desc: "Full gym with cardio and weight equipment, group fitness classes (yoga, Zumba, HIIT), rock climbing wall, Olympic-size pool, intramural sports leagues, and personal training sessions. Free for enrolled students.",
+        category: "wellness",
+        lat: 37.7255,
+        lng: -122.4795,
+        color: "#4ade80",
+        directions: "Recreation+Center+SFSU"
+      },
+      {
+        name: "Basic Needs Hub",
+        desc: "Supports students facing food insecurity, housing instability, and financial hardship. Provides access to the campus food pantry, emergency funds, CalFresh enrollment assistance, and referrals to community resources.",
+        category: "wellness",
+        lat: 37.7247,
+        lng: -122.4792,
+        color: "#4ade80",
+        directions: "Basic+Needs+Hub+SFSU"
+      },
+      {
+        name: "J. Paul Leonard Library",
+        desc: "7 floors of study space including private study rooms (bookable online), 24-hour access during finals, research librarian consultations, extensive digital databases, interlibrary loans, and printing/scanning services.",
+        category: "academic",
+        lat: 37.7238,
+        lng: -122.4785,
+        color: "#4da3ff",
+        directions: "J+Paul+Leonard+Library+SFSU"
+      },
+      {
+        name: "Student Services Building",
+        desc: "Houses the Registrar, Financial Aid office, Bursar, academic advising, Disability Programs & Resource Center (DPRC), and the Office of International Programs. One-stop hub for enrollment and student support.",
+        category: "academic",
+        lat: 37.7248,
+        lng: -122.4783,
+        color: "#4da3ff",
+        directions: "Student+Services+Building+SFSU"
+      },
+      {
+        name: "The Quad (Study Area)",
+        desc: "Open-air gathering space in the heart of campus. Popular for group study sessions, student org tabling, outdoor events, and relaxing between classes. Wi-Fi accessible throughout the area.",
+        category: "academic",
+        lat: 37.7246,
+        lng: -122.4788,
+        color: "#4da3ff",
+        directions: "SFSU+The+Quad+San+Francisco"
+      },
+      {
+        name: "Tutoring & Academic Support Center",
+        desc: "Free drop-in and scheduled tutoring for math, science, writing, and other subjects. Peer tutoring, study groups, and supplemental instruction sessions available throughout the semester.",
+        category: "academic",
+        lat: 37.7242,
+        lng: -122.4782,
+        color: "#4da3ff",
+        directions: "Tutoring+Center+SFSU"
+      },
+      {
+        name: "Career Services Center",
+        desc: "One-on-one career coaching, resume and cover letter reviews, mock interviews, Handshake job board access, on-campus recruiting events, internship and job fairs, and LinkedIn profile workshops. Free for all enrolled students.",
+        category: "career",
+        lat: 37.7241,
+        lng: -122.4770,
+        color: "#fbbf24",
+        directions: "Career+Services+Center+SFSU"
+      },
+      {
+        name: "Alumni & Industry Relations",
+        desc: "Connects students with the SFSU alumni network for mentorship, informational interviews, and networking events. Hosts industry panels, alumni career nights, and LinkedIn networking workshops throughout the year.",
+        category: "career",
+        lat: 37.7239,
+        lng: -122.4772,
+        color: "#fbbf24",
+        directions: "Alumni+Relations+SFSU"
+      },
+      {
+        name: "Caesar Chavez Student Center",
+        desc: "Hub for student life featuring dining options, Associated Students offices, meeting rooms for student organizations, event space, a bookstore, computer lab, and quiet study lounges. Great for between-class productivity.",
+        category: "productivity",
+        lat: 37.7245,
+        lng: -122.4790,
+        color: "#a78bfa",
+        directions: "Cesar+Chavez+Student+Center+SFSU"
+      },
+      {
+        name: "Student Innovation Hub",
+        desc: "Collaborative workspace for entrepreneurship, project development, and creative problem solving. Access to 3D printers, design software, whiteboard rooms, and mentorship from faculty and industry professionals.",
+        category: "productivity",
+        lat: 37.7252,
+        lng: -122.4778,
+        color: "#a78bfa",
+        directions: "Innovation+Hub+SFSU"
+      }
+    ];
+
+    let map;
+    let markers = [];
+    let activeCategory = "all";
+    let activeInfoWindow = null;
+
+    function getCategoryColor(category) {
+      const colors = {
+        wellness: "#4ade80",
+        academic: "#4da3ff",
+        career: "#fbbf24",
+        productivity: "#a78bfa"
+      };
+      return colors[category] || "#4da3ff";
+    }
+
+    function getFilteredLocations() {
+      if (activeCategory === "all") return allLocations;
+      return allLocations.filter(l => l.category === activeCategory);
+    }
+
+    function renderLocationCards(locations) {
+      const list = document.getElementById("locationList");
+      document.getElementById("locationCount").textContent = locations.length;
+
+      list.innerHTML = locations.map((loc, i) => `
+        <div class="location-card" id="card-${i}" onclick="focusLocation(${i})">
+          <div class="location-dot" style="background:${loc.color};"></div>
+          <div class="location-info">
+            <div class="location-name">${loc.name}</div>
+            <div class="location-desc">${loc.desc}</div>
+            <div class="location-actions">
+              <a class="location-directions"
+                 href="https://www.google.com/maps/dir/?api=1&destination=${loc.directions}&destination_place_id="
+                 target="_blank" rel="noopener noreferrer">
+                📍 Get Directions
+              </a>
+            </div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function focusLocation(index) {
+      const locations = getFilteredLocations();
+      const loc = locations[index];
+      if (!loc || !map) return;
+
+      // highlight card
+      document.querySelectorAll(".location-card").forEach(c => c.classList.remove("active"));
+      const card = document.getElementById(`card-${index}`);
+      if (card) card.classList.add("active");
+
+      // zoom map to location
+      map.panTo({ lat: loc.lat, lng: loc.lng });
+      map.setZoom(18);
+
+      // open info window
+      if (activeInfoWindow) activeInfoWindow.close();
+      const marker = markers[index];
+      if (marker) {
+        google.maps.event.trigger(marker, "click");
+      }
+    }
+
+    function renderMarkers(locations) {
+      // clear old markers
+      markers.forEach(m => m.setMap(null));
+      markers = [];
+
+      locations.forEach((loc, i) => {
+        const marker = new google.maps.Marker({
+          position: { lat: loc.lat, lng: loc.lng },
+          map,
+          title: loc.name,
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 11,
+            fillColor: loc.color,
+            fillOpacity: 1,
+            strokeColor: "#0b1220",
+            strokeWeight: 2
+          }
+        });
+
+        const infoWindow = new google.maps.InfoWindow({
+          content: `
+            <div style="background:var(--card); color:var(--text); padding:12px 14px; border-radius:10px; min-width:200px; max-width:240px;">
+              <strong style="font-size:13px; display:block; margin-bottom:4px;">${loc.name}</strong>
+              <p style="margin:0 0 8px; font-size:11px; color:var(--muted); line-height:1.4;">${loc.desc}</p>
+              <a href="https://www.google.com/maps/dir/?api=1&destination=${loc.directions}"
+                 target="_blank" rel="noopener noreferrer"
+                 style="font-size:11px; color:var(--accent); text-decoration:none;">
+                📍 Get Directions
+              </a>
+            </div>
+          `
+        });
+
+        marker.addListener("click", () => {
+          if (activeInfoWindow) activeInfoWindow.close();
+          infoWindow.open(map, marker);
+          activeInfoWindow = infoWindow;
+
+          // highlight corresponding card
+          document.querySelectorAll(".location-card").forEach(c => c.classList.remove("active"));
+          const card = document.getElementById(`card-${i}`);
+          if (card) {
+            card.classList.add("active");
+            card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }
+        });
+
+        markers.push(marker);
+      });
+    }
+
+    function updateMap() {
+      const locations = getFilteredLocations();
+      renderLocationCards(locations);
+      renderMarkers(locations);
+
+      // fit map to show all markers
+      if (locations.length > 0 && map) {
+        const bounds = new google.maps.LatLngBounds();
+        locations.forEach(loc => bounds.extend({ lat: loc.lat, lng: loc.lng }));
+        map.fitBounds(bounds);
+        map.setZoom(Math.min(map.getZoom(), 17));
+      }
+    }
+
+    function initMap() {
+      const sfsu = { lat: 37.7245, lng: -122.4783 };
+
+      map = new google.maps.Map(document.getElementById("campusMap"), {
+        zoom: 16,
+        center: sfsu,
+        styles: [
+          { elementType: "geometry", stylers: [{ color: "#0b1220" }] },
+          { elementType: "labels.text.fill", stylers: [{ color: "#b7c3e6" }] },
+          { elementType: "labels.text.stroke", stylers: [{ color: "#0b1220" }] },
+          { featureType: "administrative", elementType: "geometry", stylers: [{ color: "#1e2d45" }] },
+          { featureType: "road", elementType: "geometry", stylers: [{ color: "#161e2e" }] },
+          { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#1e2d45" }] },
+          { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#1a2540" }] },
+          { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#b7c3e6" }] },
+          { featureType: "transit", elementType: "geometry", stylers: [{ color: "#111a2e" }] },
+          { featureType: "water", elementType: "geometry", stylers: [{ color: "#111a2e" }] },
+          { featureType: "poi", elementType: "geometry", stylers: [{ color: "#111a2e" }] },
+          { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#b7c3e6" }] },
+          { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#0d1a2e" }] }
+        ]
+      });
+
+      updateMap();
+
+      // filter button events
+      document.querySelectorAll(".map-filter-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".map-filter-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          activeCategory = btn.dataset.category;
+          if (activeInfoWindow) activeInfoWindow.close();
+          updateMap();
+        });
+      });
+    }
+  </script>
+
+  <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBvYQ-NoFXbncou8kDwisRGwnH9haC-kf0&callback=initMap">
+  </script>
+
+  <script src="../js/headerProfile.js"></script>
+</body>
+</html>

@@ -20,6 +20,54 @@ function getStoredUser() {
   }
 }
 
+// loads saved accessibility settings for the logged-in user
+async function loadAccessibilitySettings() {
+  const token = getAccessToken();
+
+  if (!token) return;
+
+  try {
+    const response = await fetch("/api/users/me/accessibility", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || "Could not load accessibility settings.");
+    }
+
+    applyAccessibilitySettings(data.accessibility);
+  } catch (error) {
+    console.error("Accessibility settings load error:", error.message || error);
+  }
+}
+
+// applies the user accessibility mode to the current page
+function applyAccessibilitySettings(accessibility) {
+  if (!accessibility) return;
+
+  const themeMode = accessibility.themeMode || "dark";
+  const textSize = accessibility.textSize || "normal";
+  const highContrastEnabled =
+    accessibility.highContrastEnabled === true ||
+    accessibility.highContrastEnabled === 1 ||
+    accessibility.highContrastEnabled === "1";
+
+  const isAccessibilityMode =
+    themeMode === "light" &&
+    textSize === "large" &&
+    highContrastEnabled;
+
+  document.body.setAttribute(
+    "data-accessibility-mode",
+    isAccessibilityMode ? "accessibility" : "default"
+  );
+}
+
 //helper function (shared) for showing success/error messages on the dash
 function showDashboardMessage(message, type = "success") {
   const dashboardMessage = document.getElementById("dashboardMessage");
@@ -70,6 +118,7 @@ function setWelcomeFromStoredUser() {
 //shows local fallback data first
 async function initializeDashboard() {
   setWelcomeFromStoredUser();
+  await loadAccessibilitySettings();
 
   const refreshButton = document.getElementById("refreshDashboardBtn");
   const logoutButton = document.getElementById("logoutBtn");
@@ -138,7 +187,7 @@ function populateDashboard(dashboard) {
   const profile = dashboard.profile || {};
   //const summary = dashboard.summary || {};
   const projects = Array.isArray(dashboard.projects) ? dashboard.projects : [];
-  const academicProgress = Array.isArray(dashboard.academicProgress) ? dashboard.academicProgress : [];
+  //const academicProgress = Array.isArray(dashboard.academicProgress) ? dashboard.academicProgress : [];
   const wellnessEntries = Array.isArray(dashboard.wellnessMoodEntries) ? dashboard.wellnessMoodEntries : [];
 
   const dashboardWelcome = document.getElementById("dashboardWelcome");
@@ -178,58 +227,267 @@ function populateDashboard(dashboard) {
   */
 
   //render each dashboard section
-  renderAcademicProgress(academicProgress);
-  renderProjects(projects);
+  loadAcademicAssignmentsSnapshot();
+  loadTodaysScheduleSnapshot();
+  loadProjectMilestonesSnapshot();
   renderWellness(wellnessEntries);
 }
 
-//this will fill out the academic progress card (schedule).
-//currently it uses the default untill post HP when linked with different tasks
-function renderAcademicProgress(items) {
-  const container = document.getElementById("academicProgressList");
+//loads upcoming academic assignments for the dashboard academic snapshot
+async function loadAcademicAssignmentsSnapshot() {
+  const token = getAccessToken();
+  const container = document.getElementById("academicAssignmentsList");
+
   if (!container) return;
 
-  //default message when no data exists
-  if (!items.length) {
-    container.innerHTML = `<p class="small">No academic progress records yet.</p>`;
+  if (!token) {
+    container.innerHTML = `<p class="small">Sign in to view upcoming assignments.</p>`;
     return;
   }
 
-  //will only show a few items on the dash to keep the card compact
-  container.innerHTML = items.slice(0, 5).map((item) => `
-    <div class="dashboard-list-item">
-      <strong>${escapeHtml(item.courseName || "Unnamed Course")}</strong>
-      <span class="small">${Number(item.progressPercent ?? 0)}% complete</span>
-    </div>
-  `).join("");
+  try {
+    const response = await fetch("/api/academic/assignments?status=Upcoming", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || "Could not load upcoming assignments.");
+    }
+
+    renderAcademicAssignmentsSnapshot(data.assignments || []);
+  } catch (error) {
+    console.error("Academic dashboard snapshot error:", error.message || error);
+    container.innerHTML = `<p class="small">Could not load upcoming assignments.</p>`;
+  }
 }
 
-//this will fill out the project progress card (milestones).
-//currently it uses the default untill post HP when linked with our projects data
-function renderProjects(items) {
-  const container = document.getElementById("projectList");
+//renders the upcoming assignment snapshot inside the academic dashboard card
+function renderAcademicAssignmentsSnapshot(assignments) {
+  const container = document.getElementById("academicAssignmentsList");
   if (!container) return;
 
-  if (!items.length) {
-    container.innerHTML = `<p class="small">No projects found yet.</p>`;
+  if (!assignments.length) {
+    container.innerHTML = `<p class="small">No upcoming assignments. Schedule is wide open.</p>`;
     return;
   }
 
-  container.innerHTML = items.slice(0, 4).map((project) => {
-    const milestones = Array.isArray(project.milestones) ? project.milestones : [];
+  container.innerHTML = assignments.slice(0, 3).map((assignment) => {
+    const dueDateText = formatDashboardDate(assignment.dueDate);
 
     return `
       <div class="dashboard-list-item">
-        <strong>${escapeHtml(project.title || "Untitled Project")}</strong>
-        <span class="small">Status: ${escapeHtml(project.status || "unknown")}</span>
-        <span class="small">Milestones: ${milestones.length}</span>
+        <strong>${escapeHtml(assignment.title || "Untitled Assignment")}</strong>
+        <span class="small">
+          ${escapeHtml(assignment.courseName || "No course")}
+          ${dueDateText ? ` • Due: ${escapeHtml(dueDateText)}` : ""}
+          • ${escapeHtml(assignment.status || "Upcoming")}
+        </span>
       </div>
     `;
   }).join("");
 }
 
-//this will fill out the wellness progress card.
-//currently it uses the default untill post HP when linked with wellness data
+//loads today's schedule from the weekly planner combined assignment/planner endpoint
+async function loadTodaysScheduleSnapshot() {
+  const token = getAccessToken();
+  const container = document.getElementById("academicProgressList");
+
+  if (!container) return;
+
+  if (!token) {
+    container.innerHTML = `<p class="small">Sign in to view today's schedule.</p>`;
+    return;
+  }
+
+  try {
+    const today = getDashboardLocalDate();
+    const weekStart = getDashboardStartOfWeek(today);
+
+    const response = await fetch(`/api/academic/weekly-planner?weekStart=${weekStart}`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || "Could not load today's schedule.");
+    }
+
+    const weeklyItems = Array.isArray(data.items) ? data.items : [];
+    const todayItems = weeklyItems.filter(item => item.dueDate === today);
+
+    renderTodaysScheduleSnapshot(todayItems);
+  } catch (error) {
+    console.error("Today's schedule dashboard snapshot error:", error.message || error);
+    container.innerHTML = `<p class="small">Could not load today's schedule.</p>`;
+  }
+}
+
+//renders assignments and planner items due today
+function renderTodaysScheduleSnapshot(items) {
+  const container = document.getElementById("academicProgressList");
+  if (!container) return;
+
+  if (!items.length) {
+    container.innerHTML = `<p class="small">Nothing scheduled for today.</p>`;
+    return;
+  }
+
+  const sortedItems = items.sort((a, b) => {
+    const aDone = isDashboardCompletedStatus(a.status);
+    const bDone = isDashboardCompletedStatus(b.status);
+
+    if (aDone !== bDone) {
+      return aDone ? 1 : -1;
+    }
+
+    const aSourceOrder = a.source === "assignment" ? 0 : 1;
+    const bSourceOrder = b.source === "assignment" ? 0 : 1;
+
+    if (aSourceOrder !== bSourceOrder) {
+      return aSourceOrder - bSourceOrder;
+    }
+
+    return String(a.title || "").localeCompare(String(b.title || ""));
+  });
+
+  container.innerHTML = sortedItems.slice(0, 5).map((item) => {
+    const sourceLabel = item.source === "assignment" ? "Assignment" : "Planner";
+    const contextLabel = item.source === "assignment"
+      ? item.courseName || item.category || "Academic"
+      : item.category || "Planner Item";
+
+    return `
+      <div class="dashboard-list-item">
+        <strong>${escapeHtml(item.title || "Untitled Item")}</strong>
+        <span class="small">
+          ${escapeHtml(sourceLabel)}
+          ${contextLabel ? ` • ${escapeHtml(contextLabel)}` : ""}
+          • ${escapeHtml(formatDashboardStatus(item.status || "pending"))}
+        </span>
+      </div>
+    `;
+  }).join("");
+}
+
+//this fills out the project progress card (milestones).
+//loads upcoming project milestones for the dashboard snapshot
+async function loadProjectMilestonesSnapshot() {
+  const token = getAccessToken();
+  const container = document.getElementById("projectList");
+
+  if (!container) return;
+
+  if (!token) {
+    container.innerHTML = `<p class="small">Sign in to view upcoming milestones.</p>`;
+    return;
+  }
+
+  try {
+    const [projectsResponse, milestonesResponse] = await Promise.all([
+      fetch("/api/goals/projects", {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      }),
+      fetch("/api/goals/milestones", {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      })
+    ]);
+
+    const projectsData = await projectsResponse.json();
+    const milestonesData = await milestonesResponse.json();
+
+    if (!projectsResponse.ok || !projectsData.success) {
+      throw new Error(projectsData.error || "Could not load projects.");
+    }
+
+    if (!milestonesResponse.ok || !milestonesData.success) {
+      throw new Error(milestonesData.error || "Could not load milestones.");
+    }
+
+    const visibleProjects = Array.isArray(projectsData.projects)
+      ? projectsData.projects
+      : [];
+
+    const allMilestones = Array.isArray(milestonesData.milestones)
+      ? milestonesData.milestones
+      : [];
+
+    renderProjectMilestonesSnapshot(visibleProjects, allMilestones);
+  } catch (error) {
+    console.error("Project milestones dashboard snapshot error:", error.message || error);
+    container.innerHTML = `<p class="small">Could not load upcoming milestones.</p>`;
+  }
+}
+
+//renders upcoming milestones attached only to visible/non-archived projects
+function renderProjectMilestonesSnapshot(projects, milestones) {
+  const container = document.getElementById("projectList");
+  if (!container) return;
+
+  const visibleProjectIds = new Set(
+    projects.map(project => Number(project.id))
+  );
+
+  const projectTitleById = new Map(
+    projects.map(project => [Number(project.id), project.title || "Untitled Project"])
+  );
+
+  const visibleMilestones = milestones
+    .filter(milestone => visibleProjectIds.has(Number(milestone.projectId)))
+    .filter(milestone => milestone.status !== "completed");
+
+  const sortedMilestones = visibleMilestones.sort((a, b) => {
+    const aOverdue = isDashboardOverdue(a.dueDate) ? 0 : 1;
+    const bOverdue = isDashboardOverdue(b.dueDate) ? 0 : 1;
+
+    if (aOverdue !== bOverdue) {
+      return aOverdue - bOverdue;
+    }
+
+    const aTime = getDashboardDateTime(a.dueDate);
+    const bTime = getDashboardDateTime(b.dueDate);
+
+    return aTime - bTime;
+  });
+
+  if (!sortedMilestones.length) {
+    container.innerHTML = `<p class="small">No upcoming milestones. Project schedule is clear.</p>`;
+    return;
+  }
+
+  container.innerHTML = sortedMilestones.slice(0, 3).map((milestone) => {
+    const projectTitle = projectTitleById.get(Number(milestone.projectId)) || "Untitled Project";
+    const dueDateText = formatDashboardDate(milestone.dueDate);
+    const dueLabel = isDashboardOverdue(milestone.dueDate) ? "Overdue" : "Due";
+
+    return `
+      <div class="dashboard-list-item">
+        <strong>${escapeHtml(milestone.title || "Untitled Milestone")}</strong>
+        <span class="small">${escapeHtml(projectTitle)}</span>
+        <span class="small">
+          ${dueDateText ? `${dueLabel}: ${escapeHtml(dueDateText)} • ` : ""}
+          ${escapeHtml(formatDashboardStatus(milestone.status || "not started"))}
+        </span>
+      </div>
+    `;
+  }).join("");
+}
+
+//this will fill out the wellness snapshot card
 function renderWellness(items) {
   const container = document.getElementById("wellnessList");
   if (!container) return;
@@ -239,71 +497,126 @@ function renderWellness(items) {
     return;
   }
 
-  container.innerHTML = items.slice(0, 5).map((entry) => `
-    <div class="dashboard-list-item">
-      <strong>Mood: ${escapeHtml(entry.moodValue ?? "N/A")}</strong>
-      <span class="small">${escapeHtml(entry.note || "No note added.")}</span>
-    </div>
-  `).join("");
+  container.innerHTML = items.slice(0, 3).map((entry) => {
+    const mood = getDashboardMoodDisplay(entry.moodValue);
+
+    return `
+      <div class="dashboard-list-item">
+        <strong>${escapeHtml(mood.emoji)} ${escapeHtml(mood.label)}</strong>
+        <span class="small">${escapeHtml(entry.note || "No note added.")}</span>
+      </div>
+    `;
+  }).join("");
 }
 
-/*
-//takes care of our profile image upload in the front
-async function uploadProfileImage() {
-  const token = getAccessToken();
-  const fileInput = document.getElementById("profileImageInput");
+//converts numeric mood values into the same style used by the wellness page
+function getDashboardMoodDisplay(value) {
+  const moodValue = Number(value);
 
-  //uploading is blocked if the user is not logged in
-  if (!token) {
-    showDashboardMessage("You must be logged in to upload a profile image.", "error");
-    return;
-  }
+  const moods = {
+    1: { emoji: "😰", label: "Struggling" },
+    2: { emoji: "😔", label: "Low" },
+    3: { emoji: "🙂", label: "Okay" },
+    4: { emoji: "😊", label: "Good" },
+    5: { emoji: "😄", label: "Great" }
+  };
 
-  //prevents the sending of an empty request
-  if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-    showDashboardMessage("Please choose an image first.", "error");
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append("profileImage", fileInput.files[0]);
-
-  //sends image file to backend using multipart form data
-  try {
-    const response = await fetch("/api/users/me/profile-image", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`
-      },
-      body: formData
-    });
-
-    const data = await response.json();
-
-    if (!response.ok || !data.success) {
-      throw new Error(data.error || "Profile image upload failed.");
-    }
-
-    //if the upload was a success/loaded, it updates the image preview immediately w/o reload
-    if (data.image && data.image.profileThumbnailUrl) {
-      const profilePreview = document.getElementById("profilePreview");
-      if (profilePreview) {
-        profilePreview.src = data.image.profileThumbnailUrl;
-      }
-    }
-
-    showDashboardMessage("Profile image uploaded successfully.", "success");
-  } catch (error) {
-    showDashboardMessage(error.message || "An error occurred while uploading image.", "error");
-  }
+  return moods[moodValue] || { emoji: "🙂", label: "Mood Check-In" };
 }
-*/
 
 //user logout
 function logoutUser() {
   localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
   localStorage.removeItem("user");
   window.location.href = "./auth.html";
+}
+
+//returns a comparable timestamp for dashboard sorting
+function getDashboardDateTime(value) {
+  if (!value) return Number.MAX_SAFE_INTEGER;
+
+  const date = new Date(`${value}T00:00:00`);
+
+  if (Number.isNaN(date.getTime())) {
+    return Number.MAX_SAFE_INTEGER;
+  }
+
+  return date.getTime();
+}
+
+//checks whether a dashboard date is overdue
+function isDashboardOverdue(value) {
+  if (!value) return false;
+
+  const today = new Date();
+  const dueDate = new Date(`${value}T00:00:00`);
+
+  if (Number.isNaN(dueDate.getTime())) {
+    return false;
+  }
+
+  today.setHours(0, 0, 0, 0);
+
+  return dueDate < today;
+}
+
+//formats status text like "in progress" into "In Progress"
+function formatDashboardStatus(status) {
+  if (!status) return "";
+
+  return String(status)
+    .split(" ")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+//formats dates for dashboard cards
+function formatDashboardDate(value) {
+  if (!value) return "";
+
+  const date = new Date(`${value}T00:00:00`);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  });
+}
+
+//returns today's local date as YYYY-MM-DD
+function getDashboardLocalDate() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+//returns the Sunday week start for a YYYY-MM-DD date string
+function getDashboardStartOfWeek(dateString) {
+  const date = new Date(`${dateString}T00:00:00`);
+  date.setHours(0, 0, 0, 0);
+
+  const dayOfWeek = date.getDay();
+  const start = new Date(date);
+  start.setDate(date.getDate() - dayOfWeek);
+
+  const year = start.getFullYear();
+  const month = String(start.getMonth() + 1).padStart(2, "0");
+  const day = String(start.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+//dashboard version of completed/finished status check
+function isDashboardCompletedStatus(status) {
+  return status === "completed" || status === "graded";
 }
 
 //prevents html injection by replacing special chars w/ safe html versions 

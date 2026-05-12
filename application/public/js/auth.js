@@ -48,6 +48,8 @@ function initializeLoginForm() {
   const loginForm = document.getElementById("loginForm");
   const loginMessage = document.getElementById("loginMessage");
 
+  initializePasswordReset();
+
   //checks if the expected items are not on the page. If not it will stop here so that 
   //JS wont throw errors. (Used as a safety check).
   if (!loginForm || !loginMessage) return;
@@ -101,11 +103,18 @@ function initializeLoginForm() {
       //If this runs the login has been successul, so we display a success message.
       loginMessage.style.display = "block";
       loginMessage.classList.add("success");
-      loginMessage.textContent = "Login successful. Redirecting to dashboard...";
+      loginMessage.textContent = "Login successful. Redirecting...";
 
-      //After a short pause we send the user to the dashboard
+      //After a short pause we send admins to admin.html and regular users to dashboard.html
       setTimeout(() => {
-        window.location.href = "./dashboard.html";
+        const roles = Array.isArray(data.user?.roles) ? data.user.roles : [];
+
+        const isAdmin = roles.some((role) => {
+          const normalizedRole = String(role).toLowerCase();
+          return normalizedRole === "admin" || normalizedRole === "administrator";
+        });
+
+        window.location.href = isAdmin ? "./admin.html" : "./dashboard.html";
       }, 900);
 
       //If something goes wrong such as a bad response, network failure, some backend error
@@ -204,4 +213,151 @@ function initializeRegisterForm() {
       registerMessage.textContent = error.message || "An error occurred during registration.";
     }
   });
+}
+
+function initializePasswordReset() {
+  const openBtn = document.getElementById("forgotPasswordBtn");
+  const modal = document.getElementById("resetModal");
+  const closeBtn = document.getElementById("closeResetModalBtn");
+
+  const step1 = document.getElementById("resetStep1");
+  const step2 = document.getElementById("resetStep2");
+  const step3 = document.getElementById("resetStep3");
+
+  const initiateBtn = document.getElementById("initiateResetBtn");
+  const verifyBtn = document.getElementById("verifyAnswersBtn");
+  const form = document.getElementById("resetForm");
+
+  const message = document.getElementById("resetMessage");
+
+  let identifier = "";
+  let resetToken = "";
+
+  if (!openBtn || !modal) return;
+
+  openBtn.addEventListener("click", () => {
+    modal.classList.add("open");
+  });
+
+  closeBtn.addEventListener("click", () => {
+    modal.classList.remove("open");
+    form.reset();
+    step1.style.display = "block";
+    step2.style.display = "none";
+    step3.style.display = "none";
+  });
+
+  // STEP 1 → INITIATE
+  initiateBtn.addEventListener("click", async () => {
+    identifier = document.getElementById("resetIdentifier").value.trim();
+
+    try {
+      const res = await fetch("/api/auth/password-reset/initiate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ identifier })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error);
+      }
+
+      const questionsDiv = document.getElementById("resetQuestions");
+
+      questionsDiv.innerHTML = data.securityQuestions.map((q, i) => `
+        <div class="form-group">
+          <label>${q.question_text}</label>
+          <input type="text" data-id="${q.question_id}" />
+        </div>
+      `).join("");
+
+      step1.style.display = "none";
+      step2.style.display = "block";
+
+    } catch (err) {
+      showResetMessage(err.message, "error");
+    }
+  });
+
+  // STEP 2 → VERIFY
+  verifyBtn.addEventListener("click", async () => {
+    const inputs = document.querySelectorAll("#resetQuestions input");
+
+    const answers = Array.from(inputs).map(input => ({
+      question_id: Number(input.dataset.id),
+      answer: input.value.trim()
+    }));
+
+    try {
+      const res = await fetch("/api/auth/password-reset/verify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          identifier,
+          answers
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error);
+      }
+
+      resetToken = data.resetToken;
+
+      step2.style.display = "none";
+      step3.style.display = "block";
+
+    } catch (err) {
+      showResetMessage(err.message, "error");
+    }
+  });
+
+  // STEP 3 → COMPLETE
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const newPassword = document.getElementById("resetNewPassword").value;
+
+    try {
+      const res = await fetch("/api/auth/password-reset/complete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          resetToken,
+          newPassword
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error);
+      }
+
+      showResetMessage("Password reset successful. Please log in.", "success");
+
+      setTimeout(() => {
+        modal.classList.remove("open");
+      }, 1200);
+
+    } catch (err) {
+      showResetMessage(err.message, "error");
+    }
+  });
+
+  function showResetMessage(msg, type) {
+    message.style.display = "block";
+    message.className = "status-message " + type;
+    message.textContent = msg;
+  }
 }

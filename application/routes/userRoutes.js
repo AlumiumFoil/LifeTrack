@@ -59,4 +59,64 @@ router.post(
     userController.uploadProfileImage
 );
 
+/**
+ * GET /api/users/me/profile
+ * Get current user's complete profile
+ * Requires authentication
+ * Output: { success, profile }
+ */
+router.get('/me/profile', authenticateJWT, userController.getUserProfile);
+
+/**
+ * PUT /api/users/me/profile
+ * Update current user's profile 
+ * Requires authentication
+ * Input: { name, major, year, university }
+ * Output: { success, message, profile }
+ */
+router.put('/me/profile', authenticateJWT, userController.updateUserProfile);
+
+/**
+ * PUT /api/users/me/password
+ * Change user's password
+ * Requires authentication
+ * Input: { currentPassword, newPassword }
+ * Output: { success, message }
+ */
+router.put('/me/password', authenticateJWT, userController.changePassword);
+
+/**
+ * GET /api/users/me/accessibility
+ * Get user's accessibility settings
+ * Requires authentication
+ * Output: { success, accessibility }
+ */
+router.get('/me/accessibility', authenticateJWT, userController.getAccessibilitySettings);
+
+/**
+ * PUT /api/users/me/accessibility
+ * Update user's accessibility settings
+ * Requires authentication
+ * Input: { themeMode?, textSize?, highContrastEnabled? }
+ * Output: { success, message, accessibility }
+ */
+router.put('/me/accessibility', authenticateJWT, userController.updateAccessibilitySettings);
+
+/**
+ * GET /api/users/me/security-questions
+ * Get current user's security questions
+ * Requires authentication
+ * Output: { success, securityQuestions }
+ */
+router.get('/me/security-questions', authenticateJWT, userController.getUserSecurityQuestions);
+
+/**
+ * PUT /api/users/me/security-questions
+ * Update current user's security question answers
+ * Requires authentication
+ * Input: { securityQuestions: [{ questionId, answer }] }
+ * Output: { success, message, securityQuestions }
+ */
+router.put('/me/security-questions', authenticateJWT, userController.updateUserSecurityQuestions);
+
 module.exports = router;

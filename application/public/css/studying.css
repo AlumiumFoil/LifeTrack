@@ -1,0 +1,222 @@
+/* Studying page specific styles */
+
+.academic-resources-section {
+  margin-top: 28px;
+}
+
+.academic-resources-title {
+  margin-bottom: 12px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.academic-resource-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.academic-resource-card {
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+}
+
+.academic-resource-card h3 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.academic-resource-card p {
+  margin: 0 0 14px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+@media (max-width: 850px) {
+  .academic-resource-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.assignment-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.assignment-clickable {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.assignment-clickable:hover {
+  border-color: var(--accent);
+}
+
+.assignment-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.assignment-modal-overlay.open {
+  display: flex;
+}
+
+.assignment-modal {
+  width: min(620px, 100%);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--card);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+}
+
+.assignment-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 22px;
+  border-bottom: 1px solid var(--border);
+}
+
+.assignment-modal-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.assignment-modal-close {
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 1.8rem;
+  cursor: pointer;
+}
+
+.assignment-form {
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+}
+
+.assignment-form label {
+  display: grid;
+  gap: 7px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.assignment-form input,
+.assignment-form select,
+.assignment-form textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+}
+
+.assignment-form textarea {
+  resize: vertical;
+}
+
+.assignment-modal-message {
+  min-height: 18px;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.assignment-modal-message.error {
+  color: #f87171;
+}
+
+.assignment-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 6px;
+}
+
+.assignment-modal-actions-right {
+  display: flex;
+  gap: 10px;
+}
+
+.danger-btn {
+  color: #f87171;
+}
+
+@media (max-width: 700px) {
+  .assignment-heading-row,
+  .assignment-modal-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .assignment-modal-actions-right {
+    flex-direction: column;
+  }
+}
+
+.assignment-clickable .assign-title {
+  color: var(--text);
+}
+
+.assignment-clickable .assign-meta {
+  color: var(--muted);
+}
+
+.course-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.course-clickable {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.course-clickable:hover {
+  border-color: var(--accent);
+}
+
+.course-clickable .course-code,
+.course-clickable .course-name {
+  color: var(--text);
+}
+
+.course-clickable .course-meta {
+  color: var(--muted);
+}
+
+.course-clickable .course-grade {
+  font-weight: 800;
+  font-size: 1.4rem;
+}
+
+@media (max-width: 850px) {
+  .course-grid {
+    grid-template-columns: 1fr;
+  }
+}
